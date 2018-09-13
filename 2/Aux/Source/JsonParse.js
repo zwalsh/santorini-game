@@ -53,11 +53,6 @@ function processChunk(chunk) {
 	}
 }
 
-// // Is the character numeric?  this really does not work idk
-// function isNum(char) {
-// 	return char != "/n" && char != " " && char != "" && !isNaN(char);
-// }
-
 // Is the character a digit?
 function isNum(char) {
 	return char == "0" ||
