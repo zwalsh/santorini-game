@@ -8,28 +8,18 @@ Checks if the buffer represents a complete JSON value at each step,
 clears buffer when a complete JSON value is found, and adds that value
 to the array.
 */
-// Ambiguity: can a plain number be split across multiple lines?
-// we have decided: no, because we want to be able to enter multiple
-// numbers sequentially, which can only be denoted with whitespace or
-// a new line.
 function processChunk(chunk) {
 	while (chunk.length > 0) {
 		let currentChar = chunk.substring(0, 1);
-		// console.log("\ncurrent char:__" + currentChar + "__");
-		// console.log("isNum? " + isNum(currentChar));
-		// console.log("buff: " + buff);
-		// console.log("numBuff: " + numBuff);
-
 		chunk = chunk.substring(1, chunk.length);
 
 		// if we are already building a number, add the next digit
 		// or parse the finished number if next char is not digit
 		if (numBuff != '') {
-			if (isNum(currentChar)) {
+			if (isDigit(currentChar)) {
 				numBuff = numBuff.concat(currentChar);
 			} else {
 				buff = buff.concat(currentChar);
-				// console.log("inner numBuff " + numBuff);
 				tryParseNumBuff();
 				tryParseBuff();
 			}
@@ -37,7 +27,7 @@ function processChunk(chunk) {
 		}
 
 		else if (buff == '') {
-			if (isNum(currentChar)) {
+			if (isNumeric(currentChar)) {
 				numBuff = numBuff.concat(currentChar);
 				continue;
 			} else {
@@ -53,33 +43,31 @@ function processChunk(chunk) {
 	}
 }
 
-// Is the character a digit?
-function isNum(char) {
-	return char == "0" ||
-	       char == "1" ||
-				 char == "2" ||
-				 char == "3" ||
-				 char == "4" ||
-				 char == "5" ||
-				 char == "6" ||
-				 char == "7" ||
-				 char == "8" ||
-				 char == "9";
+// Is the character part of a number? (potentially a negative number)
+function isNumeric(char) {
+	return isDigit(char) || char == '-';
 }
 
+// Is the character a digit?
+function isDigit(char) {
+	return char.match(/\d/);
+}
+
+// Attempts to parse the normal buffer
 function tryParseBuff() {
 	if (tryParse(buff) === true) {
 		buff = '';
 	}
 }
 
+// Attempts to parse the number buffer
 function tryParseNumBuff() {
 	if (tryParse(numBuff) === true) {
 		numBuff = '';
 	}
 }
 
-// attempt to process the given string as JSON,
+// Attempt to process the given string as JSON,
 // if successful, add to array and return true
 function tryParse(string) {
 	try {
@@ -91,6 +79,7 @@ function tryParse(string) {
 		if (buff.trim().length == 0) {
 			buff = '';
 		}
+		return false;
 	}
 }
 
@@ -100,7 +89,6 @@ Prints the parsed JSON values in the given array,
 with additional formatting to number them in reverse index order.
 */
 function printArray(arr) {
-	// console.log("help " + arr.length);
 	for (let index = 0; index < arr.length; index++) {
 		let outputObject = '[' + (arr.length - index - 1) + ',' + JSON.stringify(arr[index]) + ']\n';
 		process.stdout.write(outputObject);
@@ -122,8 +110,7 @@ process.stdin.on('end', () => {
 	// If there is unparsed input in the buffer, this means
 	// the input contained invalid JSON.
 	if (buff.length > 0) {
-		// console.log("buff length: " + buff.length + ", buff: __" + buff + "__");
-		process.stdout.write('Invalid JSON.\n');
+		return;
 	} else {
 		printArray(arr);
 	}
