@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# This test script assumes that there exists a running instance
+# of a JsonParseServer on localhost:8000
+
+cd `dirname ${BASH_SOURCE[0]}`
+for filename in Inputs/*; do
+	./../../Aux/3-client < Inputs/${filename#Inputs/} | diff - Outputs/${filename#Inputs/};
+done
