@@ -1,4 +1,4 @@
-const JsonParse = require('./JsonParse.js')
+const JsonParse = require('./lib/JsonParse.js')
 let input = '';
 
 process.stdin.setEncoding('utf8');
