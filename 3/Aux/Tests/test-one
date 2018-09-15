@@ -1,0 +1,2 @@
+cd `dirname ${BASH_SOURCE[0]}`
+./../../2 < Inputs/${1#Inputs/} | diff - Outputs/${1#Inputs/};
