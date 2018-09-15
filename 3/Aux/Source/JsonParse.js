@@ -13,5 +13,5 @@ function jsonArrayToString(arr) {
 
 exports.parseInputString = function(inputString) {
 	jsonParser.feed(inputString);
-	return(jsonArrayToString(jsonParser.results[0]));
+	return(jsonArrayToString(jsonParser.results[0].reverse()));
 }

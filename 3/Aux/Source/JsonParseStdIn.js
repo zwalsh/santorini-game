@@ -11,5 +11,5 @@ process.stdin.on('readable', () => {
 });
 
 process.stdin.on('end', () => {
-	console.log(JsonParse.parseInputString(input));
+	process.stdout.write(JsonParse.parseInputString(input));
 });
