@@ -1,6 +1,10 @@
 const nearley = require("nearley");
 const jsonGrammar = require("./JsonGrammar.js");
-const jsonParser = new nearley.Parser(nearley.Grammar.fromCompiled(jsonGrammar));
+// const jsonParser = new nearley.Parser(nearley.Grammar.fromCompiled(jsonGrammar));
+
+function makeJsonParser() {
+	return new nearley.Parser(nearley.Grammar.fromCompiled(jsonGrammar));
+}
 
 function jsonArrayToString(arr) {
 	let outputString = '';
@@ -12,6 +16,7 @@ function jsonArrayToString(arr) {
 }
 
 exports.parseInputString = function(inputString) {
+	const jsonParser = makeJsonParser();
 	jsonParser.feed(inputString);
 	return(jsonArrayToString(jsonParser.results[0].reverse()));
 }
