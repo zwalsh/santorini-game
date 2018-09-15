@@ -1,1 +1,0 @@
-node `dirname ${BASH_SOURCE[0]}`/Aux/Source/JsonParseStdIn.js
