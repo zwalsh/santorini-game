@@ -13,7 +13,7 @@ const server = net.createServer({ "allowHalfOpen":true }, function(socket) {
   });
 
   socket.on('end', function() {
-    let data = JsonParse.parseInputString(buffer);
+    let data = JsonParse.parseAndFormatInputString(buffer);
     //console.log("Final data sent back:  " + data);
     socket.end(data);
     buffer = "";

@@ -1,0 +1,1 @@
+node `dirname ${BASH_SOURCE[0]}`/Source/JsonParseStdIn.js
