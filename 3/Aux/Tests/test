@@ -1,5 +1,0 @@
-#!/bin/bash
-cd `dirname ${BASH_SOURCE[0]}`
-for filename in Inputs/*; do
-	./../../3 < Inputs/${filename#Inputs/} | diff - Outputs/${filename#Inputs/}; 
-done

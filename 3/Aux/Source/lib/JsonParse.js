@@ -15,8 +15,14 @@ function jsonArrayToString(arr) {
 	return outputString;
 }
 
-exports.parseInputString = function(inputString) {
+exports.parseAndFormatInputString = function(inputString) {
 	const jsonParser = makeJsonParser();
 	jsonParser.feed(inputString);
 	return(jsonArrayToString(jsonParser.results[0].reverse()));
+}
+
+exports.parseInputString = function(inputString) {
+	const jsonParser = makeJsonParser();
+	jsonParser.feed(inputString);
+	return(jsonParser.results.reverse());
 }
