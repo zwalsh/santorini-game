@@ -12,18 +12,15 @@ respective locations:
 As shown in the example, row and col indices begin at 0.
 */
 
-/* A FormulaContents is one of:
-- number
+/* A Formula contains one of:
+- Number
 - Reference
 - Operation
 A Reference is a 2-number array, representing an (x,y)
     coordinate pair in a spreadsheet
 An Operation is a 3-element array, where the 1st and 3rd elements
-    are numbers or References, and the 2nd element is '+' or '*',
+    are Formulas, and the 2nd element is '+' or '*',
     representing an addition or multiplication operation
-Note that the Formula class is a wrapper for a single FormulaContents.
-    The contents of a Formula do not contain other Formulas (i.e. a Reference
-    inside of an Operation is just an array, not a Formula containing an array.)
 */
 class Formula {
 
@@ -50,6 +47,14 @@ class Formula {
     return this.contents;
   }
 
+  static isValidFormula(f) {
+    let contents = f.getContents();
+    return Formula.isValidNumber(contents) ||
+    Formula.isValidReference(contents) ||
+    Formula.isValidOperation(contents);
+  }
+
+
   /* Is n a valid number? */
   static isValidNumber(n) {
     return typeof n == 'number';
@@ -64,11 +69,10 @@ class Formula {
   /* Is op a valid Operation? */
   static isValidOperation(op) {
     return Array.isArray(op) && op.length == 3
-        && Formula.isValidReference(op[0]) && Formula.isValidReference(op[2])
+        && Formula.isValidFormula(op[0]) && Formula.isValidFormula(op[2])
         && (op[1] == '+' || op[1] == '*');
   }
 };
-
 
 
 class Spreadsheet {
@@ -122,37 +126,29 @@ class Spreadsheet {
     if (this.containsLoc(x,y)) {
       let cell = this.data[x][y];
       // Empty cells evaluate to 0.
-      if (cell === undefined || cell === null) {
+      if (cell === undefined || cell === null ||
+          cell.formula === undefined || cell.formula === null) {
         return 0;
       }
-
-      let formula = cell.formula;
-
-      if (formula.getType() == 'reference') {
-
-        return this.calculateReference(x,y,formula.getContents());
-
-      } else if (formula.getType() == 'operation') {
-        let operation = formula.getContents();
-        let val1 = operation[0];
-        let val2 = operation[2];
-        let op = operation[1];
-        // if number, number
-        // else, check then calculate reference
-        let num1 = typeof val1 == 'number' ? val1 : this.calculateReference(x,y,val1);
-        let num2 = typeof val2 == 'number' ? val2 : this.calculateReference(x,y,val2);
-        if (op == '+') {
-          return num1 + num2;
-        } else {
-          // op == '*'
-          return num1 * num2;
-        }
-      } else {
-        // formula.getType() == number
-        return formula.getContents();
-      }
+      // todo - maybe try/catch here and throw error with location
+      return this.calculateFormula(cell.formula);
     } else {
       throw `Cell location (${x},${y}) not in spreadsheet`;
+    }
+  }
+
+  /*
+  Takes in a Formula and determines its numeric value, recursing if necessary
+  as a Formula may contain nested formulas.
+  */
+  calculateFormula(formula) {
+    if (formula.getType() == 'reference') {
+      return this.calculateReference(formula.getContents());
+    } else if (formula.getType() == 'operation') {
+      return this.calculateOperation(formula.getContents());
+    } else {
+      // formula.getType() == number
+      return formula.getContents();
     }
   }
 
@@ -160,11 +156,27 @@ class Spreadsheet {
   Calculate the value of the reference in this spreadsheet,
   or throw an error if the reference points to a cell not in the sheet.
   x and y are the coordinates of the cell that contained ref. */
-  calculateReference(x, y, ref) {
+  calculateReference(ref) {
     if (this.containsLoc(ref[0], ref[1])) {
       return this.calculateValue(ref[0], ref[1]);
     } else {
       throw `Cell at (${x}, ${y}) contains out-of-bounds reference: ${ref}`;
+    }
+  }
+
+  calculateOperation(operation) {
+    let formula1 = operation[0];
+    let formula2 = operation[2];
+    let op = operation[1];
+    // if number, number
+    // else, check then calculate reference
+    let num1 = this.calculateFormula(formula1);
+    let num2 = this.calculateFormula(formula2);
+    if (op == '+') {
+      return num1 + num2;
+    } else {
+      // op == '*'
+      return num1 * num2;
     }
   }
 
@@ -173,18 +185,19 @@ class Spreadsheet {
   If a coordinate set is not provided, place f into the first empty
   cell in the first row with an empty cell. */
   placeFormula(x, y, f) {
+    if (!(f instanceof Formula || f === undefined || f === null)) {
+      throw `Invalid formula: ${f}`;
+    }
+
+
     if (x === undefined || x === null || y === undefined || y === null) {
       this.placeInEmptyCell(f);
     } else if (this.containsLoc(x, y)) {
-      if (f instanceof Formula || f) {
-        let cell = this.data[x][y];
-        if (!cell) {
-          cell = {'x':x,'y':y}
-        }
-        cell.formula = f;
-      } else {
-        throw `Invalid formula: ${f}`;
+      let cell = this.data[x][y];
+      if (!cell) {
+        cell = {'x':x,'y':y}
       }
+      cell.formula = f;
     } else {
       throw `Cell location (${x},${y}) out of bounds`;
     }

@@ -24,5 +24,5 @@ exports.parseAndFormatInputString = function(inputString) {
 exports.parseInputString = function(inputString) {
 	const jsonParser = makeJsonParser();
 	jsonParser.feed(inputString);
-	return(jsonParser.results.reverse());
+	return(jsonParser.results[0].reverse());
 }
