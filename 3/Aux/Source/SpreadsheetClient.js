@@ -1,29 +1,28 @@
 const Spreadsheet = require('./lib/Spreadsheet.js');
 const JsonParser = require('./lib/JsonParse.js');
-const anyBase = require('any-base');
-const baseConverter = require('base-converter');
+const converter = require('./lib/ColumnIndexConverter.js');
 
 let spreadsheets = {}
 
+/*
+Converts an operation [Formula, {'+'|'*'},Formula] to the format expected by
+the Spreadsheet module, namely a single String with a {number|reference},
+followed by an operation character, followed by another {number|reference}.
+*/
 function convertOperationFormula(operationFormula) {
   return convertFormula(operationFormula[0]) +
-  operationFormula[1] +
-  convertFormula(operationFormula[2]);
-}
-
-function convertColumnIndexToAlphabetIndex(columnIndex) {
-  console.log(baseConverter);
-  let alphabeticIndex = baseConverter.decToGeneric(columnIndex, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
-  console.log("converting column index: " + columnIndex + " to " + alphabeticIndex);
-  return alphabeticIndex;
+          operationFormula[1] +
+          convertFormula(operationFormula[2]);
 }
 
 /*
-Converts a reference to the format expected by the Spreadsheet module, namely
-a single String with an alphabetical column index followed by a row index.
+Converts a reference ['>', row,col] to the format expected by the Spreadsheet module,
+namely a single String with an alphabetical column index followed by a row index.
 */
 function convertReference(reference) {
-  return convertColumnIndexToAlphabetIndex(reference[2]) + reference[1];
+  let alphabeticColIdx = converter.numberToLetters(reference[2]);
+    // console.log("converting column index: " + reference[2] + " to " + alphabeticColIdx);
+  return alphabeticColIdx + (reference[1] + 1);
 }
 
 /*
@@ -64,7 +63,11 @@ function convertFormulaArray(formulaArray) {
   return convertedArray;
 }
 
-// input in form of ["sheet", name, formulaArray]
+/*
+Convert the given spreadsheet representation to the Spreadsheet library
+expected format, then create and store the spreadsheet.
+--> Input in form of ["sheet", name, formulaArray]
+*/
 function makeSheet(parsedInput) {
   let name = parsedInput[1];
   let formulaArray = parsedInput[2];
@@ -72,6 +75,11 @@ function makeSheet(parsedInput) {
   spreadsheets[name] = sheet;
 }
 
+/*
+Given a formatted evaluation request, convert the [x,y]  cell reference
+to a Reference expected by the Spreadsheet library, and return
+the result of the evaluation.
+*/
 function evaluateCell(parsedInput) {
   let sheetName = parsedInput[1];
   let sheet = spreadsheets[parsedInput[1]];
@@ -80,6 +88,12 @@ function evaluateCell(parsedInput) {
   return sheet.evaluate(convertReference([">", cellX, cellY]));
 }
 
+/*
+Given a formatted set request, convert the [x,y] cell reference
+to a Reference expected by the Spreadsheet library,
+convert the given formula to the Spreadsheet library-compatible format,
+and set the given value in the named spreadsheet.
+*/
 function setFormula(parsedInput) {
   let sheet = spreadsheets[parsedInput[1]];
   let reference = convertReference([">", parsedInput[2], parsedInput[3]]);
@@ -87,14 +101,16 @@ function setFormula(parsedInput) {
   sheet.set(reference, formula);
 }
 
+/*
+Parse the request command and
+delegate the action to the appropriate function.
+*/
 function handleIncomingRequest(request) {
-  console.log('received: ' + JSON.stringify(request));
   let command = request[0];
-  console.log('command: ' + command);
   if (command == 'sheet') {
     makeSheet(request);
   } else if (command == 'at') {
-    console.log(evaluateCell(request));
+    process.stdout.write(evaluateCell(request) + '\n');
   } else if (command == 'set') {
     setFormula(request);
   } else {
@@ -102,14 +118,14 @@ function handleIncomingRequest(request) {
   }
 }
 
+
+
 process.stdin.setEncoding('utf8');
 
 process.stdin.on('readable', () => {
   let chunk = process.stdin.read();
   if (chunk != null) {
-    console.log('received chunk: ' + chunk);
     let requests = JsonParser.parseInputString(chunk);
-    console.log('parsed into ' + requests.length + ' requests: ' + JSON.stringify(requests));
     for (let index in requests) {
       handleIncomingRequest(requests[index]);
     }
@@ -117,5 +133,5 @@ process.stdin.on('readable', () => {
 });
 
 process.stdin.on('end', function() {
-  process.stdout.write('done');
+  process.stdout.write('Good bye! ;)');
 });
