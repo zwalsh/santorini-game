@@ -1,0 +1,28 @@
+{
+  "name": "server3-json",
+  "version": "1.0.0",
+  "main": "server/index.js",
+  "scripts": {
+    "server-json": "node server-json/index.js",
+    "client-test": "node server-json/client-test.js",
+    "preinstall": "cd $(pwd)"
+  },
+  "author": "Joseph Wang and Will Slotterback",
+  "license": "ISC",
+  "dependencies": {
+    "net": "^1.0.2",
+    "readline": "^1.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "@nuscout/eslint-config": "^0.2.0",
+    "@nuscout/prettier-config": "^0.1.2",
+    "babel-eslint": "^9.0.0",
+    "babel-loader": "^8.0.0",
+    "eslint": "^5.0.0",
+    "eslint-plugin-import": "^2.11.0"
+  }
+}
