@@ -168,8 +168,6 @@ class Spreadsheet {
     let formula1 = operation[0];
     let formula2 = operation[2];
     let op = operation[1];
-    // if number, number
-    // else, check then calculate reference
     let num1 = this.calculateFormula(formula1);
     let num2 = this.calculateFormula(formula2);
     if (op == '+') {
@@ -189,15 +187,14 @@ class Spreadsheet {
       throw `Invalid formula: ${f}`;
     }
 
-
     if (x === undefined || x === null || y === undefined || y === null) {
       this.placeInEmptyCell(f);
     } else if (this.containsLoc(x, y)) {
       let cell = this.data[x][y];
       if (!cell) {
-        cell = {'x':x,'y':y}
+        this.data[x][y] = {'x':x,'y':y}
       }
-      cell.formula = f;
+      this.data[x][y].formula = f;
     } else {
       throw `Cell location (${x},${y}) out of bounds`;
     }
