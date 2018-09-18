@@ -1,0 +1,6 @@
+#!/bin/bash
+cd `dirname ${BASH_SOURCE[0]}`
+for test in `seq 1 12`; do
+	./../client < ${test}-in.json | diff - ${test}-out.json; 
+done
+
