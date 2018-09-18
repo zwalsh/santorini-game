@@ -19,15 +19,8 @@ function numberToLetters(n) {
   return output;
 }
 
-/* Given a letter string column index, generate corresponding numeric index */
-function lettersToNumber(str) {
-  // sorry this does not work yet
-  return -1;
-}
-
 module.exports = {
-  'numberToLetters' : numberToLetters,
-  'lettersToNumber' : lettersToNumber
+  'numberToLetters' : numberToLetters
 };
 
 
