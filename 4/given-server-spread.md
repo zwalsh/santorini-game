@@ -33,15 +33,25 @@ spreadsheet server                                     +------- accountant start
 
 The message formats are as follows:
 
-|  message		            |  format						                                   |
-| ----------------------- | ---------------------------------------------------- |
-| batch                   | [named-spreadsheet+, set-request*, at-request]       |
-| 	       	           	  |  			 	       			                                 |
-| 	       	           	  |  			 	       			                                 |
-| at response             | ["at", string, number, number, number]		           |
-| 	       	    	        |  where string is the name of the probed spreadsheet  |
-| 	       	           	  |        the first number is the x coordinate		       |
-| 	       	    	        |        the second number is the y coordinate	       |
-| 	       	    	        |        the third number is the value at that cell 	 |
+|  message		  		    |  format						 						                       |
+| --------------------- | ---------------------------------------------------- |
+| sign-up name	    	  | string 						 						                       |
+| internal name	    	  | string (this distinguishes all connections)          |
+| 	       	    	  	  |  			 	       			 					 											 |
+| batch                 | [(named-spreadsheet, or set-request,)*, at-request]  |
+| 											|   meaning a possibly empty repetition of 		         |
+|			  								|   named spreadsheets and set requests 		           |
+|			  								|   followed by _one_ at request			                 |
+|			  								|   	       	  	   				                           |
+| 	       	    	  		|  			 	       			                                 |
+| at request            | ["at", string, number, number]			                 |
+| 	       	    	  	  |  where string is the name of the probed spreadsheet  |
+| 	       	    	      |        the first number is the x coordinate		       |
+| 	       	    	      |        the second number is the y coordinate	       |
+| 	       	    	      |  			 	       			                                 |
+| at response  	    	  | number		 	       			                             |
 
-All JSON values are well-formed and valid. See [
+
+All JSON values are well-formed and valid. See
+[Assignment 3](http://www.ccis.northeastern.edu/home/matthias/4500-f18/3.html)
+task 3 for _well-formed_ and _valid_.
