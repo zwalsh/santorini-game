@@ -1,4 +1,4 @@
-const Spreadsheet = require('./lib/Spreadsheet.js');
+const Spreadsheet = require('./../../server-for-your-2spread.js');
 const JsonParser = require('./lib/JsonParse.js');
 const converter = require('./lib/ColumnIndexConverter.js');
 
@@ -52,14 +52,18 @@ function convertFormula(formula) {
  proper place, but Formulas must all be converted to Strings.
 */
 function convertFormulaArray(formulaArray) {
+  // console.log("converting formula array: " + JSON.stringify(formulaArray));
   let convertedArray = [];
   for (let row = 0; row < formulaArray.length; row++) {
     let currentRow = [];
-    for (let col = 0; col < formulaArray[0].length; col++) {
-      currentRow.concat(convertFormula(formulaArray[row][col]));
+    for (let col = 0; col < formulaArray[row].length; col++) {
+      let formula = convertFormula(formulaArray[row][col]);
+      // console.log("converted formula: " + JSON.stringify(formula));
+      currentRow.push(formula);
     }
-    convertedArray.concat(currentRow);
+    convertedArray.push(currentRow);
   }
+  // console.log("fully converted array: " + JSON.stringify(convertedArray));
   return convertedArray;
 }
 
@@ -71,7 +75,9 @@ expected format, then create and store the spreadsheet.
 function makeSheet(parsedInput) {
   let name = parsedInput[1];
   let formulaArray = parsedInput[2];
-  let sheet = new Spreadsheet(convertFormulaArray(formulaArray));
+  let array = convertFormulaArray(formulaArray);
+  // console.log("array in makeSheet: " + JSON.stringify(array));
+  let sheet = new Spreadsheet(array);
   spreadsheets[name] = sheet;
 }
 
@@ -110,7 +116,8 @@ function handleIncomingRequest(request) {
   if (command == 'sheet') {
     makeSheet(request);
   } else if (command == 'at') {
-    process.stdout.write(evaluateCell(request) + '\n');
+    // NOTE SUZANNE DO NOT DELETE THIS ONE WE NEED IT
+    console.log(evaluateCell(request));
   } else if (command == 'set') {
     setFormula(request);
   } else {
@@ -133,5 +140,5 @@ process.stdin.on('readable', () => {
 });
 
 process.stdin.on('end', function() {
-  process.stdout.write('Good bye! ;)');
+  //process.stdout.write('Good bye! ;)');
 });
