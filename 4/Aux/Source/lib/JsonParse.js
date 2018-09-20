@@ -18,11 +18,19 @@ function jsonArrayToString(arr) {
 exports.parseAndFormatInputString = function(inputString) {
 	const jsonParser = makeJsonParser();
 	jsonParser.feed(inputString);
-	return(jsonArrayToString(jsonParser.results[0].reverse()));
+	if (jsonParser.results.length > 0) {
+		return(jsonArrayToString(jsonParser.results[0].reverse()));
+	} else {
+		throw `Invalid JSON sent: ${inputString}`;
+	}
 }
 
 exports.parseInputString = function(inputString) {
 	const jsonParser = makeJsonParser();
 	jsonParser.feed(inputString);
-	return(jsonParser.results[0].reverse());
+	if (jsonParser.results.length > 0) {
+		return(jsonParser.results[0].reverse());
+	} else {
+		throw `Invalid JSON sent: ${inputString}`;
+	}
 }

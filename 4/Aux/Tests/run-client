@@ -1,0 +1,3 @@
+#!/bin/bash
+cd `dirname ${BASH_SOURCE[0]}`
+node ../Source/SpreadsheetTcpClient.js 127.0.0.1 < $1/client-in.json | diff - $1/client-out.json
