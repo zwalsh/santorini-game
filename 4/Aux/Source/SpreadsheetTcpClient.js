@@ -4,7 +4,7 @@ const { StringDecoder } = require('string_decoder');
 
 // create a socket and connect to the Spreadsheet server
 const socket = new net.Socket();
-console.log("Attempting to connect at: " + process.argv[2]);
+//console.log("Attempting to connect at: " + process.argv[2]);
 socket.connect(8000, process.argv[2]);
 // this is our sign-up name
 socket.write(JSON.stringify('sbzw'));
@@ -18,6 +18,7 @@ function addToBatch(command) {
   if (command[0] == 'at') {
     // send the batch to the server!
     let message = JSON.stringify(batch);
+    //console.log("Sending message: " + message);
     socket.write(message);
     batch = [];
   }
@@ -41,25 +42,43 @@ function isWellFormed(json) {
     case 'sheet':
       return json.length == 3 &&
               typeof json[1] == 'string' &&
-              Array.isArray(json[2]);
+              Array.isArray(json[2]) &&
+              isValidSheet(json[2]);
     // ["set", name, index, index, JF]
     case 'set':
       return json.length == 5 &&
               typeof json[1] == 'string' &&
               Number.isInteger(json[2]) &&
-              Number.isInteger(json[3]);
+              Number.isInteger(json[3]) &&
+              Formula.isValidFormula(json[4]);
     default:
       return false;
   }
 }
 
+function isValidSheet(arr) {
+  //console.log("Checking is valid sheet: " + JSON.stringify(arr));
+  for (let idx in arr) {
+    let row = arr[idx];
+    if (!Array.isArray(row)) {
+    //  console.log('sheet is invalid');
+      return false;
+    }
+    for (let rIdx in row) {
+      let jf = row[rIdx];
+      //console.log("checking jf: " + JSON.stringify(jf));
+      if (!Formula.isValidFormula(jf)) {
+        //console.log('sheet is invalid');
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function processInput(chunk) {
   // this gives us valid JSON that has been parsed
-  try {
-    let completedJson = JsonParse.parseInputString(chunk);
-  } catch (err) {
-    throw `Given non-JSON input: ${chunk}`;
-  }
+  let completedJson = JsonParse.parseInputString(chunk);
 
   for (let index in completedJson) {
     let json = completedJson[index];
@@ -93,3 +112,57 @@ socket.on('data', (chunk)=>{
     }
   }
 });
+
+class Formula {
+
+  constructor(formula) {
+    if (Formula.isValidNumber(formula)) {
+      this.contents = formula;
+      this.type = 'number';
+    } else if (Formula.isValidReference(formula)) {
+      this.contents = formula;
+      this.type = 'reference';
+    } else if (Formula.isValidOperation(formula)) {
+      this.contents = formula;
+      this.type = 'operation';
+    } else {
+      throw `Invalid Formula contents: ${formula}`;
+    }
+  }
+
+  getType() {
+    return this.type;
+  }
+
+  getContents() {
+    return this.contents;
+  }
+
+  static isValidFormula(contents) {
+  return Formula.isValidNumber(contents) ||
+  Formula.isValidReference(contents) ||
+  Formula.isValidOperation(contents);
+  }
+
+
+  /* Is n a valid number? */
+  static isValidNumber(n) {
+    return typeof n == 'number';
+  }
+
+  /* Is ref a valid Reference? */
+  static isValidReference(ref) {
+    return Array.isArray(ref)
+        && ref.length == 3
+        && ref[0] == '>'
+        && typeof ref[1] == 'number'
+        && typeof ref[2] == 'number';
+  }
+
+  /* Is op a valid Operation? */
+  static isValidOperation(op) {
+    return Array.isArray(op) && op.length == 3
+        && Formula.isValidFormula(op[0]) && Formula.isValidFormula(op[2])
+        && (op[1] == '+' || op[1] == '*');
+  }
+};
