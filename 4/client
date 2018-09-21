@@ -1,1 +1,1 @@
-node `dirname ${BASH_SOURCE[0]}`/Aux/Source/SpreadsheetTcpClient.js
+node `dirname ${BASH_SOURCE[0]}`/Aux/Source/SpreadsheetTcpClient.js ${@}

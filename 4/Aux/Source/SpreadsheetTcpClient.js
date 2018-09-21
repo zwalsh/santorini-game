@@ -4,6 +4,7 @@ const { StringDecoder } = require('string_decoder');
 
 // create a socket and connect to the Spreadsheet server
 const socket = new net.Socket();
+console.log("Attempting to connect at: " + process.argv[2]);
 socket.connect(8000, process.argv[2]);
 // this is our sign-up name
 socket.write(JSON.stringify('sbzw'));
