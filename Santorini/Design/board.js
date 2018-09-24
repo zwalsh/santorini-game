@@ -1,5 +1,5 @@
 /*
-This class represents a Santorini game board.
+This class represents a Santorini game board. It:
 - stores game data: 6x6 board cell heights and player locations
 - provides methods for reading and updating game state
 - maintains validity of game state by only allowing
@@ -8,8 +8,9 @@ This class represents a Santorini game board.
 
 -- Data Definitions --
 
+A Worker is represented by a Location on the Board.
 Workers are referred to using WorkerIds, which are non-negative integers
-assigned when a worker is first placed on the board.
+assigned when a Worker is first placed on the Board. 
 
 Locations are 2-element arrays storing coordinates as [row,col],
 where row is the row index and col is the column index.
@@ -17,7 +18,7 @@ Row and col indices are integers in the range [0,5].
 The pair represents a location on the game board.
 
 Board stores heights as a 6x6 array of arrays of cell heights.
-First index indicates row, second index indicates col.
+First index into the heights array indicates row, second index indicates col.
 Heights are integers in the range [0,4].
 
 */
@@ -68,14 +69,5 @@ class Board {
   Returns the current locations of all players on the board.
   */
   getWorkers(){}
-
-
-
-
-
-
-
-
-
 
 }
