@@ -10,7 +10,7 @@ This class represents a Santorini game board. It:
 
 A Worker is represented by a Location on the Board.
 Workers are referred to using WorkerIds, which are non-negative integers
-assigned when a Worker is first placed on the Board. 
+assigned when a Worker is first placed on the Board.
 
 Locations are 2-element arrays storing coordinates as [row,col],
 where row is the row index and col is the column index.
@@ -20,6 +20,8 @@ The pair represents a location on the game board.
 Board stores heights as a 6x6 array of arrays of cell heights.
 First index into the heights array indicates row, second index indicates col.
 Heights are integers in the range [0,4].
+
+BoardIndex is a number in the range [0,5].
 
 */
 
@@ -33,31 +35,31 @@ class Board {
     this.workers = [];
   }
 
-  /* Location -> [Maybe WorkerId]
+  /* BoardIndex BoardIndex -> [Maybe WorkerId]
   If the board contains fewer than 4 workers, add another worker
-  at the given location.
+  at the given location (x,y)
   Return the WorkerId that identifies the worker placed at that location.
   If location is invalid or board already contains 4 workers, return false.
   */
-  addWorker(loc){}
+  addWorker(x, y){ return 0; }
 
-  /* WorkerId Location -> Boolean
-  Move the given worker to the given location, if such a move is valid.
+  /* WorkerId BoardIndex BoardIndex -> Boolean
+  Move the given worker to the given location (x,y), if such a move is valid.
   Valid move = - move to adjacent square (one of the 8 neighboring squares)
                - that is not occupied by another worker
                - and that is not more than 1 higher than worker's current loc.
   Returns true/false if the move was/was not successful.
   */
-  moveWorker(id, loc){}
+  moveWorker(id, x, y){}
 
-  /* WorkerId Location -> Boolean
-  Build a floor at the given location, with the given worker, if possible.
+  /* WorkerId BoardIndex BoardIndex -> Boolean
+  Build a floor at the given location (x,y), with the given worker, if possible.
   Valid build location = - cell on the board
                          - that is adjacent to given worker's location
                            (adjacent = one of the 8 neighboring squares)
   Returns true/false if the build was/was not successful.
   */
-  buildFloor(id, loc){}
+  buildFloor(id, x, y){}
 
   /* Void -> [[Height, ...], ...]
   Returns the heights of every cell on the board,
@@ -65,9 +67,23 @@ class Board {
   */
   getHeights(){}
 
+  /* WorkerId -> Location
+  Returns the location of the given worker.
+  */
+  getWorker(idx) {
+    //return this.workers[idx];
+  }
+
   /* Void -> [Location, ...]
   Returns the current locations of all players on the board.
   */
   getWorkers(){}
 
+  /* Void -> Number
+  Return the side length of this board.
+  */
+  getSize(){ return this.heights.length; }
+
 }
+
+module.exports = Board;
