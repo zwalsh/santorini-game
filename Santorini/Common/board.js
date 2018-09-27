@@ -41,7 +41,27 @@ class Board {
   Return the WorkerId that identifies the worker placed at that location.
   If location is invalid or board already contains 4 workers, return false.
   */
-  addWorker(x, y){ return 0; }
+  addWorker(x, y){
+    if (this.workers.length > 3) {
+      return false;
+    }
+    if (!this.isValidLoc(x, y)) {
+      return false;
+    }
+    for (let workerLoc of this.workers) {
+      if (workerLoc[0] == x && workerLoc[1] == y) {
+        return false;
+      }
+    }
+    // now we can add the worker
+    this.workers.push([x, y]);
+    return this.workers.length - 1;
+  }
+
+  isValidLoc(x, y) {
+    let size = this.getSize();
+    return x >= 0 && x < size && y >= 0 && y < size;
+  }
 
   /* WorkerId BoardIndex BoardIndex -> Boolean
   Move the given worker to the given location (x,y), if such a move is valid.
@@ -61,6 +81,17 @@ class Board {
   */
   buildFloor(id, x, y){}
 
+  /* BoardIndex BoardIndex -> [Maybe Height]
+  Returns the height of the given cell in this Board,
+  if the cell exists.
+  */
+  getHeight(x, y){
+    if (!this.isValidLoc(x, y)) {
+      return false;
+    }
+    return this.heights[x][y];
+  }
+
   /* Void -> [[Height, ...], ...]
   Returns the heights of every cell on the board,
   in a 2d array.
@@ -71,7 +102,7 @@ class Board {
   Returns the location of the given worker.
   */
   getWorker(idx) {
-    //return this.workers[idx];
+    return this.workers[idx];
   }
 
   /* Void -> [Location, ...]
