@@ -1,15 +1,13 @@
 /*
+Script to enable testing the Board module for a Santorini game.
+Reads in a test scenario as a sequence of JSON arrays
+and creates board / executes actions on the board as directed
+by those commands.
+Prints results of each action as JSON to stdout.
 
-read single file from stdin
-convert input to json
-
-first line must be board
-  -> create board instance with that input
-next is series of commands on that board -- while or for
-  -> switch over command type and execute command
-
-need methods for:
-- worker direction -> location on board
+This test harness expects the first JSON input to be a
+board creation request, and all subsequent requests to be
+move, build, occupy, neighbor, or height actions/queries.
 
 */
 
