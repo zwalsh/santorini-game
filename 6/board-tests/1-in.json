@@ -1,3 +1,15 @@
 [["1playerA1", "2playerB1", 2],[0, "2playerA2", "1playerB2"]]
-["neighbors", "playerA1", ["EAST","PUT"]]
-["height", "playerB2", ["PUT","NORTH"]]
+
+["occupied?", "playerA1", ["PUT", "SOUTH"]]
+["occupied?", "playerA1", ["EAST", "PUT"]]
+["occupied?", "playerA1", ["EAST", "SOUTH"]]
+
+["occupied?", "playerB2", ["EAST", "SOUTH"]]
+["occupied?", "playerB2", ["EAST", "PUT"]]
+["occupied?", "playerB2", ["EAST", "NORTH"]]
+["occupied?", "playerB2", ["WEST", "SOUTH"]]
+["occupied?", "playerB2", ["WEST", "PUT"]]
+["occupied?", "playerB2", ["WEST", "NORTH"]]
+["occupied?", "playerB2", ["PUT", "SOUTH"]]
+["occupied?", "playerB2", ["PUT", "PUT"]]
+["occupied?", "playerB2", ["PUT", "NORTH"]]
