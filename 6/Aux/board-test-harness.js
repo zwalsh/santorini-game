@@ -161,6 +161,7 @@ function occupied(req) {
 
   let workerIdx = workers.indexOf(worker);
   let loc = getLocation(workerIdx, dir);
+  //console.log(`Worker ID: ${worker}, location: ${loc}`)
 
   let workerLocs = board.getWorkers();
   for (let workerLoc of workerLocs) {
@@ -193,10 +194,10 @@ function getLocation(workerIdx, dir) {
   let loc = board.getWorker(workerIdx);
   switch(dir[0]) {
     case "EAST":
-      loc[0] = loc[0] + 1;
+      loc[1] = loc[1] + 1;
       break;
     case "WEST":
-      loc[0] = loc[0] - 1;
+      loc[1] = loc[1] - 1;
       break;
     case "PUT":
       break;
@@ -205,10 +206,10 @@ function getLocation(workerIdx, dir) {
   }
   switch(dir[1]) {
     case "NORTH":
-      loc[1] = loc[1] - 1;
+      loc[0] = loc[0] - 1;
       break;
     case "SOUTH":
-      loc[1] = loc[1] + 1;
+      loc[0] = loc[0] + 1;
       break;
     case "PUT":
       break;

@@ -45,22 +45,12 @@ class Board {
     if (this.workers.length > 3) {
       return false;
     }
-    if (!this.isValidLoc(x, y)) {
+    if (!this.isValidUnoccupiedLoc(x, y)) {
       return false;
-    }
-    for (let workerLoc of this.workers) {
-      if (workerLoc[0] == x && workerLoc[1] == y) {
-        return false;
-      }
     }
     // now we can add the worker
     this.workers.push([x, y]);
     return this.workers.length - 1;
-  }
-
-  isValidLoc(x, y) {
-    let size = this.getSize();
-    return x >= 0 && x < size && y >= 0 && y < size;
   }
 
   /* WorkerId BoardIndex BoardIndex -> Boolean
@@ -70,16 +60,51 @@ class Board {
                - and that is not more than 1 higher than worker's current loc.
   Returns true/false if the move was/was not successful.
   */
-  moveWorker(id, x, y){}
+  moveWorker(id, x, y) {
+    // worker exists
+    if (this.workers.indexOf(id) === -1) {
+      return false;
+    }
+    // destination is on the board and empty
+    if (!this.isValidUnoccupiedLoc(x, y)) {
+      return false;
+    }
+    // destination is adjacent to worker location and not too high
+    if (this.isAdjacent(id, x, y) && this.heightDifference(id, x, y) <= 1) {
+      this.workers[id] = [x, y];
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   /* WorkerId BoardIndex BoardIndex -> Boolean
   Build a floor at the given location (x,y), with the given worker, if possible.
   Valid build location = - cell on the board
                          - that is adjacent to given worker's location
                            (adjacent = one of the 8 neighboring squares)
+                         - that is not occupied by another worker
   Returns true/false if the build was/was not successful.
   */
-  buildFloor(id, x, y){}
+  buildFloor(id, x, y) {
+    // worker exists
+    if (this.workers.indexOf(id) === -1) {
+      return false;
+    }
+    // destination is on the board and empty
+    if (!this.isValidUnoccupiedLoc(x, y)) {
+      return false;
+    }
+    // destination is adjacent to worker location and not height 4
+    if (this.isAdjacent(id, x, y) && this.heights[x][y] < 4) {
+      this.heights[x][y] = this.heights[x][y] + 1;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+//-------- Getters ---------
 
   /* BoardIndex BoardIndex -> [Maybe Height]
   Returns the height of the given cell in this Board,
@@ -93,27 +118,92 @@ class Board {
   }
 
   /* Void -> [[Height, ...], ...]
-  Returns the heights of every cell on the board,
+  Returns a copy of the heights of every cell on the board,
   in a 2d array.
   */
-  getHeights(){}
+  getHeights(){
+    let heightsCopy = [];
+    for (let rowIdx = 0; rowIdx < this.getSize(); rowIdx++) {
+      let row = []
+      for (let colIdx = 0; colIdx < this.getSize(); colIdx++) {
+        let cellHeight = this.heights[rowIdx][colIdx];
+        row.push(cellHeight);
+      }
+      heightsCopy.push(row);
+    }
+    return heightsCopy;
+  }
 
   /* WorkerId -> Location
-  Returns the location of the given worker.
+  Returns a copy of the location of the given worker,
+  if this board has a worker with that id.
   */
   getWorker(idx) {
-    return this.workers[idx];
+    if (idx >= 0 && idx < this.workers.length) {
+      let loc = this.workers[idx];
+      let locCopy = [loc[0], loc[1]];
+      return locCopy;
+    } else {
+      throw 'Invalid worker ID: ' + idx;
+    }
   }
 
   /* Void -> [Location, ...]
-  Returns the current locations of all players on the board.
+  Returns a copy of the current locations of all players on the board.
   */
-  getWorkers(){}
+  getWorkers(){
+    let workersCopy = [];
+    for (let i  = 0; i < this.workers.length; i++) {
+      workersCopy.push(this.getWorker(i));
+    }
+    return workersCopy;
+  }
 
   /* Void -> Number
   Return the side length of this board.
   */
   getSize(){ return this.heights.length; }
+
+//------- Helper functions for main methods -------
+
+  /* Is the location on the game board? */
+  isValidLoc(x, y) {
+    let size = this.getSize();
+    return x >= 0 && x < size && y >= 0 && y < size;
+  }
+
+  /* Is the location on the game board and not occupied by any worker? */
+  isValidUnoccupiedLoc(x, y) {
+    if (!this.isValidLoc(x, y)) {
+      return false;
+    }
+    for (let workerLoc of this.workers) {
+      if (workerLoc[0] == x && workerLoc[1] == y) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /* WorkerId BoardIndex BoardIndex -> Boolean
+  Is the worker's location adjacent to the given location on the board?
+  */
+  isAdjacent(id, x, y) {
+    let loc = this.getWorker(id);
+    let xDist = Math.abs(loc[0] - x);
+    let yDist = Math.abs(loc[1] - y);
+    return xDist <= 1 && yDist <= 1;
+  }
+
+  /* WorkerId BoardIndex BoardIndex -> Number
+  Return the difference in height between the worker's location
+  and the given location on the board.
+  Positive difference means the given location is higher.
+  */
+  heightDifference(id, x, y) {
+    let loc = this.getWorker(id);
+    return this.getHeight(x, y) - this.getHeight(loc[0],loc[1]);
+  }
 
 }
 
