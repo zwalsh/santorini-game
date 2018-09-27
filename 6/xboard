@@ -1,0 +1,3 @@
+#!/bin/bash
+# Executable that runs the test harness for the board module.
+node `dirname ${BASH_SOURCE[0]}`/Aux/board-test-harness.js
