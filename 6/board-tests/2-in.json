@@ -1,0 +1,46 @@
+[["0playerA1",0,0,0,0,"0playerA2"],
+[],
+[],
+[],
+[],
+["0playerB1",0,0,0,0,"0playerB2"]]
+
+["neighbors", "playerA1", ["WEST", "PUT"]]
+["neighbors", "playerA1", ["WEST", "NORTH"]]
+["neighbors", "playerA1", ["PUT", "NORTH"]]
+["neighbors", "playerA1", ["EAST", "NORTH"]]
+["neighbors", "playerA1", ["EAST", "PUT"]]
+["neighbors", "playerA1", ["EAST", "SOUTH"]]
+["neighbors", "playerA1", ["PUT", "SOUTH"]]
+["neighbors", "playerA1", ["WEST", "SOUTH"]]
+["neighbors", "playerA1", ["PUT", "PUT"]]
+
+["neighbors", "playerA2", ["WEST", "PUT"]]
+["neighbors", "playerA2", ["WEST", "NORTH"]]
+["neighbors", "playerA2", ["PUT", "NORTH"]]
+["neighbors", "playerA2", ["EAST", "NORTH"]]
+["neighbors", "playerA2", ["EAST", "PUT"]]
+["neighbors", "playerA2", ["EAST", "SOUTH"]]
+["neighbors", "playerA2", ["PUT", "SOUTH"]]
+["neighbors", "playerA2", ["WEST", "SOUTH"]]
+["neighbors", "playerA2", ["PUT", "PUT"]]
+
+["neighbors", "playerB1", ["WEST", "PUT"]]
+["neighbors", "playerB1", ["WEST", "NORTH"]]
+["neighbors", "playerB1", ["PUT", "NORTH"]]
+["neighbors", "playerB1", ["EAST", "NORTH"]]
+["neighbors", "playerB1", ["EAST", "PUT"]]
+["neighbors", "playerB1", ["EAST", "SOUTH"]]
+["neighbors", "playerB1", ["PUT", "SOUTH"]]
+["neighbors", "playerB1", ["WEST", "SOUTH"]]
+["neighbors", "playerB1", ["PUT", "PUT"]]
+
+["neighbors", "playerB2", ["WEST", "PUT"]]
+["neighbors", "playerB2", ["WEST", "NORTH"]]
+["neighbors", "playerB2", ["PUT", "NORTH"]]
+["neighbors", "playerB2", ["EAST", "NORTH"]]
+["neighbors", "playerB2", ["EAST", "PUT"]]
+["neighbors", "playerB2", ["EAST", "SOUTH"]]
+["neighbors", "playerB2", ["PUT", "SOUTH"]]
+["neighbors", "playerB2", ["WEST", "SOUTH"]]
+["neighbors", "playerB2", ["PUT", "PUT"]]
