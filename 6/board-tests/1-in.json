@@ -13,3 +13,8 @@
 ["occupied?", "playerB2", ["PUT", "SOUTH"]]
 ["occupied?", "playerB2", ["PUT", "PUT"]]
 ["occupied?", "playerB2", ["PUT", "NORTH"]]
+
+["move", "playerA2", ["PUT", "SOUTH"]]
+["occupied?", "playerA1", ["EAST", "SOUTH"]]
+["occupied?", "playerB2", ["WEST", "PUT"]]
+["occupied?", "playerB2", ["WEST", "SOUTH"]]
