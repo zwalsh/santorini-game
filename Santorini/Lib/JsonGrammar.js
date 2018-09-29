@@ -53,8 +53,8 @@ function extractArray(d) {
 var grammar = {
     Lexer: lexer,
     ParserRules: [
-    {"name": "json", "symbols": ["_"], "postprocess": id},
-    {"name": "json", "symbols": ["json", "value", "_"], "postprocess": function(d) { return d; }},
+    {"name": "json", "symbols": ["_", "value", "_"], "postprocess": function(d) { return [d[1]]; }},
+    {"name": "json", "symbols": ["json", "value", "_"], "postprocess": function(d) { return d[0].concat([d[1]]); }},
     {"name": "object", "symbols": [{"literal":"{"}, "_", {"literal":"}"}], "postprocess": function(d) { return {}; }},
     {"name": "object$ebnf$1", "symbols": []},
     {"name": "object$ebnf$1$subexpression$1", "symbols": ["_", {"literal":","}, "_", "pair"]},

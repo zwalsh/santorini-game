@@ -22,8 +22,8 @@ let lexer = moo.compile({
 
 @lexer lexer
 
-json -> _ {% id %}
-        | json value {% function(d) { return d; } %}
+json -> _ value _ {% function(d) { return [d[1]]; } %}
+        | json value _ {% function(d) { return d[0].concat([d[1]]); } %}
 
 object -> "{" _ "}" {% function(d) { return {}; } %}
     | "{" _ pair (_ "," _ pair):* _ "}" {% extractObject %}
