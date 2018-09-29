@@ -93,7 +93,7 @@ class Board {
   */
   buildFloor(id, x, y) {
     // worker exists
-    if (this.workers.indexOf(id) === -1) {
+    if (id < 0 || id >= this.workers.length) {
       return false;
     }
     // destination is on the board and empty
