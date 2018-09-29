@@ -1,0 +1,4 @@
+#!/bin/bash
+echo $*
+./xboard < board-tests/$1-in.json | diff - board-tests/$1-out.json
+

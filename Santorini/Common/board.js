@@ -61,7 +61,7 @@ class Board {
   Returns true/false if the move was/was not successful.
   */
   moveWorker(id, x, y) {
-    //console.log("Attempting to move worker " + id + " to " + [x, y]);
+    // console.log("Attempting to move worker " + id + " to " + [x, y]);
     // worker exists
     if (id < 0 || id >= this.workers.length) {
       return false;
@@ -92,19 +92,25 @@ class Board {
   Returns true/false if the build was/was not successful.
   */
   buildFloor(id, x, y) {
+    // console.log("worker " + id + " builds at cell: " + [x,y]);
     // worker exists
     if (id < 0 || id >= this.workers.length) {
+      // console.log("worker does not exist");
       return false;
     }
     // destination is on the board and empty
     if (!this.isValidUnoccupiedLoc(x, y)) {
+      // console.log("Not valid/unocc.");
       return false;
     }
     // destination is adjacent to worker location and not height 4
     if (this.isAdjacent(id, x, y) && this.heights[x][y] < 4) {
       this.heights[x][y] = this.heights[x][y] + 1;
+      // console.log(this.heights);
+      // console.log(this.workers);
       return true;
     } else {
+      // console.log("Not adjacent/under height 4");
       return false;
     }
   }
