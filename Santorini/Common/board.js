@@ -61,8 +61,9 @@ class Board {
   Returns true/false if the move was/was not successful.
   */
   moveWorker(id, x, y) {
+    //console.log("Attempting to move worker " + id + " to " + [x, y]);
     // worker exists
-    if (this.workers.indexOf(id) === -1) {
+    if (id < 0 || id >= this.workers.length) {
       return false;
     }
     // destination is on the board and empty
@@ -70,7 +71,11 @@ class Board {
       return false;
     }
     // destination is adjacent to worker location and not too high
-    if (this.isAdjacent(id, x, y) && this.heightDifference(id, x, y) <= 1) {
+    let isAdj = this.isAdjacent(id, x, y);
+    let heightDiff = this.heightDifference(id, x, y);
+    // console.log("isAdj: " + isAdj + " heightDiff: " + heightDiff);
+    if (isAdj && heightDiff <= 1) {
+      // console.log("moving worker " + id + " to " + JSON.stringify([x, y]));
       this.workers[id] = [x, y];
       return true;
     } else {
@@ -175,10 +180,12 @@ class Board {
   /* Is the location on the game board and not occupied by any worker? */
   isValidUnoccupiedLoc(x, y) {
     if (!this.isValidLoc(x, y)) {
+      // console.log("Not valid loc: " + [x,y]);
       return false;
     }
     for (let workerLoc of this.workers) {
       if (workerLoc[0] == x && workerLoc[1] == y) {
+        // console.log("Conflicts with workerLoc: " + workerLoc);
         return false;
       }
     }
