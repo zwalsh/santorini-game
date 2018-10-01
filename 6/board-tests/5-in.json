@@ -1,7 +1,21 @@
 [["0pA1","1pA2","0pB1","1pB2"]]
 
-["move","pA1",["PUT","SOUTH"]]
-["move","pA1",["PUT","SOUTH"]]
+["move"
+
+  ,"pA1",
+  [
+
+    "PUT",
+
+
+    "SOUTH"]]
+["move","pA1",["PUT","SOUTH"]
+
+
+
+
+
+]
 ["move","pA1",["PUT","SOUTH"]]
 ["move","pA1",["PUT","SOUTH"]]
 ["move","pA1",["PUT","SOUTH"]]
