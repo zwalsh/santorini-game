@@ -216,7 +216,8 @@ function getLocation(workerIdx, dir) {
     default:
       throw `Invalid Direction: ${dir}`;
   }
-  if (loc[0] < 0 || loc[0] > size || loc[1] < 0 || loc[1] > size) {
+  //console.log("Determined coordinate: " + loc);
+  if (loc[0] < 0 || loc[0] >= size || loc[1] < 0 || loc[1] >= size) {
     return false;
   }
   return loc;
