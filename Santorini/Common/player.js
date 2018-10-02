@@ -29,7 +29,7 @@ class Player {
   }
 
   /* Void -> Action
-  Produces the next Action that the Player wishes to take. This Action must
+  Yields the next Action that the Player wishes to take. This Action must
   be valid given the current state of the game and must be tagged with the
   Player's PlayerId.
   */
