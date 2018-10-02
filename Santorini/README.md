@@ -10,7 +10,8 @@ including representations of a Board, a Player, a RuleChecker, and various
 possible Actions
 * Lib - a directory for library-type code including JSON parsing
 * Design - a directory containing overarching plans for the general construction
- of this project
+ of this project, as well as interface designs for components to be implemented
+ in the future.
 
 # Testing
 
