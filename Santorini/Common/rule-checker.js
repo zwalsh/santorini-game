@@ -1,33 +1,35 @@
 /*
-Rule checker
+This class represents a rule checker for a game of Santorini.
 
-Has a board for getting board state data
-Tracks additional game state data, related to:
-  - whose turn it is
-  - what move has just been made
-  - which workers are which player's -> It needs to be told this ;(
+It allows players and admins to check if an action by a player is valid given
+the state of the Board and the game. It can also determine whose turn it is.
 
-Can tell others:
-- whose turn it is (which player)
-- given a PlayerId and an Action, is that action valid?
+It keeps track of additional game state information like the last action taken
+and which player controls which worker. It has a Board for accessing board state
+data.
 
 
-An Action is defined in action.js
+Data definitions:
 
-WorkerId is int in range [0,3]
-PlayerId is int in range [0.1]
+Action is defined in action.js
+
+WorkerId is an int in the range [0,3]
+PlayerId is an int in the range [0.1]
 */
 
 class RuleChecker {
-
+  /* Board PlayerId PlayerId -> RuleChecker
+  Creates a RuleChecker for the game with the given Board and Players, where the
+  first player given is assumed to move first.
+  */
   constructor(board, p1Id, p2Id) {
     this.board = board;
     this.p1 = p1Id;
     this.p2 = p2Id;
 
-    /*TODO what is this*/
+    /* The most recent Action taken in the game */
     this.lastAction;
-    /*TODO what is this*/
+    /* Map of WorkerIds to the PlayerIds that own them */
     this.workerToPlayer = new Map();
 
   }
@@ -41,7 +43,8 @@ class RuleChecker {
   Return the PlayerId corresponding to the player who must
   take the next action in the game.
   This can be determined from the prior Action that this rule checker
-  is aware of. */
+  is aware of.
+  */
   whoseTurn() {}
 
   /* Action -> Void
@@ -54,4 +57,10 @@ class RuleChecker {
   */
   notifyOfAction(action, result) {}
 
+  /* Void -> Boolean
+  Returns true if the game is in an end state.
+  */
+  isGameOver() {}
 }
+
+module.exports = RuleChecker;

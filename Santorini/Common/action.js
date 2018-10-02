@@ -1,18 +1,16 @@
 /*
 This file represents all possible actions that can be taken on a Board.
+This is an interface that has not been fully implemented.
 
 Action represents the things a player can do to affect the state of the board.
 Action is one of 3 classes:
-Place (Place-Action? naming convention tbd)
-Move
-Build
+- PlaceAction
+- MoveAction
+- BuildAction
 
-They can all execute themselves on a Board, given a Board
-  (execute = call the appropriate method on board)
-  - Execute method returns the result of that execution: [nothing] or WorkerId
-They all need PlayerId
-They can all provide their type as a string: "move", "build", "place"
-
+They can all execute themselves on a Board, given a Board (meaning they will
+mutate the given Board appropriately). The execute method returns the result of
+that execution, if there is one.
 */
 
 /* Superclass for all actions that can be taken on a board. Invalid on its own.
@@ -24,12 +22,12 @@ class Action {
     this.playerId = playerId;
   }
   execute(board) { throw 'must define execute() in subclass'; }
-  type() { throw 'must define type() in subclass'; }
+  getType() { throw 'must define type() in subclass'; }
 }
 
 /* Represents the action of placing a worker on a board at a location.
 execute() returns the WorkerId created by the Board. */
-class Place extends Action {
+class PlaceAction extends Action {
   constructor(playerId, loc) {
     super(playerId);
     this.loc = loc;
@@ -40,11 +38,14 @@ class Place extends Action {
   execute(board) {}
 
   /* Return this Action's type */
-  type() { return "place"; }
+  getType() { return "place"; }
+
+  /* Returns the location at which this Place will occur */
+  getLoc() { return this.loc; }
 }
 
 /* Represents the action of moving a worker to a location on a board. */
-class Move extends Action {
+class MoveAction extends Action {
   constructor(playerId, workerId, loc) {
     super(playerId);
     this.loc = loc;
@@ -56,11 +57,17 @@ class Move extends Action {
   execute(board) {}
 
   /* Return this Action's type */
-  type() { return "move"; }
+  getType() { return "move"; }
+
+  /* Returns the location to which this Move will occur */
+  getLoc() { return this.loc; }
+
+  /* Returns the ID of the worker making this Move */
+  getWorkerId() { return this.workerId; }
 }
 
 /* Represents the action of a worker building a floor at a location on a board. */
-class Build extends Action {
+class BuildAction extends Action {
   constructor(playerId, workerId, loc) {
     super(playerId);
     this.loc = loc;
@@ -72,11 +79,17 @@ class Build extends Action {
   execute(board) {}
 
   /* Return this Action's type */
-  type() { return "build"; }
+  getType() { return "build"; }
+
+  /* Returns the location at which this Build will occur */
+  getLoc() { return this.loc; }
+
+  /* Returns the ID of the worker building this floor */
+  getWorkerId() { return this.workerId; }
 }
 
 module.exports = {
-  "Place" : Place,
-  "Move" : Move,
-  "Build" : Build
+  "PlaceAction" : PlaceAction,
+  "MoveAction" : MoveAction,
+  "BuildAction" : BuildAction
 }
