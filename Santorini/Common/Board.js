@@ -38,12 +38,12 @@ class Board {
 
     /* heights is a 2d array of the height of each building on the board */
     this.heights = [];
-    for (int row = 0; row < this.BOARD_SIZE; row++) {
+    for (let row = 0; row < this.BOARD_SIZE; row++) {
       let currentRow = [];
-      for (int col = 0; col < this.BOARD_SIZE; col++) {
-        currentRow.append(0);
+      for (let col = 0; col < this.BOARD_SIZE; col++) {
+        currentRow.push(0);
       }
-      this.heights.append(currentRow);
+      this.heights.push(currentRow);
     }
 
     /* workers is an array of up to 4 worker locations, which are created when
@@ -169,6 +169,17 @@ class Board {
   Return the side length of this board.
   */
   getSize(){ return this.BOARD_SIZE; }
+
+  /* Void -> Board
+  Return a deep copy of this Board. 
+  */
+  copy() {
+    let brd = new Board();
+    brd.heights = this.getHeights();
+    brd.workers = this.getWorkers();
+    return brd;
+
+  }
 
 //------- Helper functions for main methods -------
 
