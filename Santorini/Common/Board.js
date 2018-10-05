@@ -29,9 +29,23 @@ BoardIndex is a number in the range [0,5].
 
 class Board {
   constructor() {
+    /* The maximum height of a cell in this Board */
+    this.MAX_HEIGHT = 4;
+    /* The length/width of this Board */
+    this.BOARD_SIZE = 6;
+    /* The maximum number of Workers in a Board */
+    this.MAX_WORKERS = 4;
+
     /* heights is a 2d array of the height of each building on the board */
-    this.heights = [[0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0],
-                    [0,0,0,0,0,0],[0,0,0,0,0,0],[0,0,0,0,0,0]];
+    this.heights = [];
+    for (int row = 0; row < this.BOARD_SIZE; row++) {
+      let currentRow = [];
+      for (int col = 0; col < this.BOARD_SIZE; col++) {
+        currentRow.append(0);
+      }
+      this.heights.append(currentRow);
+    }
+
     /* workers is an array of up to 4 worker locations, which are created when
     workers are added to the board. */
     this.workers = [];
@@ -44,7 +58,7 @@ class Board {
   If location is invalid or board already contains 4 workers, return false.
   */
   addWorker(x, y){
-    if (this.workers.length > 3) {
+    if (this.workers.length > this.MAX_WORKERS) {
       return false;
     }
     if (!this.isValidUnoccupiedLoc(x, y)) {
@@ -86,6 +100,10 @@ class Board {
     }
     // destination is on the board and empty
     if (!this.isValidUnoccupiedLoc(x, y)) {
+      return false;
+    }
+    // the height of the cell being built on is below the max height
+    if (this.heights[x][y] == this.MAX_HEIGHT) {
       return false;
     }
     this.heights[x][y] = this.heights[x][y] + 1;
@@ -150,7 +168,7 @@ class Board {
   /* Void -> Number
   Return the side length of this board.
   */
-  getSize(){ return this.heights.length; }
+  getSize(){ return this.BOARD_SIZE; }
 
 //------- Helper functions for main methods -------
 
@@ -163,12 +181,10 @@ class Board {
   /* Is the location on the game board and not occupied by any worker? */
   isValidUnoccupiedLoc(x, y) {
     if (!this.isValidLoc(x, y)) {
-      // console.log("Not valid loc: " + [x,y]);
       return false;
     }
     for (let workerLoc of this.workers) {
       if (workerLoc[0] == x && workerLoc[1] == y) {
-        // console.log("Conflicts with workerLoc: " + workerLoc);
         return false;
       }
     }
