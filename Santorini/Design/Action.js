@@ -1,41 +1,38 @@
 /*
-This file represents all possible actions that can be taken on a Board.
+This file represents all possible actions that can be taken on a GameState.
 This is an interface that has not been fully implemented.
 
-Action represents the things a player can do to affect the state of the board.
+Action represents the things a player can do to affect the state of the game.
 Action is one of 3 classes:
 - PlaceAction
 - MoveAction
 - BuildAction
 
-They can all execute themselves on a Board, given a Board (meaning they will
-mutate the given Board appropriately). The execute method returns the result of
-that execution, if there is one.
+They can all execute themselves on a GameState (meaning they will
+mutate the given GameState appropriately).
+
+GameState is defined in GameState.js
 */
 
-/* Superclass for all actions that can be taken on a board. Invalid on its own.
-Subclasses should contain all necessary data to execute themselves on a Board,
-Given a Board instance, they can do so on that Board, returning any result
-produced by the Board. */
+/* Superclass for all actions that can be taken on a GameState. Invalid on its
+own. Subclasses should contain all necessary data to execute themselves on
+a GameState, given a GS instance. */
 class Action {
-  constructor(playerId) {
-    this.playerId = playerId;
-  }
-  execute(board) { throw 'must define execute() in subclass'; }
+  constructor() {}
+  execute(gameState) { throw 'must define execute() in subclass'; }
   getType() { throw 'must define type() in subclass'; }
 }
 
-/* Represents the action of placing a worker on a board at a location.
-execute() returns the WorkerId created by the Board. */
+/* Represents the action of placing a worker on a board at a location. */
 class PlaceAction extends Action {
-  constructor(playerId, loc) {
-    super(playerId);
+  constructor(loc) {
     this.loc = loc;
   }
 
-  /* call addWorker() on the board, return resulting WorkerId */
+  /* call addWorker() on the board, update the worker ownerships, change
+  whose turn it is. */
   // TODO
-  execute(board) {}
+  execute(gameState) {}
 
   /* Return this Action's type */
   getType() { return "place"; }
@@ -46,15 +43,14 @@ class PlaceAction extends Action {
 
 /* Represents the action of moving a worker to a location on a board. */
 class MoveAction extends Action {
-  constructor(playerId, workerId, loc) {
-    super(playerId);
+  constructor(workerId, loc) {
     this.loc = loc;
     this.workerId = workerId;
   }
 
-  /* call moveWorker() on the board, return nothing */
+  /* call moveWorker() on the board */
   // TODO
-  execute(board) {}
+  execute(gameState) {}
 
   /* Return this Action's type */
   getType() { return "move"; }
@@ -68,15 +64,14 @@ class MoveAction extends Action {
 
 /* Represents the action of a worker building a floor at a location on a board. */
 class BuildAction extends Action {
-  constructor(playerId, workerId, loc) {
-    super(playerId);
+  constructor(workerId, loc) {
     this.loc = loc;
     this.workerId = workerId;
   }
 
-  /* call buildFloor() on the board, return nothing */
+  /* call buildFloor() on the board, change whose turn it is */
   // TODO
-  execute(board) {}
+  execute(gameState) {}
 
   /* Return this Action's type */
   getType() { return "build"; }
