@@ -1,37 +1,23 @@
 /**
  * Implemented by anything that wishes to participate in a game of Santorini.
  * This may be a remote TCP connection, a (local) AI component, a UI, etc.
- * 
- * Must implement methods to:
- * - provide its next move
- * - receive updates about game state
- * 
- * 
- * 
- * 
- * 
- * 
+ *
+ * Must implement a method to provide its next Action given a current GameState.
+ * When it is asked for an Action, the StrategyInterface knows that it must
+ * be its turn. As such, it knows which player it is (by inspecting the
+ * GameState), and knows which Workers it can move.
+ *
+ * See the definitions of Action and GameState in Action.js and GameState.js
+ * respectively.
  */
 
-
-
 class StrategyInterface {
-    /* PlayerId -> StrategyInterface
-    Creates a StrategyInterface with the given id (0 or 1)
+    constructor() {}
+
+    /* GameState -> Action
+    Yields the next Action that the StrategyInterface wishes to take. This
+    Action must be valid under the given GameState. This method will only
+    be called when it is this StrategyInterface's turn to act.
     */
-    constructor(id) {
-      this.playerId = id;
-    }
-  
-    /* Void -> Action
-    Yields the next Action that the StrategyInterface wishes to take. This Action must
-    be valid given the current state of the game and must be tagged with the
-    StrategyInterface's PlayerId.
-    */
-    nextAction() {}
-  
-    /* GameState -> Void
-    Called when any updates are made to the central GameState. This allows this
-    StrategyInterface to keep its knowledge of the game in sync with the actual game state.
-    */
+    nextAction(gameState) {}
   }
