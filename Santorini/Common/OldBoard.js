@@ -2,10 +2,8 @@
 This class represents a Santorini game board. It:
 - stores game data: 6x6 board cell heights and player locations
 - provides methods for reading and updating game state
-- maintains validity of board state by only allowing
-    moves that result in another valid board state
-- does not ensure validity of changes made to board state, only ensures
-    validity of resulting board state
+- maintains validity of game state by only allowing
+    moves that result in another valid game state
 - does not track turns or game history
 
 -- Data Definitions --
@@ -57,10 +55,13 @@ class Board {
 
   /* WorkerId BoardIndex BoardIndex -> Boolean
   Move the given worker to the given location (x,y), if such a move is valid.
-  Valid move = move to a square that is not occupied by another worker
+  Valid move = - move to adjacent square (one of the 8 neighboring squares)
+               - that is not occupied by another worker
+               - and that is not more than 1 higher than worker's current loc.
   Returns true/false if the move was/was not successful.
   */
   moveWorker(id, x, y) {
+    // console.log("Attempting to move worker " + id + " to " + [x, y]);
     // worker exists
     if (id < 0 || id >= this.workers.length) {
       return false;
@@ -69,27 +70,49 @@ class Board {
     if (!this.isValidUnoccupiedLoc(x, y)) {
       return false;
     }
-    this.workers[id] = [x, y];
-    return true;
+    // destination is adjacent to worker location and not too high
+    let isAdj = this.isAdjacent(id, x, y);
+    let heightDiff = this.heightDifference(id, x, y);
+    // console.log("isAdj: " + isAdj + " heightDiff: " + heightDiff);
+    if (isAdj && heightDiff <= 1) {
+      // console.log("moving worker " + id + " to " + JSON.stringify([x, y]));
+      this.workers[id] = [x, y];
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /* WorkerId BoardIndex BoardIndex -> Boolean
   Build a floor at the given location (x,y), with the given worker, if possible.
   Valid build location = - cell on the board
-                         - not occupied by another worker
+                         - that is adjacent to given worker's location
+                           (adjacent = one of the 8 neighboring squares)
+                         - that is not occupied by another worker
   Returns true/false if the build was/was not successful.
   */
   buildFloor(id, x, y) {
+    // console.log("worker " + id + " builds at cell: " + [x,y]);
     // worker exists
     if (id < 0 || id >= this.workers.length) {
+      // console.log("worker does not exist");
       return false;
     }
     // destination is on the board and empty
     if (!this.isValidUnoccupiedLoc(x, y)) {
+      // console.log("Not valid/unocc.");
       return false;
     }
-    this.heights[x][y] = this.heights[x][y] + 1;
-    return true;
+    // destination is adjacent to worker location and not height 4
+    if (this.isAdjacent(id, x, y) && this.heights[x][y] < 4) {
+      this.heights[x][y] = this.heights[x][y] + 1;
+      // console.log(this.heights);
+      // console.log(this.workers);
+      return true;
+    } else {
+      // console.log("Not adjacent/under height 4");
+      return false;
+    }
   }
 
 //-------- Getters ---------
@@ -174,6 +197,27 @@ class Board {
     }
     return true;
   }
+
+  /* WorkerId BoardIndex BoardIndex -> Boolean
+  Is the worker's location adjacent to the given location on the board?
+  */
+  isAdjacent(id, x, y) {
+    let loc = this.getWorker(id);
+    let xDist = Math.abs(loc[0] - x);
+    let yDist = Math.abs(loc[1] - y);
+    return xDist <= 1 && yDist <= 1;
+  }
+
+  /* WorkerId BoardIndex BoardIndex -> Number
+  Return the difference in height between the worker's location
+  and the given location on the board.
+  Positive difference means the given location is higher.
+  */
+  heightDifference(id, x, y) {
+    let loc = this.getWorker(id);
+    return this.getHeight(x, y) - this.getHeight(loc[0],loc[1]);
+  }
+
 }
 
 module.exports = Board;
