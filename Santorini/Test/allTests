@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Script to run all unit tests for code in any directory in the entirety of the known universe
+# and (somehow) beyond.
+ 
+# This test script will extend the boundaries of human knowledge.
+
+# It is all-knowing. It will share some.
+
+node ../../node_modules/jasmine/bin/jasmine.js --config=jasmine.json
