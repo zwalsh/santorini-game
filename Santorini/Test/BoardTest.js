@@ -12,18 +12,18 @@ describe("Board tests: ", function() {
     let workerId2;
     let workerId3;
     it("adds a worker to the board", function() {
-      workerId0 = board.placeWorker(0,0);
-      expect(board.getWorker(workerId0)).toBe([0,0]);
+      workerId0 = board.addWorker(0,0);
+      expect(board.getWorker(workerId0)).toEqual([0,0]);
     });
     it("adds four workers to the board", function() {
       workerId0 = board.addWorker(0,0);
       workerId1 = board.addWorker(1,1);
       workerId2 = board.addWorker(2,2);
       workerId3 = board.addWorker(3,3);
-      expect(board.getWorker(workerId0)).toBe([0,0]);
-      expect(board.getWorker(workerId1)).toBe([1,1]);
-      expect(board.getWorker(workerId2)).toBe([2,2]);
-      expect(board.getWorker(workerId3)).toBe([3,3]);
+      expect(board.getWorker(workerId0)).toEqual([0,0]);
+      expect(board.getWorker(workerId1)).toEqual([1,1]);
+      expect(board.getWorker(workerId2)).toEqual([2,2]);
+      expect(board.getWorker(workerId3)).toEqual([3,3]);
     });
     it("does not allow more than four workers to be added", function() {
       workerId0 = board.addWorker(0,0);

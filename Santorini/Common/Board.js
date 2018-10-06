@@ -58,7 +58,7 @@ class Board {
   If location is invalid or board already contains 4 workers, return false.
   */
   addWorker(x, y){
-    if (this.workers.length > this.MAX_WORKERS) {
+    if (this.workers.length >= this.MAX_WORKERS) {
       return false;
     }
     if (!this.isValidUnoccupiedLoc(x, y)) {

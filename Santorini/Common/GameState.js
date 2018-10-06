@@ -20,6 +20,10 @@ to its Board, last Action, worker ownership, and turn information.
     3. Possibly call flipTurn() to change which player's turn it is
 
 */
+const Action = require('./Action.js');
+const PlaceAction = Action.PlaceAction;
+const MoveAction = Action.MoveAction;
+const BuildAction = Action.BuildAction;
 
 /* The integers used to identify the 2 players in the game 
 for turn and worker ownership information */
@@ -80,13 +84,28 @@ class GameState {
     return this.workerOwnership.get(workerId);
   }
 
+  // TODO needs tests
+  /* PlayerId -> [Listof WorkerId]
+  Returns the list of Ids of Worker owned by the Player with the given PlayerId.
+  */
+  getWorkerList(playerId) {
+    let workers = Array.from(this.workerOwnership.entries());
+    return workers.filter((entry) => { 
+      // keep only the Workers owned by the given PlayerId
+      return entry[1] === playerId; 
+    }).map((entry) => {
+      // return only the WorkerId from the pair
+      return entry[0];
+    });
+  }
+
   /* Action -> Void
   Update the last Action taken in the game. Makes a copy of the
   given Action before storing it, to ensure that this GameState's last
   action can't be mutated from outside the class.
   */
   setLastAction(action) {
-    this.lastAction = action.copy();
+    this.lastAction = Action.copy(action);
   }
 
   /* WorkerId PlayerId -> Void
@@ -100,7 +119,7 @@ class GameState {
   Returns a deep copy of this GameState.
   */
   copy() {
-    let actionCopy = this.lastAction === null ? null : this.lastAction.copy();
+    let actionCopy = this.lastAction === null ? null : Action.copy(this.lastAction);
     return new GameState(this.board.copy(), this.whoseTurn, 
       actionCopy, new Map(this.workerOwnership));
   }

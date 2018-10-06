@@ -1,5 +1,9 @@
 const GameState = require('./../Common/GameState.js');
 const Board = require('./../Common/Board.js');
+const Action = require('./../Common/Action.js');
+const PlaceAction = Action.PlaceAction;
+const MoveAction = Action.MoveAction;
+const BuildAction = Action.BuildAction;
 
 describe("GameState unit tests", function() {
 
@@ -37,9 +41,13 @@ describe("GameState unit tests", function() {
     });
 
     describe("Last action", function() {
-        // TODO
         it("Update makes a copy of the action before setting it internally", function() {
-            expect("We need to finish Action before we can write this test").toBe(false);
+            // Mutating an Action after passing it to setLastAction 
+            // does not change the Action that the GameState has
+            let action = new PlaceAction([0,0]);
+            gs.setLastAction(action);
+            action.loc = [5,5];
+            expect(gs.getLastAction().loc).not.toEqual(action.loc);
         });
     });
 
@@ -78,12 +86,16 @@ describe("GameState unit tests", function() {
             expect(gsCopy.getWhoseTurn()).toBe(player2Id);
         });
         it("copies the GameState's Action when lastAction is not null", function() {
-            //TODO
-            expect("we need Action to be implemented in order to write this test").toBe(false);
+            let action = new PlaceAction([3,4]);
+            gs.setLastAction(action);
+            let gsCopy = gs.copy();
+            let gsCopyLastAction = gsCopy.getLastAction();
+            expect(gsCopyLastAction.getType()).toBe("place");
+            expect(gsCopyLastAction.getLoc()).toEqual([3,4]);
         });
         it("sets the copy's lastAction to null when lastAction is null", function() {
-            //TODO
-            expect("we need Action to be implemented in order to write this test").toBe(false);
+            let gsCopy = gs.copy();
+            expect(gsCopy.getLastAction()).toBeNull();
         });
         it("updating the copy's worker ownership doesn't affect original", function() {
             let gsCopy = gs.copy();
