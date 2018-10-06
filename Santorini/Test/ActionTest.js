@@ -3,6 +3,7 @@ const PlaceAction = Action.PlaceAction;
 const MoveAction = Action.MoveAction;
 const BuildAction = Action.BuildAction;
 const GameState = require('./../Common/GameState.js');
+const Board = require('./../Common/Board.js');
 
 describe("action tests", function() {
   describe("data access", function() {
