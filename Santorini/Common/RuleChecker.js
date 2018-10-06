@@ -20,6 +20,7 @@ const MAX_WORKERS_PER_PLAYER = 2;
 
 /* GameState Action PlayerId -> Boolean
 Is the given Action valid to take in the current game state?
+PlayerId must only be provided if validating a PlaceAction.
 */
 function validate(gameState, action, playerId) {
   switch(action.getType()) {
