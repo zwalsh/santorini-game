@@ -5,8 +5,8 @@ const BuildAction = Action.BuildAction;
 const GameState = require('./../Common/GameState.js');
 const Board = require('./../Common/Board.js');
 
-describe("action tests", function() {
-  describe("data access", function() {
+describe("Action test suite:", function() {
+  describe("Data access functions (getters): ", function() {
     describe("PlaceAction", function() {
       let placeAction;
       beforeEach(function() {
@@ -50,7 +50,7 @@ describe("action tests", function() {
       });
     });
   });
-  describe("copy operation", function() {
+  describe("Copy function: ", function() {
     describe("PlaceAction", function() {
       it("returns an exact copy", function() {
 
@@ -76,7 +76,7 @@ describe("action tests", function() {
       });
     })
   });
-  describe("execute operation", function() {
+  describe("Execute function: ", function() {
     let gameState;
     let board;
     beforeEach(function() {
