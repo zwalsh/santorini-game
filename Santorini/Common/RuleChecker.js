@@ -1,9 +1,9 @@
 /*
 This file represents a rule checker for a game of Santorini.
 
-This file provides a single function that allows players and admins 
-to check if an action by a player is valid, given the state of the game 
-(which includes the state of the board and turn information). 
+This file provides a single function that allows players and admins
+to check if an action by a player is valid, given the state of the game
+(which includes the state of the board and turn information).
 
 A rule checker has no internal state of its own, so no class definition is necessary.
 
@@ -49,10 +49,10 @@ function validatePlaceAction(gameState, action, playerId) {
   if (playerWorkers.length >= MAX_WORKERS_PER_PLAYER) {
     return false;
   }
-  if (board.getWorkers().getWorkers().length >= board.MAX_WORKERS) {
+  if (board.getWorkers().length >= board.MAX_WORKERS) {
     return false;
   }
-  let loc = action.getLoc();  
+  let loc = action.getLoc();
   return board.isValidUnoccupiedLoc(loc[0], loc[1]);
 }
 
