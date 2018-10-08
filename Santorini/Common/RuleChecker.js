@@ -137,7 +137,7 @@ function heightDifference(board, id, otherLoc) {
   let workerLoc = board.getWorker(id);
   let x = otherLoc[0];
   let y = otherLoc[1];
-  return board.getHeight(x, y) - board.getHeight(loc[0], loc[1]);
+  return board.getHeight(x, y) - board.getHeight(workerLoc[0], workerLoc[1]);
 }
 
 module.exports = {
