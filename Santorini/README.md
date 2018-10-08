@@ -15,10 +15,25 @@ possible Actions
 
 # Testing
 
+## Unit Tests
+
+Unit tests for all modules in the Common and Lib directories are located in the
+Test directory. Running the executable Tests/allTests will run all unit tests.
+
+## Integration Tests
+
+### Board
 There are tests for the Board component delivered in the 6 directory at the
 root level of this project. They can be run using the xboard executable, which
 takes JSON input from STDIN and prints the results to STDOUT. This input and
 expected output is in the board-tests directory within 6.
+
+### RuleChecker
+Integration tests for the RuleChecker component are in the directory 7, at the root
+level of this repository. The test cases are pairs of JSON-formatted input and 
+expected output files, located in the rules-tests directory within 7. 
+They can be run using the xrules executable, which takes JSON input from STDIN 
+and prints the results to STDOUT. 
 
 # Roadmap
 
