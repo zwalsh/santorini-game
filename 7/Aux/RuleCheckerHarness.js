@@ -69,7 +69,6 @@ let workerNameToId;
 process.stdin.on('readable', () => {
   let chunk = process.stdin.read();
   if (chunk != null) {
-    console.log('received chunk: ' + chunk);
     let requests = JsonParser.parseInputString(chunk);
     handleRequests(requests);
   }
@@ -96,21 +95,23 @@ function handleRequests(reqs) {
       let moveAction = createMoveAction(req, gameState);
       let moveValid = RuleChecker.validate(gameState, moveAction);
       if (reqs.length == 0) {
-        process.stdout.write(JSON.stringify(moveValid ? "yes" : "no"));
+        process.stdout.write(JSON.stringify(moveValid ? "yes" : "no") + '\n');
         return;
       }
       let next = reqs[0];
-      if (next[0] === 'build+') {
+      if (next[0] === '+build') {
           req = reqs.splice(0, 1)[0];
           if (!moveValid) {
-            process.stdout.write(JSON.stringify("no"));
+            process.stdout.write(JSON.stringify("no") + '\n');
             continue;
           }
           Action.execute(moveAction, gameState);
 
           let buildAction = createBuildAction(req, moveAction.getWorkerId(), gameState);
           let buildValid = RuleChecker.validate(gameState, buildAction);
-          process.stdout.write(JSON.stringify(buildValid ? "yes" : "no"));
+          process.stdout.write(JSON.stringify(buildValid ? "yes" : "no") + '\n');
+      } else {
+        process.stdout.write(JSON.stringify(moveValid ? "yes" : "no") + '\n');
       }
     } else {
       gameState = createGameState(req);
