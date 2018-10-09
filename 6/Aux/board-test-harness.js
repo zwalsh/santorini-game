@@ -70,7 +70,8 @@ function handleRequest(req) {
   process.stdout.write(JSON.stringify(response) + "\n");
 }
 
-/* Given a board request of the shape [[Cell, ]]
+/* Given a board request of the shape [[Cell, ...], ...],
+creates a Board object.
 */
 function createBoard(boardReq) {
   board = new Board();
