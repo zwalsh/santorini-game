@@ -1,0 +1,3 @@
+#!/bin/bash
+# Executable that runs the test harness for the rule checker module.
+node `dirname ${BASH_SOURCE[0]}`/Aux/RuleCheckerHarness.js
