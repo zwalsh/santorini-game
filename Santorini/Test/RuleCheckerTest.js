@@ -179,48 +179,190 @@ describe("RuleChecker", function() {
     });
   });
 
-  describe("BuildAction validation", function() {
-    let action;
-    beforeEach(function() {
-      board = new Board();
-      gameState = new GameState(board);
-    });
-    it("fails if the worker building doesn't belong to the player whose turn it is", function() {
-
-    });
-    it("fails if the player just built", function() {
-
-    });
-    it("fails if the player just placed a worker", function() {
-
-    });
-    it("fails if the build location isn't on the board", function() {
-
-    });
-    it("fails if the build location is occupied by another worker", function() {
-
-    });
-    it("fails if the build location is already height 4", function() {
-
-    });
-
-    it("succeeds if the build is completely valid", function() {
-
-    });
-    describe("after validation is complete", function() {
+  describe("BuildAction validation,", function() {
+    let buildAction;
+    let valid;
+    let p1Id = 0;
+    let p2Id = 1;
+    describe("when the worker doesn't belong to the player whose turn it is,", function() {
       beforeEach(function() {
-        board = new Board();
-        gameState = new GameState(board);
-        // call validate in here and check lack of side effects
-        // within the it()s below
+        buildAction = jasmine.createSpyObj('action', {
+          'getType' : Action.BUILD,
+          'getWorkerId' : 3
+        });
+        gameState = jasmine.createSpyObj('gameState', {
+          'getBoard' : undefined,
+          'getOwner' : p2Id,
+          'getWhoseTurn' : p1Id
+        });
+        valid = RuleChecker.validate(gameState, buildAction);
       });
-      it("has not mutated the given GameStaten", function() {
-
+      it("fails", function() {
+        expect(gameState.getOwner).toHaveBeenCalledTimes(1);
+        expect(valid).toBe(false);
       });
-      it("has not mutated the given Action", function() {
+    });
 
+    describe("when the player just built,", function() {
+      beforeEach(function() {
+        buildAction = jasmine.createSpyObj('buildAction', {
+          'getType' : Action.BUILD,
+          'getWorkerId' : 3
+        });
+        board = jasmine.createSpyObj('board', ['getHeight']);
+        gameState = jasmine.createSpyObj('gameState', {
+          'getBoard' : board,
+          'getOwner' : p1Id,
+          'getWhoseTurn' : p1Id,
+          'getLastAction' : buildAction
+        });
+        valid = RuleChecker.validate(gameState, buildAction);
+      });
+      it("fails", function() {
+        expect(valid).toBe(false);
+        expect(gameState.getLastAction).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("when the player just placed a worker,", function() {
+      beforeEach(function() {
+        buildAction = jasmine.createSpyObj('buildAction', {
+          'getType' : Action.BUILD,
+          'getWorkerId' : 3
+        });
+        placeAction = jasmine.createSpyObj('placeAction', {
+          'getType' : Action.PLACE
+        });
+        board = jasmine.createSpyObj('board', ['getHeight']);
+        gameState = jasmine.createSpyObj('gameState', {
+          'getBoard' : board,
+          'getOwner' : p1Id,
+          'getWhoseTurn' : p1Id,
+          'getLastAction' : placeAction
+        });
+        valid = RuleChecker.validate(gameState, buildAction);
+      });
+      it("fails", function() {
+        expect(valid).toBe(false);
+        expect(gameState.getLastAction).toHaveBeenCalledTimes(1);
+        expect(placeAction.getType).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("when the build location isn't adjacent to the worker,", function() {
+      beforeEach(function() {
+        buildAction = jasmine.createSpyObj('buildAction', {
+          'getType' : Action.BUILD,
+          'getWorkerId' : 3,
+          'getLoc' : [6, 6]
+        });
+        moveAction = jasmine.createSpyObj('moveAction', {
+          'getType' : Action.MOVE
+        });
+        board = jasmine.createSpyObj('board', {
+          'getWorker' : [0, 0]
+        });
+        gameState = jasmine.createSpyObj('gameState', {
+          'getBoard' : board,
+          'getOwner' : p1Id,
+          'getWhoseTurn' : p1Id,
+          'getLastAction' : moveAction
+        });
+        valid = RuleChecker.validate(gameState, buildAction);
+      });
+      it("fails", function() {
+        expect(valid).toBe(false);
+        expect(buildAction.getLoc).toHaveBeenCalledTimes(1);
+        expect(board.getWorker).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("when the build location is already height 4,", function() {
+      beforeEach(function() {
+        buildAction = jasmine.createSpyObj('buildAction', {
+          'getType' : Action.BUILD,
+          'getWorkerId' : 3,
+          'getLoc' : [0, 1]
+        });
+        moveAction = jasmine.createSpyObj('moveAction', {
+          'getType' : Action.MOVE
+        });
+        board = jasmine.createSpyObj('board', {
+          'getWorker' : [0, 0],
+          'getHeight' : 4
+        });
+        board.MAX_HEIGHT = 4;
+        gameState = jasmine.createSpyObj('gameState', {
+          'getBoard' : board,
+          'getOwner' : p1Id,
+          'getWhoseTurn' : p1Id,
+          'getLastAction' : moveAction
+        });
+        valid = RuleChecker.validate(gameState, buildAction);
+      });
+      it("fails", function() {
+        expect(valid).toBe(false);
+        expect(board.getHeight).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("when the build location is occupied or not on the board,", function() {
+      beforeEach(function() {
+        buildAction = jasmine.createSpyObj('buildAction', {
+          'getType' : Action.BUILD,
+          'getWorkerId' : 3,
+          'getLoc' : [-1, 1]
+        });
+        moveAction = jasmine.createSpyObj('moveAction', {
+          'getType' : Action.MOVE
+        });
+        board = jasmine.createSpyObj('board', {
+          'getWorker' : [0, 0],
+          'getHeight' : 3,
+          'isValidUnoccupiedLoc' : false
+        });
+        board.MAX_HEIGHT = 4;
+        gameState = jasmine.createSpyObj('gameState', {
+          'getBoard' : board,
+          'getOwner' : p1Id,
+          'getWhoseTurn' : p1Id,
+          'getLastAction' : moveAction
+        });
+        valid = RuleChecker.validate(gameState, buildAction);
+      });
+      it("fails", function() {
+        expect(valid).toBe(false);
+        expect(board.isValidUnoccupiedLoc).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("when the build action is completely valid,", function() {
+      beforeEach(function() {
+        buildAction = jasmine.createSpyObj('buildAction', {
+          'getType' : Action.BUILD,
+          'getWorkerId' : 3,
+          'getLoc' : [-1, 1]
+        });
+        moveAction = jasmine.createSpyObj('moveAction', {
+          'getType' : Action.MOVE
+        });
+        board = jasmine.createSpyObj('board', {
+          'getWorker' : [0, 0],
+          'getHeight' : 3,
+          'isValidUnoccupiedLoc' : true
+        });
+        board.MAX_HEIGHT = 4;
+        gameState = jasmine.createSpyObj('gameState', {
+          'getBoard' : board,
+          'getOwner' : p1Id,
+          'getWhoseTurn' : p1Id,
+          'getLastAction' : moveAction
+        });
+        valid = RuleChecker.validate(gameState, buildAction);
+      });
+      it("succeeds", function() {
+        expect(valid).toBe(true);
       });
     });
   });
-
 });
