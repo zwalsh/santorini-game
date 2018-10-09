@@ -64,6 +64,7 @@ GameState. This is allowed if:
   - the Location the Worker is being moved to is:
     - adjacent to its current Location
     - less than one level higher than the current Location
+    - less than the maximum height of the Board
     - on the Board and not occupied by another Worker
 */
 function validateMoveAction(gameState, action) {
@@ -80,6 +81,9 @@ function validateMoveAction(gameState, action) {
     return false;
   }
   if (heightDifference(board, workerId, loc) > 1) {
+    return false;
+  }
+  if (board.getHeight(loc[0], loc[1]) >= board.MAX_HEIGHT) {
     return false;
   }
   return board.isValidUnoccupiedLoc(loc[0], loc[1]);
