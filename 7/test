@@ -1,0 +1,4 @@
+#!/bin/bash
+echo $*
+./xrules < rules-tests/$1-in.json | diff - rules-tests/$1-out.json
+
