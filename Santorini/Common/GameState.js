@@ -1,7 +1,7 @@
 /*
 This file represents the state of a Santorini game.
 It has a Board for tracking and accessing height and worker location data.
-On top of that, it tracks worker ownership data, which player's 
+On top of that, it tracks worker ownership data, which player's
 turn it is, and what was the last Action taken in the game.
 
 It allows users to view and update the current state of the game.
@@ -11,9 +11,9 @@ the data it is given, nor the order/context of operations called on it
 to mutate its state.
 
 Callers are responsible for properly maintaining the GameState's state
-by calling the correct groups of associated methods when making updates 
-to its Board, last Action, worker ownership, and turn information. 
-  Example usage protocol:  
+by calling the correct groups of associated methods when making updates
+to its Board, last Action, worker ownership, and turn information.
+  Example usage protocol:
     1. Change this GameState's Board with some action
     2. Update this GameState's last Action to be that^ action
       2a. If a worker was added, update this GameState's worker ownership map
@@ -25,7 +25,7 @@ const PlaceAction = Action.PlaceAction;
 const MoveAction = Action.MoveAction;
 const BuildAction = Action.BuildAction;
 
-/* The integers used to identify the 2 players in the game 
+/* The integers used to identify the 2 players in the game
 for turn and worker ownership information */
 const PLAYER1ID = 0;
 const PLAYER2ID = 1;
@@ -90,9 +90,9 @@ class GameState {
   */
   getWorkerList(playerId) {
     let workers = Array.from(this.workerOwnership.entries());
-    return workers.filter((entry) => { 
+    return workers.filter((entry) => {
       // keep only the Workers owned by the given PlayerId
-      return entry[1] === playerId; 
+      return entry[1] === playerId;
     }).map((entry) => {
       // return only the WorkerId from the pair
       return entry[0];
@@ -120,7 +120,7 @@ class GameState {
   */
   copy() {
     let actionCopy = this.lastAction === null ? null : Action.copy(this.lastAction);
-    return new GameState(this.board.copy(), this.whoseTurn, 
+    return new GameState(this.board.copy(), this.whoseTurn,
       actionCopy, new Map(this.workerOwnership));
   }
 }

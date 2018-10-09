@@ -171,14 +171,13 @@ class Board {
   getSize(){ return this.BOARD_SIZE; }
 
   /* Void -> Board
-  Return a deep copy of this Board. 
+  Return a deep copy of this Board.
   */
   copy() {
     let brd = new Board();
     brd.heights = this.getHeights();
     brd.workers = this.getWorkers();
     return brd;
-
   }
 
 //------- Helper functions for main methods -------
