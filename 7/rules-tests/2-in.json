@@ -1,0 +1,4 @@
+[["1playera1", "2playerb1", 2],[3, "2playera2", "1playerb2"]]
+["move", "playera1", ["PUT", "SOUTH"]]
+[["3playera1", "2playerb1", 2],[4, "2playera2", "1playerb2"]]
+["move", "playera1", ["PUT", "SOUTH"]]
