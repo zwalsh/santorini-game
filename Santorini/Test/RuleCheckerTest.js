@@ -70,40 +70,25 @@ describe("RuleChecker", function() {
       expect(RuleChecker.validate(gameState, action, 0)).toBe(true);
     });
     describe("after validation is complete", function() {
-      let initialHeights;
-      let initialWorkers;
-      let initialWorkerList0;
-      let initialWorkerList1;
-      let initialTurn;
-      let initialLastAction;
+      let initialGameState;
+      let initialAction;
       beforeEach(function() {
         board = new Board();
         gameState = new GameState(board);
         let place0 = new PlaceAction([0,0]);
         Action.execute(place0, gameState);
 
-        initialHeights = board.getHeights();
-        initialWorkers = board.getWorkers();
-        initialWorkerList0 = gameState.getWorkerList(0);
-        initialWorkerList1 = gameState.getWorkerList(1);
-        initialTurn = gameState.getWhoseTurn();
-        initialLastAction = gameState.getLastAction();
-
-        // call validate here and check that no mutation occurs
         action = new PlaceAction([1,1]);
+        initialGameState = gameState.copy();
+        initialAction = Action.copy(action);
+        // call validate here and check that no mutation occurs
         RuleChecker.validate(gameState, action, 0);
       });
       it("has not mutated the given GameState", function() {
-        expect(gameState.getBoard().getHeights()).toEqual(initialHeights);
-        expect(gameState.getBoard().getWorkers()).toEqual(initialWorkers);
-        expect(gameState.getWhoseTurn()).toEqual(initialTurn);
-        expect(gameState.getLastAction()).toEqual(initialLastAction);
-        expect(gameState.getWorkerList(0)).toEqual(initialWorkerList0);
-        expect(gameState.getWorkerList(1)).toEqual(initialWorkerList1);
+        expect(gameState).toEqual(initialGameState);
       });
       it("has not mutated the given Action", function() {
-        expect(action.getType()).toBe("place");
-        expect(action.getLoc()).toEqual([1,1]);
+        expect(action).toEqual(initialAction);
       });
     });
   });
@@ -118,9 +103,9 @@ describe("RuleChecker", function() {
       // player 0 has a Worker at [1,1]
       let place0 = new PlaceAction([1,1]);
       Action.execute(place0, gameState);
-      workerId = board.getWorkers()[0];
+      workerId = board.getWorkers().length - 1;
       action = new MoveAction(workerId, [1,2]);
-      gameState.flipTurn(); // make it player 0's turn again
+      gameState.whoseTurn = 0; // make it player 0's turn again
     });
     it("fails if the worker being moved doesn't belong to the player whose turn it is", function() {
       gameState.whoseTurn = 1;
@@ -134,6 +119,7 @@ describe("RuleChecker", function() {
       expect(valid).toBe(false);
     });
     it("fails if the destination isn't on the board", function() {
+      gameState.whoseTurn = 1;
       let place1 = new PlaceAction([0,0]);
       Action.execute(place1, gameState, 1);
       // player 1 has a Worker at [0,0]
@@ -143,9 +129,16 @@ describe("RuleChecker", function() {
       let valid = RuleChecker.validate(gameState, offTheBoardMove);
       expect(valid).toBe(false);
     });
+    it("fails if the destination is not adjacent", function() {
+      action.loc = [3,3];
+      let valid = RuleChecker.validate(gameState, action);
+      expect(valid).toBe(false);
+    });
     it("fails if the destination is occupied by another worker", function() {
+      gameState.whoseTurn = 1;
       let place1 = new PlaceAction([0,0]);
       Action.execute(place1, gameState, 1);
+
       // player 1 now has a Worker at [0,0]
       action = new MoveAction(workerId, [0,0]); // attempt to move onto [0,0]
       let valid = RuleChecker.validate(gameState, action);
@@ -156,23 +149,32 @@ describe("RuleChecker", function() {
       let valid = RuleChecker.validate(gameState, action);
       expect(valid).toBe(false);
     });
+    it("fails if the destination is at the board's max height", function() {
+      board.heights[1][2] = board.MAX_HEIGHT;
+      board.heights[1][1] = board.MAX_HEIGHT - 1;
+      let valid = RuleChecker.validate(gameState, action);
+      expect(valid).toBe(false);
+    });
     it("succeeds if the movement is completely valid", function() {
-      gameState.flipTurn();
       let valid = RuleChecker.validate(gameState, action);
       expect(valid).toBe(true);
     });
     describe("after validation is complete", function() {
+      let initialGameState;
+      let initialAction;
       beforeEach(function() {
-        board = new Board();
-        gameState = new GameState(board);
         // call validate in here and check lack of side effects
         // within the it()s below
-      });
-      it("has not mutated the given GameStaten", function() {
+        initialGameState = gameState.copy();
+        initialAction = Action.copy(action);
 
+        expect(RuleChecker.validate(gameState, action)).toBe(true);
+      });
+      it("has not mutated the given GameState", function() {
+        expect(gameState).toEqual(initialGameState);
       });
       it("has not mutated the given Action", function() {
-
+        expect(action).toEqual(initialAction);
       });
     });
   });
