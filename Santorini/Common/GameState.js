@@ -84,7 +84,6 @@ class GameState {
     return this.workerOwnership.get(workerId);
   }
 
-  // TODO needs tests
   /* PlayerId -> [Listof WorkerId]
   Returns the list of Ids of Worker owned by the Player with the given PlayerId.
   */

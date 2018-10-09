@@ -42,7 +42,7 @@ describe("GameState unit tests", function() {
 
     describe("Last action", function() {
         it("Update makes a copy of the action before setting it internally", function() {
-            // Mutating an Action after passing it to setLastAction 
+            // Mutating an Action after passing it to setLastAction
             // does not change the Action that the GameState has
             let action = new PlaceAction([0,0]);
             gs.setLastAction(action);
@@ -53,15 +53,25 @@ describe("GameState unit tests", function() {
 
     describe("Adding worker ownership", function() {
         it("gets stored properly and can be accessed via WorkerId", function() {
-            let workerId0 = 0;
-            let workerId1 = 1;
-            let workerId2 = 2;
-            gs.addOwnership(workerId0, player1Id);
-            gs.addOwnership(workerId1, player2Id);
-            gs.addOwnership(workerId2, player2Id);
-            expect(gs.getOwner(workerId0)).toBe(player1Id);
-            expect(gs.getOwner(workerId1)).toBe(player2Id);
-            expect(gs.getOwner(workerId2)).toBe(player2Id);
+          let workerId0 = 0;
+          let workerId1 = 1;
+          let workerId2 = 2;
+          gs.addOwnership(workerId0, player1Id);
+          gs.addOwnership(workerId1, player2Id);
+          gs.addOwnership(workerId2, player2Id);
+          expect(gs.getOwner(workerId0)).toBe(player1Id);
+          expect(gs.getOwner(workerId1)).toBe(player2Id);
+          expect(gs.getOwner(workerId2)).toBe(player2Id);
+        });
+        it("can provide the workers owned by a given player", function() {
+          let workerId0 = 0;
+          let workerId1 = 1;
+          let workerId2 = 2;
+          gs.addOwnership(workerId0, player1Id);
+          gs.addOwnership(workerId1, player2Id);
+          gs.addOwnership(workerId2, player2Id);
+          expect(gs.getWorkerList(player1Id)).toEqual([0])
+          expect(gs.getWorkerList(player2Id)).toEqual([1,2]);;
         });
     });
 
