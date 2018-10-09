@@ -18,7 +18,7 @@ possible Actions
 ## Unit Tests
 
 Unit tests for all modules in the Common and Lib directories are located in the
-Test directory. Running the executable Tests/allTests will run all unit tests.
+Test directory. Running the executable Test/allTests will run all unit tests.
 
 ## Integration Tests
 
@@ -30,14 +30,14 @@ expected output is in the board-tests directory within 6.
 
 ### RuleChecker
 Integration tests for the RuleChecker component are in the directory 7, at the root
-level of this repository. The test cases are pairs of JSON-formatted input and 
-expected output files, located in the rules-tests directory within 7. 
-They can be run using the xrules executable, which takes JSON input from STDIN 
-and prints the results to STDOUT. 
+level of this repository. The test cases are pairs of JSON-formatted input and
+expected output files, located in the rules-tests directory within 7.
+They can be run using the xrules executable, which takes JSON input from STDIN
+and prints the results to STDOUT.
 
 # Roadmap
 
-The central data of this system lives in the Board class (within Common).
-The RuleChecker class uses a Board to check various Actions for validity. An
-as-of-yet undefined admin component will create Players with RuleCheckers and
-take those Players through all phases of the Santorini game. 
+The central data of this system lives in the GameState and Board classes
+(within Common). The RuleChecker class uses a GameState to check various
+Actions for validity. An as-of-yet undefined admin component will create
+Players and take those Players through all phases of the Santorini game.
