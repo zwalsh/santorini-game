@@ -32,7 +32,7 @@ function createGameState(boardReq) {
         height = Number(cell.substring(0, 1));
         let placeAction = new PlaceAction([rowIdx, colIdx]);
         let id = cell.substring(1, cell.length - 1);
-        if (playerNameToId.length < 2) {
+        if (playerNameToId.indexOf(id) === -1 && playerNameToId.length < 2) {
           playerNameToId.push(id);
         }
         let playerId = playerNameToId.indexOf(id);
