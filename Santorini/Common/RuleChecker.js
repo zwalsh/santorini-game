@@ -17,6 +17,7 @@ GameState is defined in GameState.js
 const Action = require('./Action.js');
 
 const MAX_WORKERS_PER_PLAYER = 2;
+const WINNING_HEIGHT = 3;
 
 /* GameState Action PlayerId -> Boolean
 Is the given Action valid to take in the current game state?
@@ -145,5 +146,6 @@ function heightDifference(board, id, otherLoc) {
 }
 
 module.exports = {
-  "validate": validate
+  "validate": validate,
+  "WINNING_HEIGHT": WINNING_HEIGHT
 };
