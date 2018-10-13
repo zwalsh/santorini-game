@@ -59,10 +59,6 @@ const RuleChecker = require('./../../Santorini/Common/RuleChecker.js');
 const Action = require('./../../Santorini/Common/Action.js');
 const JsonToComponent = require('./../../Santorini/Lib/JsonToComponent.js');
 
-
-let playerNameToId;
-let workerNameToId;
-
 process.stdin.on('readable', () => {
   let chunk = process.stdin.read();
   if (chunk != null) {
@@ -77,6 +73,7 @@ Otherwise, delegate to appropriate request handler.
 */
 function handleRequests(reqs) {
   let gameState;
+  let workerNameToId;
   let moveAction;
   let buildAction;
 
@@ -89,9 +86,9 @@ function handleRequests(reqs) {
       if so then pop it and validate build on current gamestate,
       then print && of both validations
       */
-      let moveAction = JsonToComponent.createMoveAction(req, gameState);
+      let moveAction = JsonToComponent.createMoveAction(req, workerNameToId, gameState);
       let moveValid = RuleChecker.validate(gameState, moveAction);
-      if (reqs.length == 0) {
+      if (reqs.length === 0) {
         process.stdout.write(JSON.stringify(moveValid ? "yes" : "no") + '\n');
         return;
       }
@@ -111,7 +108,9 @@ function handleRequests(reqs) {
         process.stdout.write(JSON.stringify(moveValid ? "yes" : "no") + '\n');
       }
     } else {
-      gameState = JsonToComponent.createGameState(req);
+      gameCreation = JsonToComponent.createGameState(req);
+      gameState = gameCreation[0];
+      workerNameToId = gameCreation[1];
     }
   }
 }

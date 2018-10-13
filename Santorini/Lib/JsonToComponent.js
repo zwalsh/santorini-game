@@ -12,20 +12,21 @@ const MoveAction = Action.MoveAction;
 const BuildAction = Action.BuildAction;
 
 
-/* Given a board request of the shape [[Cell, ...], ...],
-creates a GameState object.
+/* BoardRequest -> [GameState, Map<Worker, WorkerId>]
+Given a board request of the shape [[Cell, ...], ...],
+creates a GameState object, and a Map of the worker names to their IDs
 */
 function createGameState(boardReq) {
   let board = new Board();
   let gameState = new GameState(board);
-  playerNameToId = [];
-  workerNameToId = new Map();
+  let playerNameToId = [];
+  let workerNameToId = new Map();
   for (let rowIdx = 0; rowIdx < boardReq.length; rowIdx++) {
     let row = boardReq[rowIdx];
     for (let colIdx = 0; colIdx < row.length; colIdx++) {
       let cell = row[colIdx];
       let height;
-      if (typeof cell == 'number') {
+      if (typeof cell === 'number') {
         height = cell;
       } else {
         height = Number(cell.substring(0, 1));
@@ -44,14 +45,14 @@ function createGameState(boardReq) {
       board.heights[rowIdx][colIdx] = height;
     }
   }
-  return gameState;
+  return [gameState, workerNameToId];
 }
 
 /* ["move", Worker, Direction] GameState -> MoveAction
 Creates a MoveAction from the given JSON request and GameState.
 Also sets the game state to the correct turn given who is attempting to move.
 */
-function createMoveAction(request, gameState) {
+function createMoveAction(request, workerNameToId, gameState) {
   let workerId = workerNameToId.get(request[1]);
   let location = getLocation(gameState.getBoard(), workerId, request[2]);
   gameState.whoseTurn = gameState.getOwner(workerId);
