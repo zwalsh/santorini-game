@@ -56,12 +56,9 @@ A MoveBuild is as follows:
 
 const JsonParser = require('./../../Santorini/Lib/JsonParse.js');
 const RuleChecker = require('./../../Santorini/Common/RuleChecker.js');
-const Board = require('./../../Santorini/Common/Board.js');
-const GameState = require('./../../Santorini/Common/GameState.js');
 const Action = require('./../../Santorini/Common/Action.js');
-const PlaceAction = Action.PlaceAction;
-const MoveAction = Action.MoveAction;
-const BuildAction = Action.BuildAction;
+const JsonToComponent = require('./../../Santorini/Lib/JsonToComponent.js');
+
 
 let playerNameToId;
 let workerNameToId;
@@ -92,7 +89,7 @@ function handleRequests(reqs) {
       if so then pop it and validate build on current gamestate,
       then print && of both validations
       */
-      let moveAction = createMoveAction(req, gameState);
+      let moveAction = JsonToComponent.createMoveAction(req, gameState);
       let moveValid = RuleChecker.validate(gameState, moveAction);
       if (reqs.length == 0) {
         process.stdout.write(JSON.stringify(moveValid ? "yes" : "no") + '\n');
@@ -107,121 +104,14 @@ function handleRequests(reqs) {
           }
           Action.execute(moveAction, gameState);
 
-          let buildAction = createBuildAction(req, moveAction.getWorkerId(), gameState);
+          let buildAction = JsonToComponent.createBuildAction(req, moveAction.getWorkerId(), gameState);
           let buildValid = RuleChecker.validate(gameState, buildAction);
           process.stdout.write(JSON.stringify(buildValid ? "yes" : "no") + '\n');
       } else {
         process.stdout.write(JSON.stringify(moveValid ? "yes" : "no") + '\n');
       }
     } else {
-      gameState = createGameState(req);
+      gameState = JsonToComponent.createGameState(req);
     }
   }
-}
-
-/* Given a board request of the shape [[Cell, ...], ...],
-creates a GameState object.
-*/
-function createGameState(boardReq) {
-  let board = new Board();
-  let gameState = new GameState(board);
-  playerNameToId = [];
-  workerNameToId = new Map();
-  for (let rowIdx = 0; rowIdx < boardReq.length; rowIdx++) {
-    let row = boardReq[rowIdx];
-    for (let colIdx = 0; colIdx < row.length; colIdx++) {
-      let cell = row[colIdx];
-      let height;
-      if (typeof cell == 'number') {
-        height = cell;
-      } else {
-        height = Number(cell.substring(0, 1));
-        let placeAction = new PlaceAction([rowIdx, colIdx]);
-        let id = cell.substring(1, cell.length - 1);
-        if (playerNameToId.length < 2) {
-          playerNameToId.push(id);
-        }
-        let playerId = playerNameToId.indexOf(id);
-        gameState.whoseTurn = playerId;
-        Action.execute(placeAction, gameState);
-
-        let workerName = cell.substring(1);
-        workerNameToId.set(workerName, board.getWorkers().length - 1);
-      }
-      board.heights[rowIdx][colIdx] = height;
-    }
-  }
-  return gameState;
-}
-
-/* ["move", Worker, Direction] GameState -> MoveAction
-Creates a MoveAction from the given JSON request and GameState.
-Also sets the game state to the correct turn given who is attempting to move.
-*/
-function createMoveAction(request, gameState) {
-  let workerId = workerNameToId.get(request[1]);
-  let location = getLocation(gameState.getBoard(), workerId, request[2]);
-  gameState.whoseTurn = gameState.getOwner(workerId);
-  return new MoveAction(workerId, location);
-}
-
-/* ["+build", Direction] WorkerId GameState -> BuildAction
-*/
-function createBuildAction(request, workerId, gameState) {
-  let location = getLocation(gameState.getBoard(), workerId, request[1]);
-  return new BuildAction(workerId, location);
-}
-
-
-/* Parse the given BuildingWorker string into height and player/worker id,
-set the board height at position [row,col],
-place that worker onto the board at [row,col],
-and record the WorkerId index (returned by the Board)
-that is associated with the Worker identifier.
-*/
-function placeBuildingWorker(board, row, col, bw) {
-  let height = bw.substring(0,1);
-  let id = bw.substring(1);
-
-  board.heights[row][col] = Number(height);
-  let workerIdx = board.addWorker(row,col);
-  workers[workerIdx] = id;
-}
-
-/* Board WorkerId Direction -> [Maybe Location]
-Given a worker and a direction, produce the location on the
-board adjacent to that worker in that direction.
-If the resulting location is off the board, return false.
-*/
-function getLocation(board, workerIdx, dir) {
-  let loc = board.getWorker(workerIdx);
-  switch(dir[0]) {
-    case "EAST":
-      loc[1] = loc[1] + 1;
-      break;
-    case "WEST":
-      loc[1] = loc[1] - 1;
-      break;
-    case "PUT":
-      break;
-    default:
-      throw `Invalid Direction: ${dir}`;
-  }
-  switch(dir[1]) {
-    case "NORTH":
-      loc[0] = loc[0] - 1;
-      break;
-    case "SOUTH":
-      loc[0] = loc[0] + 1;
-      break;
-    case "PUT":
-      break;
-    default:
-      throw `Invalid Direction: ${dir}`;
-  }
-  //console.log("Determined coordinate: " + loc);
-  if (loc[0] < 0 || loc[0] >= board.getSize() || loc[1] < 0 || loc[1] >= board.getSize()) {
-    return false;
-  }
-  return loc;
 }
