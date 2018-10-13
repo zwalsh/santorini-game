@@ -57,7 +57,7 @@ class Board {
   Return the WorkerId that identifies the worker placed at that location.
   If location is invalid or board already contains 4 workers, return false.
   */
-  addWorker(x, y){
+  addWorker(x, y) {
     if (this.workers.length >= this.MAX_WORKERS) {
       return false;
     }
@@ -116,7 +116,7 @@ class Board {
   Returns the height of the given cell in this Board,
   if the cell exists.
   */
-  getHeight(x, y){
+  getHeight(x, y) {
     if (!this.isValidLoc(x, y)) {
       return false;
     }
@@ -127,7 +127,7 @@ class Board {
   Returns a copy of the heights of every cell on the board,
   in a 2d array.
   */
-  getHeights(){
+  getHeights() {
     let heightsCopy = [];
     for (let rowIdx = 0; rowIdx < this.getSize(); rowIdx++) {
       let row = []
@@ -157,9 +157,9 @@ class Board {
   /* Void -> [Location, ...]
   Returns a copy of the current locations of all players on the board.
   */
-  getWorkers(){
+  getWorkers() {
     let workersCopy = [];
-    for (let i  = 0; i < this.workers.length; i++) {
+    for (let i = 0; i < this.workers.length; i++) {
       workersCopy.push(this.getWorker(i));
     }
     return workersCopy;
@@ -168,7 +168,9 @@ class Board {
   /* Void -> Number
   Return the side length of this board.
   */
-  getSize(){ return this.BOARD_SIZE; }
+  getSize() {
+    return this.BOARD_SIZE;
+  }
 
   /* Void -> Board
   Return a deep copy of this Board.
