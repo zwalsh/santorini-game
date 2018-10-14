@@ -101,11 +101,7 @@ function canWin(gameState, depth) {
   return false;
 }
 
-
-
-
-
-
-
-
-
+module.exports = {
+  "chooseTurn": chooseTurn,
+  "canWin": canWin
+};
