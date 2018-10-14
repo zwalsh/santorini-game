@@ -7,7 +7,18 @@
 
 # It is all-knowing. It may share some.
 
-node ../../node_modules/jasmine/bin/jasmine.js --config=jasmine.json
+node ../../node_modules/jasmine/bin/jasmine.js --config=Jasmine/jasmine.json
+
+echo =====================================
+echo END JASMINE TESTS
+echo =====================================
+echo
+echo
+echo
+echo =====================================
+echo BEGIN MOCHA TESTS
+echo =====================================
+
 
 ./../../node_modules/mocha/bin/mocha "./*.js"
 

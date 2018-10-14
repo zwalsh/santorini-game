@@ -1,9 +1,9 @@
-const Action = require('./../Common/Action.js');
+const Action = require('../../Common/Action.js');
 const PlaceAction = Action.PlaceAction;
 const MoveAction = Action.MoveAction;
 const BuildAction = Action.BuildAction;
-const GameState = require('./../Common/GameState.js');
-const Board = require('./../Common/Board.js');
+const GameState = require('../../Common/GameState.js');
+const Board = require('../../Common/Board.js');
 
 describe("Action test suite:", function() {
   describe("Data access functions (getters): ", function() {
