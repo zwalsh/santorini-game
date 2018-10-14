@@ -1,14 +1,39 @@
 /* Unit tests for the TurnGenerator component. */
 const TurnGenerator = require('./../Common/TurnGenerator.js');
 const Action = require('./../Common/Action.js');
+const PlaceAction = Action.PlaceAction;
+const MoveAction = Action.MoveAction;
+const BuildAction = Action.BuildAction;
+const Board = require('./../Common/Board.js');
 const GameState = require('./../Common/GameState.js');
+const Direction = require('./../Common/Direction.js');
 
-describe("GameState test suite", function () {
+const DIRS = Direction.MOVEMENT_DIRECTIONS;
+
+xdescribe("GameState test suite", function () {
 
   // Generates all 64 possible next moves for a worker
   describe("when a worker can move and build anywhere", function () {
-    it("generates 64 actions for that worker", function () {
+    let board, placeAction, workerId0, playerId0, gameState, tg, turns;
+    // Construct a board and gamestate with one worker placed at the
+    // center. Set the gamestate so it's the same player's turn again.
+    beforeEach(function () {
+      board = new Board();
+      placeAction = new PlaceAction([3,3])
+      workerId0 = board.addWorker(3,3);
+      playerId0 = 0;
+      gameState = new GameState(board);
+      Action.execute(placeAction, gameState);
+      gameState.flipTurn();
+      tg = new TurnGenerator(gameState);
+      turns = [];
+    });
 
+    it("generates 64 actions for that worker", function () {
+      while (tg.hasNext()) {
+        turns.push(tg.next());
+      }
+      expect(turns.length).toBe(64);
     });
 
     it("generates 64 unique actions", function () {
@@ -41,7 +66,9 @@ describe("GameState test suite", function () {
   // (first worker has 1 move only, to get to second worker)
   describe("when there are two workers", function () {
 
-    it("generates all possible actions for the first worker, then the second");
+    it("generates all possible actions for the first worker, then the second", function () {
+
+    });
   });
 
 });

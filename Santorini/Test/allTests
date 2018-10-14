@@ -9,6 +9,8 @@
 
 node ../../node_modules/jasmine/bin/jasmine.js --config=jasmine.json
 
+./../../node_modules/mocha/bin/mocha "./*.js"
+
 # Nice thing to have in the future would be a test script
 # where we can include the name of a module as a param
 # and only run those unit tests
