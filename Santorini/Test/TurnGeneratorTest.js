@@ -1,6 +1,6 @@
 let expect = require('chai').expect;
 /* Unit tests for the TurnGenerator component. */
-const TurnGenerator = require('./../Common/TurnGenerator.js');
+const TurnGenerator = require('./../Common/TurnGenerator.js').TurnGenerator;
 const Action = require('./../Common/Action.js');
 const PlaceAction = Action.PlaceAction;
 const MoveAction = Action.MoveAction;
@@ -41,6 +41,9 @@ describe("TurnGenerator test suite", function () {
       for (let move = 0; move < DIRS.length; move++) {
         for (let bld = 0; bld < DIRS.length; bld++) {
           let turn = turns[move*DIRS.length + bld];
+          if (turn === undefined) {
+            console.log(`move : ${move}, bld: ${bld}, turns: ${JSON.stringify(turns)}`);
+          }
           let moveAction = turn[0];
           let bldAction = turn[1];
           let moveLoc = Direction.adjacentLocation(workerStartLoc, DIRS[move]);

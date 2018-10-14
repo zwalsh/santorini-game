@@ -95,13 +95,6 @@ class TurnGenerator {
 
   }
 
-  /* MoveAction -> Void ????
-    We would like to pull out the part of the hasNext() method
-    that ensures that a gameStateAfterMove exists.
-  */
-  soemthing(moveAction) {
-  }
-
   /* Void -> Void
     Increments the build index, increasing its value by one.
     If the build index is too high, the move index is incremented instead
@@ -139,7 +132,7 @@ class TurnGenerator {
     hasNext() and getting back a value of true.
    */
   next() {
-    return this.nextMove;
+    return this.nextTurn;
   }
 }
 
@@ -158,7 +151,6 @@ class MoveGenerator {
     this.nextMove = null;
     this.workerIndex = 0;
     this.moveDirectionIndex = 0;
-    this.gameStatePostMove = null;
   }
 
   /* Void -> Boolean
