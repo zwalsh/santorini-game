@@ -96,6 +96,7 @@ describe("TurnGenerator test suite", function () {
 
     it("hasNext() returns true first, then false after next() is called", function () {
       expect(tg.hasNext()).to.eql(true);
+      tg.next();
       expect(tg.hasNext()).to.eql(false);
     });
   });
