@@ -78,8 +78,8 @@ function canWin(gameState, depth) {
   // Check all 8 possible MoveActions for win condition (can move to 3-height)
   let mg = new MoveGenerator(gameState);
   while (mg.hasNext()) {
-    let moveLoc = mg.next().getLoc;
-    if (gameState.getHeight(moveLoc[0], moveLoc[1]) === RuleChecker.WINNING_HEIGHT) {
+    let moveLoc = mg.next().getLoc();
+    if (gameState.getBoard().getHeight(moveLoc[0], moveLoc[1]) === RuleChecker.WINNING_HEIGHT) {
       return true;
     }
   }
