@@ -22,135 +22,185 @@ const BuildAction = Action.BuildAction;
 
 const RuleChecker = require('./RuleChecker.js');
 
+/*
+Given a GameState where it is a player's turn, produce all possible Turns
+that the player could take, using any of its workers on the board.
+
+ */
 class TurnGenerator {
-  /* GameState -> TurnGenerator
-    Produces a TurnGenerator that iterates over all valid Turns
-    that can be taken from the given GameState.
-   */
+
   constructor(gameState) {
     this.gameState = gameState;
     this.whoseTurn = gameState.getWhoseTurn();
     this.workerList = gameState.getWorkerList(this.whoseTurn);
-    this.nextTurn = null;
     this.workerIndex = 0;
-    this.moveDirectionIndex = 0;
-    this.buildDirectionIndex = 0;
-    this.gameStatePostMove = null;
+
+    this.nextTurn = null;
+
+    this.moveGenerator = null;
+    this.buildGenerator = null;
+
   }
 
   /* Void -> Boolean
-    Returns true if there is another valid Turn that can be
-    taken that has not yet been returned by this TurnGenerator.
 
-    hasNext determines and set the next turn on this
-    TurnGenerator, if a valid next turn exists.
    */
   hasNext() {
-    // must check if the worker index is too high (implying that all possible moves have been checked)
-    if (this.workerIndex >= this.workerList.length) {
-      return false;
-    }
-    let workerId = this.workerList[this.workerIndex];
-    let workerLocation = this.gameState.getBoard().getWorker(workerId);
-    let moveLocation = Direction.adjacentLocation(workerLocation, DIRS[this.moveDirectionIndex]);
-    let moveAction = new MoveAction(workerId, moveLocation);
+    // Return true if we haven't retrieved the next turn with next() yet
+    if (this.nextTurn !== null) { return true; }
 
-    let buildLocation = Direction.adjacentLocation(moveLocation, DIRS[this.buildDirectionIndex]);
-    let buildAction = new BuildAction(workerId, buildLocation);
+    // must check if the worker index is too high
+    // (implying that all possible turns have been checked)
+    if (this.workerIndex >= this.workerList.length) { return false; }
 
-    // If we have not yet checked the move for the current move index,
-    // validate that move, and store a copy of the game state with
-    // that move executed on it.
-    if (this.gameStatePostMove === null) {
-      // validate if/else increment  in  else  case
-      if (RuleChecker.validate(this.gameState, moveAction, this.whoseTurn)) {
-        let gsCopy = this.gameState.copy();
-        Action.execute(moveAction, gsCopy);
-        this.gameStatePostMove = gsCopy;
-      } else {
-        this.incrementMoveIndex();
+    // A null build generator signifies that we are starting from a new move.
+    if (this.buildGenerator === null) {
+      // A null move generator signifies that we are starting a new set of moves for a new worker.
+      if (this.moveGenerator === null) {
+        this.moveGenerator = new MoveGenerator(this.gameState, this.workerList[this.workerIndex]);
+      }
+      // We now are guaranteed to have a MoveGenerator to work with.
+      // If no next move for current worker, then increment worker index.
+      if (this.moveGenerator.hasNext()) {
+        let action = this.moveGenerator.peek();
+        let moveLoc = action.getLoc();
+
+        // Since we have not yet checked this next move for a win,
+        // check for win now, and if win, then pop the move,
+        // set it as the Turn + return.
+        if (this.gameState.getBoard().getHeight(moveLoc[0], moveLoc[1]) === RuleChecker.WINNING_HEIGHT) {
+          this.nextTurn = [this.moveGenerator.next()];
+          return true;
+        } else {
+          let gameStateAfterMove = this.gameState.copy();
+          Action.execute(action, gameStateAfterMove);
+          this.buildGenerator = new BuildGenerator(gameStateAfterMove, this.workerList[this.workerIndex]);
+        }
+      }
+      // If the move generator was exhausted, increment worker index
+      // and remove that move generator, then continue looking for next turn.
+      else {
+        this.workerIndex += 1;
+        this.moveGenerator = null;
         return this.hasNext();
       }
     }
 
-    // check if won - if so, increment, set move, return true
-    let newWorkerHeight = this.gameStatePostMove.getBoard().getHeight(moveLocation[0], moveLocation[1]);
-    if (newWorkerHeight === RuleChecker.WINNING_HEIGHT) {
-      this.nextTurn = [moveAction];
-      this.incrementMoveIndex();
+    // Now we have a move gen and a build gen.
+
+    // If build gen has next, pop + return.
+    if (this.buildGenerator.hasNext()) {
+      this.nextTurn = [this.moveGenerator.peek(), this.buildGenerator.next()];
       return true;
     }
-
-    // check build
-    if (RuleChecker.validate(this.gameStatePostMove, buildAction, this.whoseTurn)) {
-      // if valid, increment, set move, return true
-      this.nextTurn = [moveAction, buildAction];
-      this.incrementBuildIndex();
-      return true;
-    } else {
-      // if invalid, increment and call has next
-      this.incrementBuildIndex();
+    // Else, build gen = null, pop move + return hasNext().
+    else {
+      this.buildGenerator = null;
+      this.moveGenerator.next();
       return this.hasNext();
-    }
-
-  }
-
-  /* Void -> Void
-    Increments the build index, increasing its value by one.
-    If the build index is too high, the move index is incremented instead
-    (rolling the build index over, back to 0).
-   */
-  incrementBuildIndex() {
-    this.buildDirectionIndex += 1;
-    if (this.buildDirectionIndex >= DIRS.length) {
-      this.incrementMoveIndex();
-    }
-  }
-
-  /* Void -> Void
-    Increments the move index, increasing its value by one.
-    Sets the build index back to zero, as we are considering
-    an entirely new set of possible builds after the new movement.
-
-    If the move index is too high, it rolls over and the worker
-    index is incremented. There are no guarantees that the
-    worker index is within bounds.
-   */
-  incrementMoveIndex() {
-    this.buildDirectionIndex = 0;
-    this.moveDirectionIndex += 1;
-    this.gameStatePostMove = null;
-    if (this.moveDirectionIndex >= DIRS.length) {
-      this.moveDirectionIndex = 0;
-      this.workerIndex += 1;
     }
   }
 
   /* Void -> Turn
-    Returns the next turn that has been found by hasNext().
-    Invalid to call this method without first calling
-    hasNext() and getting back a value of true.
+  Return the next valid Turn that this Generator has found.
+  Invalid to call without first checking that hasNext() returns true.
    */
   next() {
-    return this.nextTurn;
+    let turn = this.nextTurn;
+    this.nextTurn = null;
+    return turn;
   }
 }
 
 /*
-Class that generates all 8 possible moves for a player in a gamestate
+Iterator that generates all <=8 possible BuildActions for a player in a gamestate.
+ */
+class BuildGenerator {
+
+  /* GameState -> BuildGenerator
+  Produce a BuildGenerator that iterates over all valid BuildActions
+  that can be taken from the given GameState, by the given worker.
+
+  The worker must belong to the player whose turn it is in the GameState.
+   */
+  constructor(gameState, workerId) {
+    this.gameState = gameState;
+    this.whoseTurn = gameState.getWhoseTurn();
+    this.workerId = workerId;
+    this.nextAction = null;
+    this.directionIndex = 0;
+  }
+
+  /* Void -> Boolean
+  Returns true if there exists another valid MoveAction that can be
+  taken that has not yet been returned by this MoveGenerator.
+
+  A false result means there are no more valid BuildActions that can be
+  taken by this BuildGenerator's worker on the GameState it was constructed with.
+   */
+  hasNext() {
+    // Don't get the next action until the most recently found one has been used.
+    if (this.nextAction != null) {
+      return true;
+    }
+    if (this.directionIndex >= DIRS.length) {
+      return false;
+    }
+    let workerLocation = this.gameState.getBoard().getWorker(this.workerId);
+    let buildLocation = Direction.adjacentLocation(workerLocation, DIRS[this.directionIndex]);
+    let buildAction = new BuildAction(this.workerId, buildLocation);
+
+    // Validate the build action, call hasNext again if not a valid move.
+    if (RuleChecker.validate(this.gameState, buildAction, this.whoseTurn)) {
+      this.nextAction = buildAction;
+      return true;
+    } else {
+      this.incrementDirectionIndex();
+      return this.hasNext();
+    }
+  }
+
+  /* Void -> BuildAction
+  Return the next action found, without mutating this Iterator.
+  Invalid to call without first checking that hasNext() returns true.
+   */
+  peek() {
+    return this.nextAction;
+  }
+
+  /* Void -> BuildAction
+  Pop the most recent action found by this BuildGenerator.
+  Invalid to call without first checking that hasNext() returns true.
+   */
+  next() {
+    let action = this.nextAction;
+    this.nextAction = null;
+    this.incrementDirectionIndex();
+    return action;
+  }
+
+  incrementDirectionIndex() {
+    this.directionIndex += 1;
+  }
+}
+
+/*
+Iterator that generates all <=16 possible valid MoveActions for a player
+in a GameState (all moves that can be made by either worker).
  */
 class MoveGenerator {
-  /* GameState -> TurnGenerator
-  Produces a TurnGenerator that iterates over all valid Turns
-  that can be taken from the given GameState.
+  /* GameState -> MoveGenerator
+  Produces a MoveGenerator that iterates over all valid MoveActions
+  that can be taken from the given GameState, by any Worker belonging
+  to the player
  */
   constructor(gameState) {
     this.gameState = gameState;
     this.whoseTurn = gameState.getWhoseTurn();
     this.workerList = gameState.getWorkerList(this.whoseTurn);
-    this.nextMove = null;
+    this.nextAction = null;
     this.workerIndex = 0;
-    this.moveDirectionIndex = 0;
+    this.directionIndex = 0;
   }
 
   /* Void -> Boolean
@@ -158,6 +208,9 @@ class MoveGenerator {
   taken that has not yet been returned by this MoveGenerator.
    */
   hasNext() {
+    if (this.nextAction !== null) {
+      return true;
+    }
     // must check if the worker index is too high (implying that all possible moves have been checked)
     if (this.workerIndex >= this.workerList.length) {
       return false;
@@ -165,26 +218,40 @@ class MoveGenerator {
 
     let workerId = this.workerList[this.workerIndex];
     let workerLocation = this.gameState.getBoard().getWorker(workerId);
-    let moveLocation = Direction.adjacentLocation(workerLocation, DIRS[this.moveDirectionIndex]);
+    let moveLocation = Direction.adjacentLocation(workerLocation, DIRS[this.directionIndex]);
     let moveAction = new MoveAction(workerId, moveLocation);
 
     // Validate the move action, call hasNext again if not a valid move.
     if (RuleChecker.validate(this.gameState, moveAction, this.whoseTurn)) {
-      this.nextMove = moveAction;
+      this.nextAction = moveAction;
       return true;
     } else {
-      this.incrementMoveIndex();
+      this.incrementDirectionIndex();
       return this.hasNext();
     }
+  }
+
+  /* Void -> MoveAction
+  Return the next action found, without mutating this Iterator.
+  Invalid to call without first checking that hasNext() returns true.
+  */
+  peek() {
+    return this.nextAction;
   }
 
   /* Void -> MoveAction
     Returns the next MoveAction that has been found by hasNext().
     Invalid to call this method without first calling
     hasNext() and getting back a value of true.
+
+    Pops the next action stored in this class, and increments the
+    direction index so that hasNext finds the right next move.
    */
   next() {
-    return this.nextMove;
+    let action = this.nextAction;
+    this.nextAction = null;
+    this.incrementDirectionIndex();
+    return action;
   }
 
   /* Void -> Void
@@ -195,17 +262,19 @@ class MoveGenerator {
 
   There are no guarantees that the worker index is within bounds.
  */
-  incrementMoveIndex() {
-    this.moveDirectionIndex += 1;
-    if (this.moveDirectionIndex >= DIRS.length) {
-      this.moveDirectionIndex = 0;
+  incrementDirectionIndex() {
+    this.directionIndex += 1;
+    if (this.directionIndex >= DIRS.length) {
+      this.directionIndex = 0;
       this.workerIndex += 1;
     }
   }
-
 }
+
+
 
 module.exports = {
   "TurnGenerator" : TurnGenerator,
-  "MoveGenerator" : MoveGenerator
+  "MoveGenerator" : MoveGenerator,
+  "BuildGenerator" : BuildGenerator
 };
