@@ -29,7 +29,7 @@ class TurnGenerator {
   constructor(gameState) {
     this.gameState = gameState;
     this.whoseTurn = gameState.getWhoseTurn();
-    console.log(" - " + JSON.stringify(this.whoseTurn) + " - whose turn in tg");
+    //console.log(" - " + JSON.stringify(this.whoseTurn) + " - whose turn in tg");
     this.workerList = gameState.getWorkerList(this.whoseTurn);
     this.nextTurn = null;
     this.workerIndex = 0;
@@ -51,12 +51,12 @@ class TurnGenerator {
       return false;
     }
     let workerId = this.workerList[this.workerIndex];
-    console.log(" - " + JSON.stringify(this.workerList) + " - worker list in tg");
-    console.log(" - " + JSON.stringify(this.workerIndex) + " - worker index in tg");
-    console.log(" - " + workerId + " - worker id in tg");
+    // console.log(" - " + JSON.stringify(this.workerList) + " - worker list in tg");
+    // console.log(" - " + JSON.stringify(this.workerIndex) + " - worker index in tg");
+    // console.log(" - " + workerId + " - worker id in tg");
     let workerLocation = this.gameState.getBoard().getWorker(workerId);
     let moveLocation = Direction.adjacentLocation(workerLocation, DIRS[this.moveDirectionIndex]);
-    let moveAction = new MoveAction(workerId, location);
+    let moveAction = new MoveAction(workerId, workerLocation);
 
     let buildLocation = Direction.adjacentLocation(moveLocation, DIRS[this.buildDirectionIndex]);
     let buildAction = new BuildAction(workerId, buildLocation);

@@ -1,3 +1,4 @@
+let expect = require('chai').expect;
 /* Unit tests for the TurnGenerator component. */
 const TurnGenerator = require('./../Common/TurnGenerator.js');
 const Action = require('./../Common/Action.js');
@@ -10,7 +11,7 @@ const Direction = require('./../Common/Direction.js');
 
 const DIRS = Direction.MOVEMENT_DIRECTIONS;
 
-xdescribe("GameState test suite", function () {
+describe("GameState test suite", function () {
 
   // Generates all 64 possible next moves for a worker
   describe("when a worker can move and build anywhere", function () {
@@ -19,8 +20,7 @@ xdescribe("GameState test suite", function () {
     // center. Set the gamestate so it's the same player's turn again.
     beforeEach(function () {
       board = new Board();
-      placeAction = new PlaceAction([3,3])
-      workerId0 = board.addWorker(3,3);
+      placeAction = new PlaceAction([3,3]);
       playerId0 = 0;
       gameState = new GameState(board);
       Action.execute(placeAction, gameState);
@@ -33,7 +33,7 @@ xdescribe("GameState test suite", function () {
       while (tg.hasNext()) {
         turns.push(tg.next());
       }
-      expect(turns.length).toBe(64);
+      expect(turns.length).to.eql(64);
     });
 
     it("generates 64 unique actions", function () {
