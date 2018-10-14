@@ -1,23 +1,32 @@
 /*
-This file represents the state of a Santorini game.
-It has a Board for tracking and accessing height and worker location data.
-On top of that, it tracks worker ownership data, which player's
-turn it is, and what was the last Action taken in the game.
+  This file represents the state of a Santorini game.
+  It has a Board for tracking and accessing height and worker location data.
+  On top of that, it tracks worker ownership data, which player's
+  turn it is, and what was the last Action taken in the game.
 
-It allows users to view and update the current state of the game.
+  It allows users to view and update the current state of the game.
 
-GameState is a data object and performs no checks on the validity of
-the data it is given, nor the order/context of operations called on it
-to mutate its state.
+  GameState is a data object and performs no checks on the validity of
+  the data it is given, nor the order/context of operations called on it
+  to mutate its state.
 
-Callers are responsible for properly maintaining the GameState's state
-by calling the correct groups of associated methods when making updates
-to its Board, last Action, worker ownership, and turn information.
-  Example usage protocol:
-    1. Change this GameState's Board with some action
-    2. Update this GameState's last Action to be that^ action
-      2a. If a worker was added, update this GameState's worker ownership map
-    3. Possibly call flipTurn() to change which player's turn it is
+  Callers are responsible for properly maintaining the GameState's state
+  by calling the correct groups of associated methods when making updates
+  to its Board, last Action, worker ownership, and turn information.
+    Example usage protocol:
+      1. Change this GameState's Board with some action
+      2. Update this GameState's last Action to be that^ action
+        2a. If a worker was added, update this GameState's worker ownership map
+      3. Possibly call flipTurn() to change which player's turn it is
+
+
+  ---- Data Definitions -----
+
+  A PlayerId is an integer in the range [0,1].
+
+  The data definition for Action is in Action.js
+
+  The data definition for Board is in Board.js
 
 */
 const Action = require('./Action.js');

@@ -1,27 +1,36 @@
 /*
-This file represents all possible actions that can be taken on a GameState.
+  This file represents all possible actions that can be taken on a GameState.
 
-Action represents the things a player can do to affect the state of the game.
-Action is one of 3 classes:
-- PlaceAction
-- MoveAction
-- BuildAction
+  Action represents the things a player can do to affect the state of the game.
+  Action is one of 3 classes:
+  - PlaceAction
+  - MoveAction
+  - BuildAction
 
-Actions are simply units of data that can be passed around the program.
-Operations involving Actions, such as copying or executing them, are
-located in this module, since it would not be secure to rely on 
-execution or copying functions associated with an Action object coming from
-an outside source. 
+  Actions are simply units of data that can be passed around the program.
+  Operations involving Actions, such as copying or executing them, are
+  located in this module, since it would not be secure to rely on
+  execution or copying functions associated with an Action object coming from
+  an outside source.
 
-The functions execute() and copy() are exported as part of this module
-in order to facilitate:
-  1. executing an action on a GameState and 
-  2. making a deep copy of an Action
+  Actions will commonly be paired in Turns.
+  A Turn is one of:
+    - [MoveAction]
+    - [MoveAction, BuildAction]
 
-GameState is defined in GameState.js
-Location is a 2-element array [row,col], where
-- row is a row index on a Board
-- col is a col index on a Board
+  Where a single MoveAction is only a valid Turn if it results in an
+  end-game condition. It represents the whole Turn for a Player.
+
+
+  The functions execute() and copy() are exported as part of this module
+  in order to facilitate:
+    1. executing an action on a GameState and
+    2. making a deep copy of an Action
+
+  GameState is defined in GameState.js
+  Location is a 2-element array [row,col], where
+  - row is a row index on a Board
+  - col is a col index on a Board
 */
 
 const PLACE = "place";
