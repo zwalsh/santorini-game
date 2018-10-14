@@ -7,20 +7,22 @@
 
 # It is all-knowing. It may share some.
 
+./../../node_modules/mocha/bin/mocha "./*.js"
+
+echo =====================================
+echo END MOCHA TESTS
+echo =====================================
+echo
+echo
+echo
+echo =====================================
+echo BEGIN JASMINE TESTS
+echo =====================================
+
+
 node ../../node_modules/jasmine/bin/jasmine.js --config=Jasmine/jasmine.json
 
-echo =====================================
-echo END JASMINE TESTS
-echo =====================================
-echo
-echo
-echo
-echo =====================================
-echo BEGIN MOCHA TESTS
-echo =====================================
 
-
-./../../node_modules/mocha/bin/mocha "./*.js"
 
 # Nice thing to have in the future would be a test script
 # where we can include the name of a module as a param
