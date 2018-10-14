@@ -23,7 +23,7 @@ describe("StayAliveStrategy", function () {
       Action.execute(placeAction, gameState);
       gameState.flipTurn();
     });
-    it("returns an available move if depth is 0", function () {
+    it("returns an available turn if depth is 0", function () {
       let turn = StayAliveStrategy.chooseTurn(gameState, 0);
       expect(turn).to.not.eql(false);
     });
@@ -34,7 +34,7 @@ describe("StayAliveStrategy", function () {
       let turn = StayAliveStrategy.chooseTurn(gameState, 0);
       expect(turn).to.eql(false);
     });
-    it("returns a move if it is a winning move", function () {
+    it("returns just a move if it is a winning move", function () {
       board.heights[0][0] = 2;
       board.heights[0][1] = 3;
       board.heights[1][0] = 4;
@@ -46,12 +46,60 @@ describe("StayAliveStrategy", function () {
       expect(moveAction.getType()).to.eql(Action.MOVE);
       expect(moveAction.getLoc()).to.eql([0, 1]);
     });
-    it("returns false if the opponent can win no matter the choice", function () {
+    it("returns false if the opponent can win no matter the choice of turn by this player", function () {
+      let opponentPlace = new PlaceAction([2, 3]);
+      gameState.flipTurn();
+      Action.execute(opponentPlace, gameState);
 
+      // player is too far to prevent the opponent from climbing and winning here
+      board.heights[1][3] = 3;
+      board.heights[2][3] = 2;
+
+      let turn = StayAliveStrategy.chooseTurn(gameState, 1);
+      expect(turn).to.eql(false);
+    });
+    it("checks multiple levels deep for opponent victory", function () {
+      let opponentPlace = new PlaceAction([3, 4]);
+      gameState.flipTurn();
+      Action.execute(opponentPlace, gameState);
+
+      // worker is too far to prevent the opponent to climbing and winning here
+      board.heights[1][4] = 3;
+      board.heights[2][4] = 2;
+      board.heights[3][4] = 1;
+
+      let turn = StayAliveStrategy.chooseTurn(gameState, 4);
+      expect(turn).to.eql(false);
+    });
+    it("picks the correct move to prevent opponent victory", function () {
+      let opponentPlace = new PlaceAction([2, 2]);
+      gameState.flipTurn();
+      Action.execute(opponentPlace, gameState);
+
+      board.heights[1][2] = 3;
+      board.heights[2][2] = 2;
+
+      let turn = StayAliveStrategy.chooseTurn(gameState, 2);
+      expect(turn.length).to.eql(2);
+      // player builds on available 3-height to prevent opponent victory
+      expect(turn[1].getLoc()).to.eql([1, 2]);
     });
   });
-
   describe("canWin function", function () {
+    it("checks all directions for a possible win-move", function () {
 
+    });
+    it("returns false if depth is 0 and no wins are possible", function () {
+
+    });
+    it("checks if the player can prevent an opponent from staying alive in one round", function () {
+
+    });
+    it("checks if the player can prevent an opponent from staying alive in multiple rounds", function () {
+
+    });
+    it("checks that the player cannot prevent an opponent from staying alive in multiple rounds", function () {
+
+    });
   });
 });
