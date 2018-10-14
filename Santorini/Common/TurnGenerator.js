@@ -6,12 +6,11 @@
   allowing clients of this TurnGenerator to smartly iterate through
   the possible Turns and stop generating new Turns at any time.
 
-  A Turn is one of:
-  - [MoveAction]
-  - [MoveAction, BuildAction]
+  ---- Data Definitions -----
 
-  Where a single MoveAction is only a valid Turn if it results in an
-  end-game condition. It represents the whole Turn for a Player.
+  The data definition for a Turn is in Action.js.
+
+  The data definition for a PlayerId is in GameState.js
 
  */
 const Direction = require('./Direction.js');
@@ -35,6 +34,7 @@ class TurnGenerator {
     this.workerIndex = 0;
     this.moveDirectionIndex = 0;
     this.buildDirectionIndex = 0;
+    this.gameStatePostMove = null;
   }
 
   /* Void -> Boolean
@@ -57,33 +57,48 @@ class TurnGenerator {
     let buildLocation = Direction.adjacentLocation(moveLocation, DIRS[this.buildDirectionIndex]);
     let buildAction = new BuildAction(workerId, buildLocation);
 
-    if (RuleChecker.validate(this.gameState, moveAction, this.whoseTurn)) {
-      let gsCopy = gameState.copy();
-      Action.execute(moveAction, gsCopy);
-
-      // check if won - if so, increment, set move, return true
-      let newWorkerHeight = gameState.getBoard().getHeight(moveLocation[0], moveLocation[1]);
-      if (newWorkerHeight === RuleChecker.WINNING_HEIGHT) {
-        this.nextTurn = [moveAction];
-        this.incrementMoveIndex();
-        return true;
-      }
-
-      // check build
-      if (RuleChecker.validate(gsCopy, buildAction, this.whoseTurn)) {
-        // if valid, increment, set move, return true
-        this.nextTurn = [moveAction, buildAction];
-        this.incrementBuildIndex();
-        return true;
+    // If we have not yet checked the move for the current move index,
+    // validate that move, and store a copy of the game state with
+    // that move executed on it.
+    if (this.gameStatePostMove === null) {
+      // validate if/else increment  in  else  case
+      if (RuleChecker.validate(this.gameState, moveAction, this.whoseTurn)) {
+        let gsCopy = this.gameState.copy();
+        Action.execute(moveAction, gsCopy);
+        this.gameStatePostMove = gsCopy;
       } else {
-        // if invalid, increment and call has next
-        this.incrementBuildIndex();
+        this.incrementMoveIndex();
         return this.hasNext();
       }
-    } else {
+    }
+
+    // check if won - if so, increment, set move, return true
+    let newWorkerHeight = this.gameStatePostMove.getBoard().getHeight(moveLocation[0], moveLocation[1]);
+    if (newWorkerHeight === RuleChecker.WINNING_HEIGHT) {
+      this.nextTurn = [moveAction];
       this.incrementMoveIndex();
+      return true;
+    }
+
+    // check build
+    if (RuleChecker.validate(this.gameStatePostMove, buildAction, this.whoseTurn)) {
+      // if valid, increment, set move, return true
+      this.nextTurn = [moveAction, buildAction];
+      this.incrementBuildIndex();
+      return true;
+    } else {
+      // if invalid, increment and call has next
+      this.incrementBuildIndex();
       return this.hasNext();
     }
+
+  }
+
+  /* MoveAction -> Void ????
+    We would like to pull out the part of the hasNext() method
+    that ensures that a gameStateAfterMove exists.
+  */
+  soemthing(moveAction) {
   }
 
   /* Void -> Void
@@ -110,6 +125,7 @@ class TurnGenerator {
   incrementMoveIndex() {
     this.buildDirectionIndex = 0;
     this.moveDirectionIndex += 1;
+    this.gameStatePostMove = null;
     if (this.moveDirectionIndex >= DIRS.length) {
       this.moveDirectionIndex = 0;
       this.workerIndex += 1;
@@ -125,3 +141,5 @@ class TurnGenerator {
     return this.nextTurn;
   }
 }
+
+module.exports = TurnGenerator;
