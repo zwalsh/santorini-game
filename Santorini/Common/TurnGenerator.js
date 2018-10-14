@@ -1,6 +1,7 @@
 /*
-  This module contains a TurnGenerator class that takes in a GameState
-  and produces all valid Turns that can be taken given the GameState.
+  This module contains two classes, a TurnGenerator and a MoveGenerator,
+  that take in a GameState and produce all valid Turns or Moves, respectively,
+  that can be taken by the current player (whose turn it is) in the GameState.
 
   It provides an iterator-like interface of next() and hasNext(),
   allowing clients of this TurnGenerator to smartly iterate through
@@ -29,7 +30,6 @@ class TurnGenerator {
   constructor(gameState) {
     this.gameState = gameState;
     this.whoseTurn = gameState.getWhoseTurn();
-    //console.log(" - " + JSON.stringify(this.whoseTurn) + " - whose turn in tg");
     this.workerList = gameState.getWorkerList(this.whoseTurn);
     this.nextTurn = null;
     this.workerIndex = 0;
@@ -42,8 +42,8 @@ class TurnGenerator {
     Returns true if there is another valid Turn that can be
     taken that has not yet been returned by this TurnGenerator.
 
-    hasNext will determine and set the next turn on this
-    TurnGenerator if one exists.
+    hasNext determines and set the next turn on this
+    TurnGenerator, if a valid next turn exists.
    */
   hasNext() {
     // must check if the worker index is too high (implying that all possible moves have been checked)
@@ -51,12 +51,9 @@ class TurnGenerator {
       return false;
     }
     let workerId = this.workerList[this.workerIndex];
-    // console.log(" - " + JSON.stringify(this.workerList) + " - worker list in tg");
-    // console.log(" - " + JSON.stringify(this.workerIndex) + " - worker index in tg");
-    // console.log(" - " + workerId + " - worker id in tg");
     let workerLocation = this.gameState.getBoard().getWorker(workerId);
     let moveLocation = Direction.adjacentLocation(workerLocation, DIRS[this.moveDirectionIndex]);
-    let moveAction = new MoveAction(workerId, workerLocation);
+    let moveAction = new MoveAction(workerId, moveLocation);
 
     let buildLocation = Direction.adjacentLocation(moveLocation, DIRS[this.buildDirectionIndex]);
     let buildAction = new BuildAction(workerId, buildLocation);
@@ -142,8 +139,80 @@ class TurnGenerator {
     hasNext() and getting back a value of true.
    */
   next() {
-    return this.nextTurn;
+    return this.nextMove;
   }
 }
 
-module.exports = TurnGenerator;
+/*
+Class that generates all 8 possible moves for a player in a gamestate
+ */
+class MoveGenerator {
+  /* GameState -> TurnGenerator
+  Produces a TurnGenerator that iterates over all valid Turns
+  that can be taken from the given GameState.
+ */
+  constructor(gameState) {
+    this.gameState = gameState;
+    this.whoseTurn = gameState.getWhoseTurn();
+    this.workerList = gameState.getWorkerList(this.whoseTurn);
+    this.nextMove = null;
+    this.workerIndex = 0;
+    this.moveDirectionIndex = 0;
+    this.gameStatePostMove = null;
+  }
+
+  /* Void -> Boolean
+  Returns true if there exists another valid MoveAction that can be
+  taken that has not yet been returned by this MoveGenerator.
+   */
+  hasNext() {
+    // must check if the worker index is too high (implying that all possible moves have been checked)
+    if (this.workerIndex >= this.workerList.length) {
+      return false;
+    }
+
+    let workerId = this.workerList[this.workerIndex];
+    let workerLocation = this.gameState.getBoard().getWorker(workerId);
+    let moveLocation = Direction.adjacentLocation(workerLocation, DIRS[this.moveDirectionIndex]);
+    let moveAction = new MoveAction(workerId, moveLocation);
+
+    // Validate the move action, call hasNext again if not a valid move.
+    if (RuleChecker.validate(this.gameState, moveAction, this.whoseTurn)) {
+      this.nextMove = moveAction;
+    } else {
+      this.incrementMoveIndex();
+      return this.hasNext();
+    }
+  }
+
+  /* Void -> MoveAction
+    Returns the next MoveAction that has been found by hasNext().
+    Invalid to call this method without first calling
+    hasNext() and getting back a value of true.
+   */
+  nextMove() {
+    return this.nextMove;
+  }
+
+  /* Void -> Void
+  Increments the move index, increasing its value by one.
+
+  If the move index is outside the range of the list of directions,
+  it rolls over and the worker index is incremented.
+
+  There are no guarantees that the worker index is within bounds.
+ */
+  incrementMoveIndex() {
+    this.moveDirectionIndex += 1;
+    if (this.moveDirectionIndex >= DIRS.length) {
+      this.moveDirectionIndex = 0;
+      this.workerIndex += 1;
+    }
+  }
+
+}
+
+module.exports = {
+  "TurnGenerator" : TurnGenerator,
+  "MoveGenerator" : MoveGenerator
+};
