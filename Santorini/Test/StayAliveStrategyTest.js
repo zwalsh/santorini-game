@@ -9,6 +9,7 @@ const Board = require('./../Common/Board.js');
 const GameState = require('./../Common/GameState.js');
 const Action = require('./../Common/Action.js');
 const PlaceAction = Action.PlaceAction;
+const Direction = require('./../Common/Direction.js');
 
 describe("StayAliveStrategy", function () {
   describe("chooseTurn function", function () {
@@ -86,20 +87,72 @@ describe("StayAliveStrategy", function () {
     });
   });
   describe("canWin function", function () {
+    let board, gameState, playerId0, playerId1, workerStartLoc;
+    beforeEach(function () {
+      board = new Board();
+      workerStartLoc = [1, 1];
+      let placeAction = new PlaceAction(workerStartLoc);
+      playerId0 = 0;
+      playerId1 = 1;
+      gameState = new GameState(board);
+      Action.execute(placeAction, gameState);
+      gameState.flipTurn();
+    });
     it("checks all directions for a possible win-move", function () {
-
+      board.heights[1][1] = 2;
+      let location = null;
+      for (let dir of Direction.MOVEMENT_DIRECTIONS) {
+        if (location !== null) {
+          board.heights[location[0]][location[1]] = 0;
+        }
+        location = Direction.adjacentLocation(workerStartLoc, dir);
+        board.heights[location[0]][location[1]] = 3;
+        expect(StayAliveStrategy.canWin(gameState, 0)).to.eql(true);
+      }
     });
     it("returns false if depth is 0 and no wins are possible", function () {
-
+      expect(StayAliveStrategy.canWin(gameState, 0)).to.eql(false);
     });
     it("checks if the player can prevent an opponent from staying alive in one round", function () {
+      let opponentPlace = new PlaceAction([0, 0]);
+      gameState.flipTurn();
+      Action.execute(opponentPlace, gameState);
 
+      // worker must move to [0,1] and build on [1,1], blocking opponent
+      board.heights[1][0] = 2;
+      board.heights[1][1] = 1;
+      board.heights[0][1] = 1;
+
+      expect(StayAliveStrategy.canWin(gameState, 1)).to.eql(true);
     });
     it("checks if the player can prevent an opponent from staying alive in multiple rounds", function () {
+      board.heights =
+        [[2, 0, 1, 0, 2, 4],
+          [4, 4, 2, 4, 4, 4],
+          [0, 0, 1, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0]];
+      board.workers[0] = [2, 2];
 
+      let opponentPlace1 = new PlaceAction([0, 0]);
+      gameState.whoseTurn = playerId1;
+      Action.execute(opponentPlace1, gameState);
+      gameState.whoseTurn = playerId1;
+      let opponentPlace2 = new PlaceAction([0, 4]);
+      Action.execute(opponentPlace2, gameState);
+      gameState.whoseTurn = playerId0;
+
+      // player 0 wins by blocking all possible moves by both workers
+      expect(StayAliveStrategy.canWin(gameState, 3)).to.eql(true);
     });
     it("checks that the player cannot prevent an opponent from staying alive in multiple rounds", function () {
+      let opponentPlace1 = new PlaceAction([0, 0]);
+      gameState.whoseTurn = playerId1;
+      Action.execute(opponentPlace1, gameState);
+      gameState.whoseTurn = playerId0;
 
+      expect(StayAliveStrategy.canWin(gameState, 4)).to.eql(false);
     });
   });
 });
