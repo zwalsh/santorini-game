@@ -171,6 +171,7 @@ class MoveGenerator {
     // Validate the move action, call hasNext again if not a valid move.
     if (RuleChecker.validate(this.gameState, moveAction, this.whoseTurn)) {
       this.nextMove = moveAction;
+      return true;
     } else {
       this.incrementMoveIndex();
       return this.hasNext();
@@ -182,7 +183,7 @@ class MoveGenerator {
     Invalid to call this method without first calling
     hasNext() and getting back a value of true.
    */
-  nextMove() {
+  next() {
     return this.nextMove;
   }
 
