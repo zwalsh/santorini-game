@@ -37,7 +37,7 @@ class TurnGenerator {
 
     this.nextTurn = null;
 
-    this.moveGenerator = null;
+    this.moveGenerator = new MoveGenerator(this.gameState);
     this.buildGenerator = null;
 
   }
@@ -49,40 +49,28 @@ class TurnGenerator {
     // Return true if we haven't retrieved the next turn with next() yet
     if (this.nextTurn !== null) { return true; }
 
-    // must check if the worker index is too high
-    // (implying that all possible turns have been checked)
-    if (this.workerIndex >= this.workerList.length) { return false; }
+    if (!this.moveGenerator.hasNext()) {
+      return false;
+    }
 
     // A null build generator signifies that we are starting from a new move.
     if (this.buildGenerator === null) {
-      // A null move generator signifies that we are starting a new set of moves for a new worker.
-      if (this.moveGenerator === null) {
-        this.moveGenerator = new MoveGenerator(this.gameState, this.workerList[this.workerIndex]);
-      }
-      // We now are guaranteed to have a MoveGenerator to work with.
       // If no next move for current worker, then increment worker index.
-      if (this.moveGenerator.hasNext()) {
-        let action = this.moveGenerator.peek();
-        let moveLoc = action.getLoc();
+      let action = this.moveGenerator.peek();
+      let moveLoc = action.getLoc();
 
-        // Since we have not yet checked this next move for a win,
-        // check for win now, and if win, then pop the move,
-        // set it as the Turn + return.
-        if (this.gameState.getBoard().getHeight(moveLoc[0], moveLoc[1]) === RuleChecker.WINNING_HEIGHT) {
-          this.nextTurn = [this.moveGenerator.next()];
-          return true;
-        } else {
-          let gameStateAfterMove = this.gameState.copy();
-          Action.execute(action, gameStateAfterMove);
-          this.buildGenerator = new BuildGenerator(gameStateAfterMove, this.workerList[this.workerIndex]);
-        }
+      // Since we have not yet checked this next move for a win,
+      // check for win now, and if win, then pop the move,
+      // set it as the Turn + return.
+      if (this.gameState.getBoard().getHeight(moveLoc[0], moveLoc[1]) === RuleChecker.WINNING_HEIGHT) {
+        this.nextTurn = [this.moveGenerator.next()];
+        return true;
       }
-      // If the move generator was exhausted, increment worker index
-      // and remove that move generator, then continue looking for next turn.
+      // If the move is not a win, then we can generate all the Move+Build turns from it.
       else {
-        this.workerIndex += 1;
-        this.moveGenerator = null;
-        return this.hasNext();
+        let gameStateAfterMove = this.gameState.copy();
+        Action.execute(action, gameStateAfterMove);
+        this.buildGenerator = new BuildGenerator(gameStateAfterMove, this.moveGenerator.getCurrentWorkerId());
       }
     }
 
@@ -237,6 +225,13 @@ class MoveGenerator {
   */
   peek() {
     return this.nextAction;
+  }
+
+  /* Void -> WorkerId
+  Get the ID of the worker whose moves are currently being generated.
+   */
+  getCurrentWorkerId() {
+    return this.workerList[this.workerIndex];
   }
 
   /* Void -> MoveAction
