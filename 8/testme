@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Runs all unit tests associated with components written for Assignment 8
+# This includes:
+#
+# - Strategy components
+#   - Player/CompoundStrategy.js
+#   - Player/FarthestFromEnemyPlacementStrategy.js
+#   - Player/DiagonalPlacementStrategy.js
+#   - Player/StayAliveStrategy.js
+#
+# - Components created for use by the strategy:
+#   - Common/TurnGenerator (MoveGenerator, BuildGenerator)
+#
+# - JSON translation component:
+#   - Lib/JsonToComponent.js
+
+declare -a testFiles=(
+    "./CompoundStrategyTest.js"
+    "./DiagonalPlacementStrategyTest.js"
+    "./StayAliveStrategy.js"
+    "./FarthestFromEnemyPlacementStrategy.js"
+    "./TurnGeneratorTest.js"
+    "./JsonToComponentTest.js"
+)
+
+cd ../Santorini/Test
+./../../node_modules/mocha/bin/mocha ${testFiles[@]}
+cd -
