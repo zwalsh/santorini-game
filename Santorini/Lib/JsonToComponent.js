@@ -12,9 +12,11 @@ const MoveAction = Action.MoveAction;
 const BuildAction = Action.BuildAction;
 
 
-/* BoardRequest -> [GameState, Map<Worker, WorkerId>]
+/* BoardRequest -> [GameState, Map<Worker, WorkerId>, [String, ...]]
 Given a board request of the shape [[Cell, ...], ...],
-creates a GameState object, and a Map of the worker names to their IDs
+creates a GameState object, a Map of the worker names to their IDs,
+and a list of player names, in order of which player's worker was
+encountered first while iterating through the given BoardRequest.
 */
 function createGameState(boardReq) {
   let board = new Board();
@@ -45,7 +47,7 @@ function createGameState(boardReq) {
       board.heights[rowIdx][colIdx] = height;
     }
   }
-  return [gameState, workerNameToId];
+  return [gameState, workerNameToId, playerNameToId];
 }
 
 /* ["move", Worker, Direction] GameState -> MoveAction
