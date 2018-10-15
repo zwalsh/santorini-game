@@ -13,7 +13,7 @@
 
  */
 
-const PlaceAction = require('./Action.js').PlaceAction;
+const PlaceAction = require('../Common/Action.js').PlaceAction;
 
 /* GameState -> [Maybe PlaceAction]
   Returns a PlaceAction that places a Worker on the first empty spot along the

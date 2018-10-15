@@ -3,7 +3,7 @@ const Board = require('./../Common/Board.js');
 const GameState = require('./../Common/GameState.js');
 const Action = require('./../Common/Action.js');
 const PlaceAction = Action.PlaceAction;
-const FarthestFromEnemyPlacementStrategy = require('./../Common/FarthestFromEnemyPlacementStrategy.js');
+const FarthestFromEnemyPlacementStrategy = require('../Player/FarthestFromEnemyPlacementStrategy.js');
 
 describe("Farthest from enemy placement strategy", function () {
   let board, gameState, size;

@@ -5,7 +5,7 @@
   Worker as far as possible from all enemy Workers.
  */
 
-const PlaceAction = require('./Action.js').PlaceAction;
+const PlaceAction = require('../Common/Action.js').PlaceAction;
 
 /* GameState -> PlaceAction
    Provides a PlaceAction that will place the Worker as far as possible

@@ -32,10 +32,10 @@
 
 
 */
-const TurnGenerator = require('./TurnGenerator.js').TurnGenerator;
-const MoveGenerator = require('./TurnGenerator.js').MoveGenerator;
-const Action = require('./Action.js');
-const RuleChecker = require('./RuleChecker.js');
+const TurnGenerator = require('../Common/TurnGenerator.js').TurnGenerator;
+const MoveGenerator = require('../Common/TurnGenerator.js').MoveGenerator;
+const Action = require('../Common/Action.js');
+const RuleChecker = require('../Common/RuleChecker.js');
 
 
 /* GameState Natural -> [Maybe Turn]

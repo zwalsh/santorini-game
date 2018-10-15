@@ -4,7 +4,7 @@
   can win the game.
  */
 let expect = require('chai').expect
-const StayAliveStrategy = require('./../Common/StayAliveStrategy.js');
+const StayAliveStrategy = require('../Player/StayAliveStrategy.js');
 const Board = require('./../Common/Board.js');
 const GameState = require('./../Common/GameState.js');
 const Action = require('./../Common/Action.js');

@@ -3,7 +3,7 @@ const Board = require('./../Common/Board.js');
 const GameState = require('./../Common/GameState.js');
 const Action = require('./../Common/Action.js');
 const PlaceAction = Action.PlaceAction;
-const DiagonalPlacementStrategy = require('./../Common/DiagonalPlacementStrategy.js');
+const DiagonalPlacementStrategy = require('../Player/DiagonalPlacementStrategy.js');
 
 describe("Diagonal placement strategy", function () {
   let board, gameState;
