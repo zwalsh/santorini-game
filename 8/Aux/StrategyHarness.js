@@ -116,7 +116,7 @@ function handleBoardAndTurn(gameState, workerNameToId, playerNameToId, numRounds
   let workerId = moveAction.getWorkerId();
   let buildAction = JsonToComponent.createBuildAction(turn[1], workerId, gameState);
   Action.execute(buildAction, gameState);
-  
+
   StayAliveStrategy.canWin(gameState, numRounds - 1) ? printNo() : printYes();
 }
 
