@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Executable that runs the test harness for the StayAliveStrategy module.
+
+node `dirname ${BASH_SOURCE[0]}`/Aux/StrategyHarness.js
+
