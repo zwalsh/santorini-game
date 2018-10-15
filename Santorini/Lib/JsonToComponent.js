@@ -47,12 +47,6 @@ function createGameState(boardReq) {
       board.heights[rowIdx][colIdx] = height;
     }
   }
-  // ===
-  for (let key of workerNameToId.keys()) {
-  }
-  for (let val of workerNameToId.values()) {
-  }
-  // ===
   return [gameState, workerNameToId, playerNameToId];
 }
 
