@@ -147,5 +147,6 @@ function heightDifference(board, id, otherLoc) {
 
 module.exports = {
   "validate": validate,
-  "WINNING_HEIGHT": WINNING_HEIGHT
+  "WINNING_HEIGHT": WINNING_HEIGHT,
+  "MAX_WORKERS_PER_PLAYER": MAX_WORKERS_PER_PLAYER
 };
