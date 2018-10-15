@@ -38,6 +38,10 @@ Accept a list of incoming requests.
 
 */
 function handleRequests(requests) {
+  /*
+  Actually process the  board req. here.
+  then give the appropriate info to each function.
+   */
   switch(requests.length) {
     case 3:
       handleBoardOnly();
