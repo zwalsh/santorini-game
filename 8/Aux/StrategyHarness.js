@@ -71,7 +71,7 @@ function handleRequests(reqs) {
         numRounds, reqs.slice(3));
       break;
     default:
-      throw 'uh oh spaghettio';
+      throw 'Invalid test case given';
   }
 }
 
@@ -102,8 +102,12 @@ function handleWinningMove() {
   print 1. "yes" or 2. "no" if the resulting GameState is one where
   the player's opponent 1. is not or 2. is guaranteed to win.
 
+  As the given turn counts as one look-ahead round, this function will check
+  if the opponent can win in one less than the given number of rounds,
+  after application of the turn.
+
   If the # of rounds to look ahead to is 0, then we know that the player
-  can certainly win in this round, because they have supplied a valid
+  can certainly survive in this round, because they have supplied a valid
   move for this round and therefore have not already lost.
  */
 function handleBoardAndTurn(gameState, workerNameToId, playerNameToId, numRounds, turn) {
