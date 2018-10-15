@@ -23,34 +23,52 @@
 const JsonParser = require('./../../Santorini/Lib/JsonParse.js');
 const StayAliveStrategy = require('./../../Santorini/Player/StayAliveStrategy.js');
 const Action = require('./../../Santorini/Common/Action.js');
+const GameState = require('./../../Santorini/Common/GameState.js');
 const JsonToComponent = require('./../../Santorini/Lib/JsonToComponent.js');
 
 process.stdin.on('readable', () => {
   let chunk = process.stdin.read();
-  if (chunk != null) {
-    let requests = JsonParser.parseInputString(chunk);
-    handleRequests(requests);
+    if (chunk != null) {
+        let reqs = JsonParser.parseInputString(chunk);
+        handleRequests(reqs);
   }
 });
 
 /*
-Accept a list of incoming requests.
-
+Accept a set of test data (as specified in file header)
+and test the Strategy using the input scenario.
 */
-function handleRequests(requests) {
-  /*
-  Actually process the  board req. here.
-  then give the appropriate info to each function.
-   */
-  switch(requests.length) {
+function handleRequests(reqs) {
+  // Process board request here, then give appropriate info to each function.
+  let targetPlayerName = reqs[0];
+
+  let gameStateData = JsonToComponent.createGameState(reqs[1]);
+  let numRounds = Number.parseInt(reqs[2]);
+
+  let gameState = gameStateData[0];
+  // Map of Workers (ex. "one1", "p2") to their WorkerId in the game
+  let workerNameToId = gameStateData[1];
+
+  // Array of player names (ex. "one", "p") where index is their PlayerId in the game
+  let playerNameToId = gameStateData[2];
+  let targetPlayerId = playerNameToId.indexOf(targetPlayerName);
+
+  // After creating the game state and placing workers on it,
+  // ensure that its current turn is set to the player we are playing for.
+  if (gameState.getWhoseTurn() !== targetPlayerId) {
+    gameState.flipTurn();
+  }
+
+  switch(reqs.length) {
     case 3:
-      handleBoardOnly();
+      handleBoardOnly(gameState, targetPlayerId, numRounds);
       break;
     case 4:
       handleWinningMove();
       break;
     case 5:
-      handleBoardAndTurn();
+      handleBoardAndTurn(gameState, workerNameToId, playerNameToId,
+        numRounds, reqs.slice(3));
       break;
     default:
       throw 'uh oh spaghettio';
@@ -58,33 +76,60 @@ function handleRequests(requests) {
 }
 
 /*
-Convert board req. to GameState,
-ensure that it's proper player's turn,
-and call chooseTurn() with gamestate.
+Given a GameState where it is the designated player's turn
+(according to the request being handled), print "yes" or "no"
+if they can or cannot make any moves that will keep them alive
+for the given number of rounds.
  */
-function handleBoardOnly() {
-
+function handleBoardOnly(gameState, targetPlayerId, numRounds) {
+  let turn = StayAliveStrategy.chooseTurn(gameState, numRounds);
+  turn === false ? printNo() : printYes();
 }
 
 /*
-convert board req. to GameState,
-ensure it's proper player's turn,
-and call chooseTurn() with depth 0
-to ensure that the gamestate does have the winning move
-we are looking for
--- or --
-print "yes"
+Given a request with a winning move, we do not need to check with
+our Strategy to know that the player will not lose from the given GameState.
+They have already won in this round/turn.
  */
 function handleWinningMove() {
+  printYes();
+}
 
+/* GameState  Map<Worker,WorkerId>  [String, ...]  Natural [Move, MoveBuild] -> Void
+  Given a GameState where it is the designated player's turn
+  (according to the request being handled), and data representing a Turn
+  for that player to take, apply that Turn to the GameState, and
+  print 1. "yes" or 2. "no" if the resulting GameState is one where
+  the player's opponent 1. is not or 2. is guaranteed to win.
+
+  If the # of rounds to look ahead to is 0, then we know that the player
+  can certainly win in this round, because they have supplied a valid
+  move for this round and therefore have not already lost.
+ */
+function handleBoardAndTurn(gameState, workerNameToId, playerNameToId, numRounds, turn) {
+  if (numRounds === 0) {
+    printYes();
+    return;
+  }
+  let moveAction = JsonToComponent.createMoveAction(turn[0], workerNameToId, gameState);
+  Action.execute(moveAction, gameState);
+  let workerId = moveAction.getWorkerId();
+  let buildAction = JsonToComponent.createBuildAction(turn[1], workerId, gameState);
+  Action.execute(buildAction, gameState);
+  
+  StayAliveStrategy.canWin(gameState, numRounds - 1) ? printNo() : printYes();
 }
 
 /*
-Convert board req. to GameState,
-ensure it's proper player's turn,
-apply given Turn actions,
-and call canWin() with gamestate.
+Write the JSON string "no" to stdout.
  */
-function handleBoardAndTurn() {
+function printNo() {
+  process.stdout.write(JSON.stringify("no"));
+}
 
+/*
+Write the JSON string "yes" to stdout.
+ */
+function printYes() {
+  process.stdout.write(JSON.stringify("yes"));
 }
