@@ -12,7 +12,7 @@ const MoveAction = Action.MoveAction;
 const BuildAction = Action.BuildAction;
 
 
-/* BoardRequest -> [GameState, Map<Worker, WorkerId>, [String, ...]]
+/* BoardRequest -> [GameState, Map<Worker,WorkerId>, [String, ...]]
 Given a board request of the shape [[Cell, ...], ...],
 creates a GameState object, a Map of the worker names to their IDs,
 and a list of player names, in order of which player's worker was
@@ -47,10 +47,16 @@ function createGameState(boardReq) {
       board.heights[rowIdx][colIdx] = height;
     }
   }
+  // ===
+  for (let key of workerNameToId.keys()) {
+  }
+  for (let val of workerNameToId.values()) {
+  }
+  // ===
   return [gameState, workerNameToId, playerNameToId];
 }
 
-/* ["move", Worker, Direction] GameState -> MoveAction
+/* ["move", Worker, Direction] Map<Worker,WorkerId> GameState -> MoveAction
 Creates a MoveAction from the given JSON request and GameState.
 Also sets the game state to the correct turn given who is attempting to move.
 */
@@ -63,6 +69,9 @@ function createMoveAction(request, workerNameToId, gameState) {
 
 
 /* ["+build", Direction] WorkerId GameState -> BuildAction
+Creates a BuildAction from the given JSON request, WorkerId, and GameState.
+Build location is determined for the given worker relative to that
+worker's current position in the GameState.
 */
 function createBuildAction(request, workerId, gameState) {
   let location = getLocation(gameState.getBoard(), workerId, request[1]);
