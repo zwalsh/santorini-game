@@ -1,16 +1,22 @@
 /*
-  This module contains two classes, a TurnGenerator and a MoveGenerator,
-  that take in a GameState and produce all valid Turns or Moves, respectively,
-  that can be taken by the current player (whose turn it is) in the GameState.
+  This module contains two exposed classes, a TurnGenerator and a MoveGenerator,
+  that take in a GameState and produce all valid Turns and MoveActions, respectively,
+  that can be taken by the current player (whose turn it is) in the generator's GameState.
 
-  It provides an iterator-like interface of next() and hasNext(),
-  allowing clients of this TurnGenerator to smartly iterate through
-  the possible Turns and stop generating new Turns at any time.
+  They provide an iterator-like interface of next() and hasNext(),
+  allowing users of this TurnGenerator/MoveGenerator to smartly iterate through
+  the possible Turns/MoveActions and stop generating new Turns/MoveActions at any time.
+
+  The MoveGenerator is exposed to enable users to search only for
+  winning moves, if they wish. However, it returns all possible
+  moves in its GameState, not just winning moves.
+
+  The BuildGenerator class is only used internally by the TurnGenerator.
 
   ---- Data Definitions -----
 
+  The data definitions for Actions are in Action.js
   The data definition for a Turn is in Action.js.
-
   The data definition for a PlayerId is in GameState.js
 
  */
@@ -22,71 +28,63 @@ const BuildAction = Action.BuildAction;
 
 const RuleChecker = require('./RuleChecker.js');
 
-/*
-Given a GameState where it is a player's turn, produce all possible Turns
-that the player could take, using any of its workers on the board.
+/* TurnGenerator
+  When constructed with a GameState where it is some player's turn,
+  produce all possible valid Turns that that player could take in the game.
 
+  First produces all valid move-only Turns (winning moves),
+  then produces all valid move-build Turns.
  */
 class TurnGenerator {
 
   constructor(gameState) {
     this.gameState = gameState;
-    this.whoseTurn = gameState.getWhoseTurn();
-    this.workerList = gameState.getWorkerList(this.whoseTurn);
-    this.workerIndex = 0;
-
     this.nextTurn = null;
 
+    this.moveToWinGenerator = new MoveGenerator(this.gameState);
     this.moveGenerator = new MoveGenerator(this.gameState);
     this.buildGenerator = null;
+
+    this.currentMove = null;
 
   }
 
   /* Void -> Boolean
-
+    Return true if there is another Turn that the player could take in the game.
+    Sets that turn in the nextTurn field for return by the next() method.
    */
   hasNext() {
-    // Return true if we haven't retrieved the next turn with next() yet
-    if (this.nextTurn !== null) { return true; }
-
-    if (!this.moveGenerator.hasNext()) {
-      return false;
-    }
-
-    // A null build generator signifies that we are starting from a new move.
-    if (this.buildGenerator === null) {
-      // If no next move for current worker, then increment worker index.
-      let action = this.moveGenerator.peek();
-      let moveLoc = action.getLoc();
-
-      // Since we have not yet checked this next move for a win,
-      // check for win now, and if win, then pop the move,
-      // set it as the Turn + return.
-      if (RuleChecker.isWinningLocation(this.gameState, moveLoc)) {
-        this.nextTurn = [this.moveGenerator.next()];
-        return true;
-      }
-      // If the move is not a win, then we can generate all the Move+Build turns from it.
-      else {
-        let gameStateAfterMove = this.gameState.copy();
-        Action.execute(action, gameStateAfterMove);
-        this.buildGenerator = new BuildGenerator(gameStateAfterMove, this.moveGenerator.getCurrentWorkerId());
-      }
-    }
-
-    // Now we have a move gen and a build gen.
-
-    // If build gen has next, pop + return.
-    if (this.buildGenerator.hasNext()) {
-      this.nextTurn = [this.moveGenerator.peek(), this.buildGenerator.next()];
+    // Return true if user hasn't retrieved the next turn with next() yet
+    if (this.nextTurn !== null) {
       return true;
     }
-    // Else, build gen = null, pop move + return hasNext().
-    else {
-      this.buildGenerator = null;
-      this.moveGenerator.next();
-      return this.hasNext();
+
+    // First, find all winning moves
+    while (this.moveToWinGenerator.hasNext()) {
+      let turn = [this.moveToWinGenerator.next()];
+      if (RuleChecker.validateTurn(this.gameState, turn)) {
+        this.nextTurn = turn;
+        return true;
+      }
     }
+    // Then, find all valid move-build Turns.
+    while (this.moveGenerator.hasNext() || (this.buildGenerator && this.buildGenerator.hasNext())) {
+      while (this.buildGenerator && this.buildGenerator.hasNext()) {
+        let turn = [this.currentMove, this.buildGenerator.next()];
+        if (RuleChecker.validateTurn(this.gameState, turn)) {
+          this.nextTurn = turn;
+          return true;
+        }
+      }
+      // Get the next move from MoveGenerator, store it for use in making Turns,
+      // and make a BuildGenerator that finds all valid Builds in the
+      // game state where the move has been executed.
+      let gameStateAfterMove = this.gameState.copy();
+      this.currentMove = this.moveGenerator.next();
+      Action.execute(this.currentMove, gameStateAfterMove);
+      this.buildGenerator = new BuildGenerator(gameStateAfterMove, this.currentMove.getWorkerId());
+    }
+    return false;
   }
 
   /* Void -> Turn
@@ -105,7 +103,7 @@ Iterator that generates all <=8 possible BuildActions for a player in a gamestat
  */
 class BuildGenerator {
 
-  /* GameState -> BuildGenerator
+  /* GameState WorkerId -> BuildGenerator
   Produce a BuildGenerator that iterates over all valid BuildActions
   that can be taken from the given GameState, by the given worker.
 
@@ -149,14 +147,6 @@ class BuildGenerator {
   }
 
   /* Void -> BuildAction
-  Return the next action found, without mutating this Iterator.
-  Invalid to call without first checking that hasNext() returns true.
-   */
-  peek() {
-    return this.nextAction;
-  }
-
-  /* Void -> BuildAction
   Pop the most recent action found by this BuildGenerator.
   Invalid to call without first checking that hasNext() returns true.
    */
@@ -167,6 +157,9 @@ class BuildGenerator {
     return action;
   }
 
+  /* Void -> Void
+    Internal method to increment direction index used to make moves.
+   */
   incrementDirectionIndex() {
     this.directionIndex += 1;
   }
@@ -220,21 +213,6 @@ class MoveGenerator {
   }
 
   /* Void -> MoveAction
-  Return the next action found, without mutating this Iterator.
-  Invalid to call without first checking that hasNext() returns true.
-  */
-  peek() {
-    return this.nextAction;
-  }
-
-  /* Void -> WorkerId
-  Get the ID of the worker whose moves are currently being generated.
-   */
-  getCurrentWorkerId() {
-    return this.workerList[this.workerIndex];
-  }
-
-  /* Void -> MoveAction
     Returns the next MoveAction that has been found by hasNext().
     Invalid to call this method without first calling
     hasNext() and getting back a value of true.
@@ -250,6 +228,7 @@ class MoveGenerator {
   }
 
   /* Void -> Void
+  Internal method.
   Increments the move index, increasing its value by one.
 
   If the move index is outside the range of the list of directions,
@@ -267,9 +246,7 @@ class MoveGenerator {
 }
 
 
-
 module.exports = {
-  "TurnGenerator" : TurnGenerator,
-  "MoveGenerator" : MoveGenerator,
-  "BuildGenerator" : BuildGenerator
+  "TurnGenerator": TurnGenerator,
+  "MoveGenerator": MoveGenerator
 };
