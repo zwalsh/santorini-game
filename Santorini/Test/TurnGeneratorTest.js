@@ -134,7 +134,10 @@ describe("TurnGenerator test suite", function () {
     // Construct a board and gamestate with one worker placed at the
     // top left corner, completely surrounded by 4-height bldgs.
     beforeEach(function () {
-
+      /* Board:      Worker at:
+        2 , 3 , 4     [0,0]
+        2 , 2 , 4
+        4 , 4 , 4      */
       board = new Board();
       workerStartLoc = [0,0];
       board.heights[0][0] = 2;
