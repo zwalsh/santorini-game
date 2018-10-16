@@ -119,6 +119,19 @@ function validateBuildAction(gameState, action) {
   return board.isValidUnoccupiedLoc(loc[0], loc[1]);
 }
 
+/* GameState Location -> Boolean
+  Checks if the given Location is a winning one on the Board in the
+  given GameState.
+
+  A winning Location is one where the height of that location is
+  equal to the WINNING_HEIGHT.
+ */
+function isWinningLocation(gameState, location) {
+  let board = gameState.getBoard();
+  let height = board.getHeight(location[0], location[1]);
+  return height === WINNING_HEIGHT;
+}
+
 // +=========================== HELPERS ===========================+
 
 /* Board WorkerId Location -> Boolean
@@ -147,6 +160,7 @@ function heightDifference(board, id, otherLoc) {
 
 module.exports = {
   "validate": validate,
+  "isWinningLocation": isWinningLocation,
   "WINNING_HEIGHT": WINNING_HEIGHT,
   "MAX_WORKERS_PER_PLAYER": MAX_WORKERS_PER_PLAYER
 };

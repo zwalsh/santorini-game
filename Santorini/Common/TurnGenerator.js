@@ -62,7 +62,7 @@ class TurnGenerator {
       // Since we have not yet checked this next move for a win,
       // check for win now, and if win, then pop the move,
       // set it as the Turn + return.
-      if (this.gameState.getBoard().getHeight(moveLoc[0], moveLoc[1]) === RuleChecker.WINNING_HEIGHT) {
+      if (RuleChecker.isWinningLocation(this.gameState, moveLoc)) {
         this.nextTurn = [this.moveGenerator.next()];
         return true;
       }

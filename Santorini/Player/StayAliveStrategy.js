@@ -79,7 +79,7 @@ function canWin(gameState, depth) {
   let mg = new MoveGenerator(gameState);
   while (mg.hasNext()) {
     let moveLoc = mg.next().getLoc();
-    if (gameState.getBoard().getHeight(moveLoc[0], moveLoc[1]) === RuleChecker.WINNING_HEIGHT) {
+    if (RuleChecker.isWinningLocation(gameState, moveLoc)) {
       return true;
     }
   }
