@@ -13,6 +13,18 @@
   managing, two player objects that implement the StrategyInterface
   interface, and access to the RuleChecker.
 
+  VERY IMPORTANT: Data Integrity Protection Duty!
+  The Referee gets information (Turns and PlaceActions) from an untrusted player.
+  Internal components, such as GameState and RuleChecker, expect their users
+  to provide correctly formed data.
+  Therefore, it is the Referee's duty to ensure that the data from players
+  is well-formed before using it with internal components.
+
+  Examples of this may be:
+   - Turns with too many / wrong elements
+   - Incomplete Actions (ex. missing location)
+
+
   ============= DATA DEFINITIONS =============
 
   An EndGameReason is one of:
