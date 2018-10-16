@@ -10,7 +10,9 @@ A rule checker has no internal state of its own, so no class definition is neces
 Data definitions:
 
 Action is defined in Action.js
+Turn is defined in Action.js
 GameState is defined in GameState.js
+PlayerId is defined in GameState.js
 
 */
 
@@ -32,6 +34,33 @@ function validate(gameState, action, playerId) {
     case Action.BUILD:
       return validateBuildAction(gameState, action);
   }
+}
+
+
+/* GameState Turn -> Boolean
+  Check if the given Turn is valid to take in the current game state.
+  If the Turn is just a move, it must be a winning move.
+  Otherwise, both the MoveAction and BuildAction must be valid
+  in sequence, and must use the same worker.
+ */
+function validateTurn(gameState, turn) {
+  let move = turn[0];
+  if (!validateMoveAction(gameState, move)) {
+    return false;
+  }
+  if (isWinningLocation(gameState, move.getLoc())) {
+    return turn.length === 1;
+  }
+  if (turn.length !== 2) {
+    return false;
+  }
+
+  let gameStateAfterMove = gameState.copy();
+  Action.execute(move, gameStateAfterMove);
+
+  let build = turn[1];
+  let sameWorker = (move.getWorkerId() === build.getWorkerId());
+  return sameWorker && validateBuildAction(gameStateAfterMove, build);
 }
 
 /* GameState Action PlayerId -> Boolean
@@ -160,6 +189,7 @@ function heightDifference(board, id, otherLoc) {
 
 module.exports = {
   "validate": validate,
+  "validateTurn": validateTurn,
   "isWinningLocation": isWinningLocation,
   "WINNING_HEIGHT": WINNING_HEIGHT,
   "MAX_WORKERS_PER_PLAYER": MAX_WORKERS_PER_PLAYER
