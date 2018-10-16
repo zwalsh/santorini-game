@@ -135,7 +135,7 @@ class PlaceAction {
   }
 
   /* Return this Action's type */
-  getType() { return "place"; }
+  getType() { return PLACE; }
 
   /* Returns the location at which this Place will occur */
   getLoc() { return this.loc; }
@@ -152,7 +152,7 @@ class MoveAction {
   }
 
   /* Return this Action's type */
-  getType() { return "move"; }
+  getType() { return MOVE; }
 
   /* Returns the location to which this Move will occur */
   getLoc() { return this.loc; }
@@ -172,7 +172,7 @@ class BuildAction {
   }
 
   /* Return this Action's type */
-  getType() { return "build"; }
+  getType() { return BUILD; }
 
   /* Returns the location at which this Build will occur */
   getLoc() { return this.loc; }
