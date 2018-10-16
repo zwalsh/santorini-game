@@ -4,7 +4,8 @@ This project implements an (eventually) distributed version of the board game
 Santorini. This folder contains the following:
 
 * Admin - a directory for all administrator-specific code
-* Player - a directory for all player-specific code
+* Player - a directory for all player-specific code (including strategies for 
+playing the game - choosing both turns and worker placements)
 * Common - a directory for all code that both player and admin components need,
 including representations of a Board, a Player, a RuleChecker, and various
 possible Actions
@@ -35,9 +36,15 @@ expected output files, located in the rules-tests directory within 7.
 They can be run using the xrules executable, which takes JSON input from STDIN
 and prints the results to STDOUT.
 
+### Strategy
+Integration tests for the Strategy component are in the directory 8, at the
+root level of the repository. The test cases are (as above) pairs of JSON
+input and output files. They can be run using the xstrategy executable, 
+which takes JSON input from STDIN and prints to STDOUT.
+
 # Roadmap
 
 The central data of this system lives in the GameState and Board classes
 (within Common). The RuleChecker class uses a GameState to check various
-Actions for validity. An as-of-yet undefined admin component will create
-Players and take those Players through all phases of the Santorini game.
+Actions for validity. The newly-designed Referee component will take
+Players through all phases of the Santorini game.
