@@ -17,6 +17,7 @@ class Player {
   */
   constructor(strategyInterface) {
     this.strategyInterface = strategyInterface;
+    this.guid;
   }
 
   /* GameState -> Action
@@ -26,5 +27,14 @@ class Player {
   */
   nextAction(gameState) {
     return this.strategyInterface.nextAction(gameState);
+  }
+
+  /* Void -> GUID
+    Returns a globally-unique identifier of this Player.
+
+    Note that this is distinct from the PlayerId used within a GameState.
+   */
+  getGuid() {
+    return this.guid;
   }
 }
