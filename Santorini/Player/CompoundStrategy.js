@@ -1,13 +1,11 @@
-/**
- * Represents a Strategy that can participate in a game of Santorini.
- * Uses a Strategy for placing a worker and a Strategy for choosing
- * a turn. These are specified at construction.
- *
- * See the definitions of Action and GameState in Action.js and GameState.js
- * respectively.
- */
+/*
+   Represents a Strategy that can participate in a game of Santorini.
+   Uses a Strategy for placing a worker and a Strategy for choosing
+   a Turn. These are provided at construction.
 
-const MAX_WORKERS_PER_PLAYER = require('../Common/RuleChecker.js').MAX_WORKERS_PER_PLAYER;
+   See the definitions of Action and GameState in Action.js and GameState.js
+   respectively.
+ */
 
 class CompoundStrategy {
   /* [GameState -> PlaceAction] [GameState -> Turn] -> CompoundStrategy
@@ -18,24 +16,26 @@ class CompoundStrategy {
   constructor(choosePlacement, chooseTurn) {
     this.choosePlacement = choosePlacement;
     this.chooseTurn = chooseTurn;
-    this.currentActionList = [];
   }
 
-  /* GameState -> Action
-  Yields the next Action that the StrategyInterface wishes to take. This
-  Action must be valid under the given GameState. This method will only
-  be called when it is this StrategyInterface's turn to act.
+  /* GameState -> PlaceAction
+    Yields the next PlaceAction that the player wishes to take.
+    This PlaceAction must be valid under the given GameState.
+    This method will only be called when it is this Player's turn
+    to place a worker.
   */
-  nextAction(gameState) {
-    let myPlayerId = gameState.whoseTurn;
-    let myWorkers = gameState.getWorkerList(myPlayerId);
-    if (myWorkers.length < MAX_WORKERS_PER_PLAYER) {
-      return this.choosePlacement(gameState);
-    }
-    if (this.currentActionList.length === 0) {
-      this.currentActionList = this.chooseTurn(gameState);
-    }
-    return this.currentActionList.splice(0, 1)[0];
+  nextPlacement(gameState) {
+    return this.choosePlacement(gameState);
+  }
+
+  /* GameState -> Turn
+    Yields the next Turn, or set of Action(s), that the StrategyInterface wishes to take.
+    The Turn must be valid under the given GameState.
+    This method will only be called when it is this StrategyInterface's turn
+    to move and possibly build in the game.
+  */
+  nextTurn(gameState) {
+    return this.chooseTurn(gameState);
   }
 }
 

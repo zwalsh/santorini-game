@@ -43,9 +43,14 @@ class Referee {
   /* Void -> [GUID, EndGameReason]
     Plays the game to completion.
 
-    This involves repeating the following steps:
-      1. Get whose Turn it is from the GameState
-      2. Get the Turn from the Player whose Turn it is
+    This has two parts.
+
+    First, it takes players through game setup, as described in setupGame().
+    If that results in an end game (through player error), end the game.
+
+    Second, it repeats the following steps:
+      1. Get whose turn it is from the GameState
+      2. Get the Turn from the Player whose turn it is
       3. Validate that Turn
         a. Ending the game if the Turn is invalid
       4. Apply the Turn to the GameState
@@ -55,9 +60,18 @@ class Referee {
 
     Returns the GUID of the Player who won, and the reason why they won.
    */
-  playGame() {
+  playGame() { /* TODO */ }
 
-  }
+  /* Void -> [Maybe [GUID, EndGameReason]]
+    Leads players through placing their workers in the game.
+    Repeats the following steps until all workers are placed in the game:
+      1. Get whose turn it is from the GameState
+      2. Get the PlaceAction from the player whose turn it is
+      3. Validate that PlaceAction
+        a. Ending the game if that PlaceAction is invalid
+      4. Apply the PlaceAction to the GameState
+   */
+  setupGame() { /* TODO */ }
 
 
 }

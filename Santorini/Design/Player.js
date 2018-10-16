@@ -13,20 +13,31 @@ GameState is defined in GameState.js.
 
 class Player {
   /* StrategyInterface -> Player
-  Creates a Player with the given StrategyInterface
+    Creates a Player with the given StrategyInterface
   */
   constructor(strategyInterface) {
     this.strategyInterface = strategyInterface;
     this.guid;
   }
 
-  /* GameState -> Action
-  Yields the next Action that the Player wishes to take. This
-  Action must be valid under the given GameState. This method will only
-  be called when it is this Player's turn to act.
+  /* GameState -> PlaceAction
+    Yields the next PlaceAction that the player wishes to take.
+    This PlaceAction must be valid under the given GameState.
+    This method will only be called when it is this Player's turn
+    to place a worker.
+   */
+  nextPlacement(gameState) {
+    return this.strategyInterface.nextPlacement(gameState);
+  }
+
+  /* GameState -> Turn
+    Yields the next Turn, or set of Action(s), that the Player wishes to take.
+    The Turn must be valid under the given GameState.
+    This method will only be called when it is this Player's turn
+    to move and possibly build in the game.
   */
   nextAction(gameState) {
-    return this.strategyInterface.nextAction(gameState);
+    return this.strategyInterface.nextTurn(gameState);
   }
 
   /* Void -> GUID
