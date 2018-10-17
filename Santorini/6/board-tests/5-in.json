@@ -1,0 +1,16 @@
+[[0, 1, 2, 3, 2, 1],
+  [1, 1, 1, "1alfred2", 1, 1],
+  [3, 3, 3, 3, 3, 3],
+  [4, 3, 2, "1sampson2", 0, 0],
+  [3, 4, 2, 3, 1, 2],
+  [1, 0, 0, 0, "0alfred1", "1sampson1"]]
+
+["height", "alfred1", ["WEST", "PUT"]]
+["build", "alfred1", ["WEST", "PUT"]]
+["height", "alfred1", ["WEST", "PUT"]]
+["build", "alfred1", ["WEST", "PUT"]]
+["height", "alfred1", ["WEST", "PUT"]]
+["build", "alfred1", ["WEST", "PUT"]]
+["height", "alfred1", ["WEST", "PUT"]]
+["build", "alfred1", ["WEST", "PUT"]]
+["height", "alfred1", ["WEST", "PUT"]]

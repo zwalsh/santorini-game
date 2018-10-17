@@ -1,0 +1,28 @@
+{
+  "name": "santorini",
+  "version": "1.0.0",
+  "description": "Santorini Board Game",
+  "main": "index.js",
+  "dependencies": {
+    "nearley": "^2.15.1"
+  },
+  "devDependencies": {
+    "chai": "*",
+    "mocha": "*",
+    "nyc": "^13.0.1",
+    "sinon": "*"
+  },
+  "scripts": {
+    "test": "mocha -- test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.ccs.neu.edu/CS4500-F18/anon.git"
+  },
+  "keywords": [
+    "santorini",
+    "matthias"
+  ],
+  "author": "anon",
+  "license": "ISC"
+}

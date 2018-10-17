@@ -1,0 +1,12 @@
+[[0, 1, 2, 3, 2, 1],
+  [1, 1, 1, "1alfred2", 1, 1],
+  [3, 3, 3, 3, 3, 3],
+  [4, 3, 2, "1sampson2", 0, 0],
+  [3, 4, 2, 3, 1, 2],
+  [1, 0, 0, 0, "0alfred1", "1sampson1"]]
+
+["occupied?", "alfred1", ["EAST", "PUT"]]
+["move", "sampson1", ["PUT", "NORTH"]]
+["occupied?", "alfred1", ["EAST", "PUT"]]
+["occupied?", "alfred1", ["EAST", "NORTH"]]
+
