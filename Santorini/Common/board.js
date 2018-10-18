@@ -122,8 +122,8 @@ class Board {
   // Finds the Worker object in this board's list of workers based on the given WorkerRequest.
   // WorkerRequest -> Worker
   findWorker(workerRequest) {
-    return this.workers.find((e) => {
-      return e.player === workerRequest.player && e.id === workerRequest.id;
+    return this.workers.find((worker) => {
+      return worker.player === workerRequest.player && worker.id === workerRequest.id;
     });
   }
 
