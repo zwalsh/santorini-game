@@ -116,12 +116,17 @@ class Strategy {
   // Determines the next move and build requests from the Board
   // Board -> Turn
   getNextTurn(board) {
+    // all possible turns this player can take (where Turn is only [move, build])
     let decisions = this.genDecisions(board, this.playerID);
 
     let decisionFound;
     let decToMake;
 
+    // while we have not found a viable turn and can still look ahead further
+    // where one is base case
     while (!decisionFound && this.maxLookahead !== 1) {
+
+      // find one where the decision keeps you alive
       decisionFound = decisions.some((d) => {
         if (this.decisionKeepsAlive(board, this.maxLookahead, this.playerID, d)) {
           decToMake = d;
@@ -153,33 +158,49 @@ class Strategy {
 
   // See if we are guaranteed to be alive after the given number of turns.
   // Board Int String -> Boolean
+
+  // is this strategy's player alive given that it's the given Player's turn?
   aliveAfterLookahead(board, lookahead, playerID) {
     // A lookahead of 0 means we just see if we are still alive at the given game state.
     if (lookahead === 0) {
+      // todo this is a wrong assumption - if it's not this Player's turn, it's not time to check if we're still alive
       return this.isStillAlive(board);
     } else {
+      // todo check if won first, don't genDecisions
+      // decisions for the player whose turn it is
       let decisions = this.genDecisions(board, playerID);
 
       // Check to see if there are any decisions to be made.
       if (decisions.length !== 0) {
+        // this should also be dependent on whose turn it is - every vs. some
+        // currently checks that every single decision the current player makes keeps this strategy's player alive
         return this.isStillAlive(board) && decisions.every((d) => this.decisionKeepsAlive(board, lookahead, playerID, d));
       } else {
         return this.isStillAlive(board);
       }
     }
-
   }
 
-  // Sees if the given decision will keep this Strategy's Player alive in the given number of rounds.
+  // > Sees if the given decision will keep this Strategy's Player alive in the given number of rounds.
   // Board Int String Turn -> Boolean
+
+  // does the given decision keep the given player alive?
   decisionKeepsAlive (board, lookahead, playerID, decision) {
-    return this.aliveAfterLookahead(this.applyDecision(board, decision, playerID), --lookahead, this.otherPlayer(playerID));
+
+    // returns true if the other player is alive given that turn with one less lookahead?
+    // should maybe be if the other player can win after that decision in the given lookahead
+    return this.aliveAfterLookahead(this.applyDecision(board, decision, playerID), lookahead - 1, this.otherPlayer(playerID));
   }
 
 
   // Determine if this strategy's Player is still alive on the given board.
   // Board -> Boolean
   isStillAlive(board) {
+    // todo should we check if playerId has won here?
+    // this is dependent on whose turn it is, but that info is not passed in here
+    // what is this method actually checking?
+    // either: we are at a winning height, the opponent is at a winning height, or we cannot move
+    // todo this is a bug (or where it's called) - more nuanced def of still alive than this
     return (this.ruleChecker.hasWon(board, this.playerID) || !this.ruleChecker.hasLost(board, this.playerID))
         && !this.ruleChecker.hasWon(board, this.opponentID);
   }
@@ -199,10 +220,10 @@ class Strategy {
         // Iterate through all possible combinations of Move Direction and Build Direction
         for (let moveCoord in dirs.directions) {
           let moveDir = dirs.coordToDirection(dirs.directions[moveCoord]);
-
+          // todo use checkTurn and add just the move to the list of decisions
           for (let buildCoord in dirs.directions) {
             let buildDir = dirs.coordToDirection(dirs.directions[buildCoord]);
-
+            // todo this could also be checkTurn
             if (this.ruleChecker.isValidMoveBuild(board, wRequest, moveDir, buildDir)) {
               decisions.push([["move", w.id, moveDir], ["build", buildDir]]);
             }
