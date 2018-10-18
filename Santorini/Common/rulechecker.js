@@ -25,7 +25,7 @@ class Rulechecker {
   // Sees if the given x and y coordinates is a valid position for a new InitWorker.
   // Checks posn bounds, and if tile is occupied.
   // ListOfInitWorker Int Int -> Boolean
-  isValidPlace(initWorkerList, x, y) {
+  isValidPlace(initWorkerList, x, y) { // TODO REFACTOR into single return statement -sb
     if (this.tileIsInBounds(x, y)) {
       if (!initWorkerList.some((w) => w.x === x && w.y === y)) {
         return true;
@@ -66,7 +66,7 @@ class Rulechecker {
   // Sees if the given move direction and build direction together are valid.
   // This means that either the Move is valid and leads to a win, or both the Move and Build are valid.
   // Board WorkerRequest Direction Direction -> Boolean
-  isValidMoveBuild(board, workerRequest, moveDir, buildDir) {
+  isValidMoveBuild(board, workerRequest, moveDir, buildDir) {  // todo this needs refactoring to fit turn  def -sb
     let clone = board.renderGame();
 
     if (this.isValidMove(clone, workerRequest, moveDir)) {

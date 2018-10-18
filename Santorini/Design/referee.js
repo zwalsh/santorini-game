@@ -50,7 +50,7 @@ class Referee {
 
   // Checks if the Turn given by a player is well-formed/valid.
   // Turn -> Boolean
-  isValidTurnRequest(turn) {
+  isValidTurnRequest(turn) { //  todo this is  definitely going into the rule checker -sb
     // Parses out necessary data and dispatches to rulechecker
   }
 

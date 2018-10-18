@@ -29,7 +29,7 @@ describe('Board Tests', function () {
       let b = Board.createBoard(6, 6);
       assert.isTrue(b.length === 6 && b[0].length === 6)
     });
-    it('should return board with wrong number of rows or columns', function () {
+    it('should not return board with wrong number of rows or columns', function () {
       let b = Board.createBoard(6, 6);
       assert.isFalse(b.length === 3 && b[0].length === 6);
       assert.isFalse(b.length === 6 && b[0].length === 2);
