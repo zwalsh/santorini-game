@@ -1,6 +1,6 @@
 const c = require('../Lib/constants');
 const dirs = require('../Lib/direction');
-const Rulechecker = require('./rulechecker');
+const Rulechecker = require('../Common/rulechecker');
 
 /**
  * Data Definitions:
