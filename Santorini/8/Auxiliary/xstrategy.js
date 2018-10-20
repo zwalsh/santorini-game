@@ -1,5 +1,5 @@
-const utility = require("../../Santorini/Lib/utility");
-const Strategy = require("../../Santorini/Common/strategy");
+const utility = require("../../Lib/utility");
+const Strategy = require("../../Common/strategy");
 
 const process = require('process');
 let out = process.stdout;
