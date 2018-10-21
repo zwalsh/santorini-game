@@ -16,7 +16,7 @@ const Strategy = require('./strategy');
 class Player {
   // Instantiates a Player with their own given name, their opponent's name,
   // as well as the unique name given by the software.
-  // String String -> Player
+  // cc
   constructor (name, opponentName) {
     this.name = name;
     this.strategy = new Strategy(name, opponentName, 4, 0);
@@ -34,6 +34,22 @@ class Player {
   // Board -> Turn
   takeTurn(board) {
     return this.strategy.getNextTurn(board);
+  }
+
+  /* String -> Player
+    Notify this Player that they have been put into a new game, against the given opponent,
+    so that internal information can be reset/updated as necessary
+  */
+  newGame(opponentName) {
+    this.strategy = new Strategy(this.name, opponentName, 4, 0);
+  }
+
+  /* GameResult -> Void
+    Notify this Player of the result of a game they played,
+    so that internal information can be reset/updated as necessary
+  */
+  notifyGameOver(gameResult) {
+    // Nothing to do here for now.
   }
 }
 
