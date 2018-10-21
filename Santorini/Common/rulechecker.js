@@ -8,6 +8,12 @@ const c = require('../Lib/constants');
  *
  * A WorkerRequest is a: {player: string , id: int}
  *
+ * A MoveRequest is a: ["move", WorkerRequest, Direction]
+ *
+ * A BuildRequest is a: ["build", Direction]
+ *
+ * A Turn is a [MoveRequest, BuildRequest]
+ *
  * Height (H) is a: int from 0 to 4 representing height
  *
  * A Direction is a: [EastWest, NorthSouth]
@@ -38,6 +44,31 @@ class Rulechecker {
   // Int Int -> Boolean
   tileIsInBounds(x, y) {
     return x >= 0 && x < c.BOARD_WIDTH && y >= 0 && y < c.BOARD_HEIGHT;
+  }
+
+  /* Board Turn -> Boolean
+    Given the current board, is the entire Turn valid?
+
+   */
+  isValidTurn(board, turn) {
+    // 1. move valid?
+    // 2. if winning move, is turn just a move?
+    // 3. else, apply move, is build valid?
+    let moveReq = turn[0];
+    let workerReq = moveReq[1];
+    let moveDir = moveReq[2];
+    if (!this.isValidMove(board, workerReq, moveDir)) {
+      return false;
+    }
+    // If moving to a winning height, the turn is only valid if there is no build.
+    let isMoveToWinningHeight = board.workerNeighborHeight(workerReq, moveDir) === c.WINNING_HEIGHT;
+    if (turn.length === 1) {
+      return isMoveToWinningHeight;
+    }
+    let buildDir = turn[1][1];
+    let boardAfterMove = board.renderGame();
+    boardAfterMove.moveWorker(workerReq, moveDir);
+    return !isMoveToWinningHeight && this.isValidBuild(boardAfterMove, workerReq, buildDir);
   }
 
   // Sees if the move command satisfies Santorini's valid move conditions
