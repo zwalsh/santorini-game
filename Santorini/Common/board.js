@@ -179,7 +179,7 @@ class Board {
 
   // Returns a new copy of the Board.
   // Nothing -> Board
-  renderGame() {
+  copy() {
     return new Board(null, this.getBoard(), this.getWorkers());
   }
 

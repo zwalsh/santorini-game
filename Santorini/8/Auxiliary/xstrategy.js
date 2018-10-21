@@ -21,11 +21,11 @@ process.stdin.on('end', () => {
   strat = new Strategy(playerID, opponentID, lookAhead, 0);
 
   if (potentialMove.length === 0) {
-    strat.aliveAfterLookahead(board.renderGame(), lookAhead, playerID) ?
+    strat.aliveAfterLookahead(board.copy(), lookAhead, playerID) ?
       out.write(JSON.stringify("yes") + "\n") :
       out.write(JSON.stringify("no") + "\n");
   } else {
-    strat.decisionKeepsAlive(board.renderGame(), lookAhead, playerID, potentialMove) ?
+    strat.decisionKeepsAlive(board.copy(), lookAhead, playerID, potentialMove) ?
       out.write(JSON.stringify("yes") + "\n") :
       out.write(JSON.stringify("no") + "\n");
   }

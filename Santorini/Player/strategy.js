@@ -240,7 +240,7 @@ class Strategy {
   // Board Turn -> Board
   applyDecision(board, decision) {
     let wReq;
-    let newBoard = board.renderGame();
+    let newBoard = board.copy();
 
     decision.forEach((d) => {
       if (d[0] === "move") {

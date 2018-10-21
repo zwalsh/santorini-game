@@ -143,7 +143,7 @@ class Referee {
     Otherwise, return a GameResult indicating that the player broke the rules.
    */
   getAndApplyTurn(activePlayer) {
-    let turn = activePlayer.takeTurn(this.board.renderGame());
+    let turn = activePlayer.takeTurn(this.board.copy());
     if (this.checkTurn(turn, activePlayer)) {
       this.board.applyTurn(turn);
     } else {

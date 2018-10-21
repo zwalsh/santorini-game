@@ -66,7 +66,7 @@ class Rulechecker {
       return isMoveToWinningHeight;
     }
     let buildDir = turn[1][1];
-    let boardAfterMove = board.renderGame();
+    let boardAfterMove = board.copy();
     boardAfterMove.moveWorker(workerReq, moveDir);
     return !isMoveToWinningHeight && this.isValidBuild(boardAfterMove, workerReq, buildDir);
   }
@@ -98,7 +98,7 @@ class Rulechecker {
   // This means that either the Move is valid and leads to a win, or both the Move and Build are valid.
   // Board WorkerRequest Direction Direction -> Boolean
   isValidMoveBuild(board, workerRequest, moveDir, buildDir) {  // todo this needs refactoring to fit turn  def -sb
-    let clone = board.renderGame();
+    let clone = board.copy();
 
     if (this.isValidMove(clone, workerRequest, moveDir)) {
       clone.moveWorker(workerRequest, moveDir);
