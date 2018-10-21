@@ -5,9 +5,11 @@ const Rulechecker = require('../Common/rulechecker');
 /**
  * Data Definitions:
  *
+ * A WorkerRequest is a: {player: string , id: int}
+ *
  * A PlaceRequest is a: ["place", x:int, y:int]
  *
- * A MoveRequest is a: ["move", workerID, Direction]
+ * A MoveRequest is a: ["move", WorkerRequest, Direction]
  *
  * A BuildRequest is a: ["build", Direction]
  *
@@ -189,7 +191,7 @@ class Strategy {
 
     // returns true if the other player is alive given that turn with one less lookahead?
     // should maybe be if the other player can win after that decision in the given lookahead
-    return this.aliveAfterLookahead(this.applyDecision(board, decision, playerID), lookahead - 1, this.otherPlayer(playerID));
+    return this.aliveAfterLookahead(this.applyDecision(board, decision), lookahead - 1, this.otherPlayer(playerID));
   }
 
 
@@ -225,7 +227,7 @@ class Strategy {
             let buildDir = dirs.coordToDirection(dirs.directions[buildCoord]);
             // todo this could also be checkTurn
             if (this.ruleChecker.isValidMoveBuild(board, wRequest, moveDir, buildDir)) {
-              decisions.push([["move", w.id, moveDir], ["build", buildDir]]);
+              decisions.push([["move", wRequest, moveDir], ["build", buildDir]]);
             }
           }
         }
@@ -235,14 +237,14 @@ class Strategy {
   }
 
   // Given a valid decision to be made, make a copy of the board and apply the decision to it.
-  // Board Turn String -> Board
-  applyDecision(board, decision, playerID) {
+  // Board Turn -> Board
+  applyDecision(board, decision) {
     let wReq;
     let newBoard = board.renderGame();
 
     decision.forEach((d) => {
       if (d[0] === "move") {
-        wReq = {player: playerID, id: d[1]};
+        wReq = d[1];
         newBoard.moveWorker(wReq, d[2]);
       } else {
         // Need to check if the build is valid. A MoveBuild can be valid if the Move leads to a win, but the subsequent
