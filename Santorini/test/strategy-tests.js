@@ -130,7 +130,7 @@ describe('Strategy Test', function () {
     let w4 = new Worker(2, 1, 2, 'sampson');
     let json1WorkerList = [w1, w2, w3, w4];
     let jsonBoard1 = new Board(null, jsonBoard1Layout, json1WorkerList);
-    let jsonTurn = [["move", 1, ["WEST", "PUT"]], ["build", ["EAST", "PUT"]]];
+    let jsonTurn = [["move", { player:'alfred', id:1 }, ["WEST", "PUT"]], ["build", ["EAST", "PUT"]]];
 
     let jsonBoard2Layout =
       [[0, 0, 4, 0, 0, 0],
@@ -145,12 +145,11 @@ describe('Strategy Test', function () {
     let w8 = new Worker(4, 1, 2, 'sampson');
     let json2WorkerList = [w5, w6, w7, w8];
     let jsonBoard2 = new Board(null, jsonBoard2Layout, json2WorkerList);
-    let jsonTurn2 = [["move", 1, ["EAST", "PUT"]], ["build", ["WEST", "PUT"]]];
+    let jsonTurn2 = [["move", { player:'alfred', id:1 }, ["EAST", "PUT"]], ["build", ["WEST", "PUT"]]];
 
     it('return if the decision and following decisions keep me alive', function () {
       assert.isFalse(strategy0.decisionKeepsAlive(jsonBoard1, 3, 'alfred', jsonTurn));
       assert.isTrue(strategy0.decisionKeepsAlive(jsonBoard2, 3, 'alfred', jsonTurn2));
-
     });
   });
 
@@ -204,7 +203,7 @@ describe('Strategy Test', function () {
     let board = new Board(null, cleanBoard, listOfWorkers);
 
     it ('can operate on a move without a build', function() {
-      let newBoard = strategy0.applyDecision(board, [["move", 1, ["EAST", "SOUTH"]]], 'alfred');
+      let newBoard = strategy0.applyDecision(board, [["move", {player: 'alfred', id: 1}, ["EAST", "SOUTH"]]]);
 
       assert.equal(newBoard.getWorkers()[0].posn.x, 1);
       assert.equal(newBoard.getWorkers()[0].posn.y, 1);
@@ -217,7 +216,7 @@ describe('Strategy Test', function () {
     });
 
     it ('doesn\'t mutate the given board', function () {
-      let newBoard = strategy0.applyDecision(board, [["move", 1, ["EAST", "PUT"]], ["build", ["WEST", "PUT"]]], 'alfred');
+      let newBoard = strategy0.applyDecision(board, [["move", {player: 'alfred', id: 1}, ["EAST", "PUT"]], ["build", ["WEST", "PUT"]]]);
 
       // The worker is moved on the new board and remains on the old board.
       assert.equal(board.getWorkers()[0].posn.x, 0);
