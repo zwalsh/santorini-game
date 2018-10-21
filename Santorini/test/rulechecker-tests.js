@@ -167,6 +167,104 @@ describe('Rulechecker Tests', function() {
     });
   });
 
+  /**
+   * A WorkerRequest is a: {player: string , id: int}
+   * A MoveRequest is a: ["move", WorkerRequest, Direction]
+   * A BuildRequest is a: ["build", Direction]
+   * A Turn is a [MoveRequest, BuildRequest]
+   */
+  describe('isValidTurn', function() {
+    let p1name, workerId, worker, board;
+    beforeEach(function () {
+      p1name = 'wallace';
+      workerId = 1;
+      let heights =
+        [ [0, 0, 0, 0, 0, 0],
+          [3, 4, 4, 0, 0, 0],
+          [2, 2, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0] ];
+      worker = new Worker(0, 2, workerId, p1name); // remember x=col, y=row. Board indexes [y][x]
+      let workerList = [worker];
+      board = new Board(null, heights, workerList);
+
+    });
+    describe('given a move-only turn that is not valid', function () {
+      let turn;
+      beforeEach(function () {
+        turn = [["move", { player:p1name, id:workerId }, ["EAST","NORTH"]]];
+      });
+      it('rejects the turn', function () {
+        assert.isFalse(rulechecker.isValidTurn(board, turn));
+      });
+    });
+
+    describe('given a move-only turn that is a winning move', function () {
+      let turn;
+      beforeEach(function () {
+        turn = [["move", { player:p1name, id:workerId }, ["PUT","NORTH"]]];
+      });
+      it('accepts the turn', function () {
+        assert.isTrue(rulechecker.isValidTurn(board, turn));
+      });
+    });
+
+    describe('given a move-only turn that is not a winning move', function () {
+      let turn;
+      beforeEach(function () {
+        turn = [["move", { player:p1name, id:workerId }, ["EAST","PUT"]]];
+      });
+      it('rejects the turn', function () {
+        assert.isFalse(rulechecker.isValidTurn(board, turn));
+      });
+    });
+
+    describe('given a move-build turn where the move is invalid', function () {
+      let turn;
+      beforeEach(function () {
+        turn = [["move", { player:p1name, id:workerId }, ["EAST","NORTH"]],
+                ["build", ["PUT","NORTH"]]];
+      });
+      it('rejects the turn', function () {
+        assert.isFalse(rulechecker.isValidTurn(board, turn));
+      });
+    });
+
+    describe('given a move-build turn where the move is a winning move', function () {
+      let turn;
+      beforeEach(function () {
+        turn = [["move", { player:p1name, id:workerId }, ["PUT","NORTH"]],
+          ["build", ["PUT","NORTH"]]];
+      });
+      it('rejects the turn', function () {
+        assert.isFalse(rulechecker.isValidTurn(board, turn));
+      });
+    });
+
+    describe('given a move-build turn where the build is invalid', function () {
+      let turn;
+      beforeEach(function () {
+        turn = [["move", { player:p1name, id:workerId }, ["EAST","PUT"]],
+          ["build", ["PUT","NORTH"]]];
+      });
+      it('rejects the turn', function () {
+        assert.isFalse(rulechecker.isValidTurn(board, turn));
+      });
+    });
+
+    describe('given a move-build turn that is completely valid', function () {
+      let turn;
+      beforeEach(function () {
+        turn = [["move", { player:p1name, id:workerId }, ["EAST","PUT"]],
+          ["build", ["WEST","NORTH"]]];
+      });
+      it('accepts the turn', function () {
+        assert.isTrue(rulechecker.isValidTurn(board, turn));
+      });
+    });
+  });
+
   describe('isValidMove', function() {
     it('checkValid() passes and a worker is not moving to a tile > 1 their current height', function() {
       assert.isTrue(rulechecker.isValidMove(board, {player: 'alfred', id: 1}, ["PUT", "SOUTH"]), 'Valid move performed');
