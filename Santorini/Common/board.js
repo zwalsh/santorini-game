@@ -75,6 +75,29 @@ class Board {
     return workers;
   }
 
+  /* [InitWorker, ...] -> [InitWorker, ...]
+    Create a deep copy of the list of InitWorkers.
+   */
+  static copyInitWorkerList(initWorkers) {
+    return initWorkers.map(iw => ({
+      player: iw.player,
+      id: iw.id
+    }));
+  }
+
+  /* Turn -> Void
+    Apply the given turn to this board.
+   */
+  applyTurn(turn) {
+    let moveReq = turn[0];
+    let workerReq = moveReq[1];
+    this.moveWorker(workerReq, moveReq[2]);
+    if (turn.length === 2) {
+      let buildReq = turn[1];
+      this.buildWithWorker(workerReq, buildReq[1]);
+    }
+  }
+
   // Move the player's worker to the Target Tile
   // WorkerRequest Direction -> Void
   moveWorker(workerRequest, direction) {
