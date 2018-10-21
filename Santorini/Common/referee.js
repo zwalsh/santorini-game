@@ -43,7 +43,48 @@ const c = require('../Lib/constants');
  *
  * A GameResult is a [String, EndGameReason] where the String
  * is the name of the winner of the game.
+ *
+ *
  */
+
+
+/* Player Player -> GameResult
+  Manages a game of Santorini between the two given players.
+  Returns a GameResult representing the winner of the game, and the reason they won.
+ */
+function playGame(player1, player2) {
+  // note: want a helper function that handles getting a turn from a player,
+  // format-checking and validating it, and maybe applying it to the board.
+}
+
+/* Player Player -> (Board | GameResult)
+  Takes two players through the setup state of a Santorini game:
+  placing workers on the board. Returns the complete initialized Board,
+  or if a player provides an invalid PlaceRequest, returns a GameResult
+  indicating that the other player won.
+ */
+function setup(player1, player2) {
+
+}
+
+
+/* Player Player PositiveInteger -> [GameResult, ...]
+  Manages a game of Santorini between the two given players.
+  Returns a GameResult representing the winner of the game, and the reason they won.
+ */
+function playNGames(player1, player2, numGames) {
+
+}
+
+module.exports = {
+  "playGame" : playGame,
+  "playNGames" : playNGames,
+}
+
+
+// Below: the class/design document that was part of the code we received.
+// We would like to proceed with a functional approach (above), but are leaving
+// it there for now in case that fails spectacularly.
 
 // A class to handle the different phases of the game - Initialization, Steady-State, and Game Over
 class Referee {
@@ -52,15 +93,6 @@ class Referee {
     this.board = null;
     this.playerMap = {};
   }
-
-  /* Void ->
-
-   */
-  playGame() {
-
-  }
-
-
 
   // Called when a player connects to add player to the game
   // String -> void
