@@ -118,7 +118,7 @@ class Referee {
     while (gameState === c.GameState.IN_PROGRESS && initWorkerList.length < c.NUM_WORKERS) {
       let placeReq = activePlayer.placeInitialWorker(Board.copyInitWorkerList(initWorkerList));
 
-      if (Referee.isWellFormedPlaceReq(placeReq) && RC.isValidPlace(initWorkerList, placeReq[1], placeReq[2])) {
+      if (this.checkPlaceReq(placeReq, initWorkerList)) {
         let initWorker = {
           player: activePlayer.name,
           x: placeReq[1],
@@ -132,6 +132,15 @@ class Referee {
     }
     this.board = new Board(initWorkerList);
     return gameState;
+  }
+
+  /* Any -> Boolean
+    Return true if the input value is a well-formed PlaceRequest that
+    the RuleChecker considers valid.
+   */
+  checkPlaceReq(placeReq, initWorkerList) {
+    return Referee.isWellFormedPlaceReq(placeReq) &&
+      RC.isValidPlace(initWorkerList, placeReq[1], placeReq[2]);
   }
 
   /* Player -> GameState
@@ -158,7 +167,7 @@ class Referee {
   }
 
   /* Any Player -> Boolean
-    Return true if the input is a Turn that can be used by the Referee:
+    Return true if the input value is a Turn that can be used by the Referee:
     well-formed, refers to the right Player, and valid per the Rulechecker.
    */
   checkTurn(turn, activePlayer) {
