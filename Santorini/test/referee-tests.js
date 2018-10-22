@@ -1,16 +1,70 @@
 let assert = require('chai').assert;
+let sinon = require('sinon');
 let Referee = require('../Admin/referee');
 let Rulechecker = require('../Common/rulechecker');
+let Worker = require('../Common/worker');
 let Board = require('../Common/board');
+let c = require('../Lib/constants');
 
 describe('Referee', function () {
 
   describe('Game playing methods', function () {
 
     describe('playGame', function () {
+      let board, referee, p1, p2, w11, w12, w21, w22;
+      let p1Name = "wayne";
+      let p2Name = "garth";
+      beforeEach(function () {
+        let grid = [[2, 3, 0, 0, 0, 0],
+          [3, 3, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0]];
+
+        w11 = new Worker(0, 0, 1, p1Name);
+        w12 = new Worker(4, 0, 2, p1Name);
+        w21 = new Worker(5, 0, 1, p2Name);
+        w22 = new Worker(6, 0, 2, p2Name);
+        let workerList = [w11, w12, w21, w22];
+
+        board = new Board(null, grid, workerList);
+
+
+      });
       it('notifies both Players of the game start and opponent name');
       describe('when neither Player provides an invalid Turn', function () {
-        it('requests Turns from both');
+        let gameResult;
+        beforeEach(function () {
+          let endGameReason = [p1Name, c.EndGameReason.WON];
+          let p2Turn = [["move", {player:p2Name, id:1}, ["PUT", "SOUTH"]], ["build", ["PUT", "SOUTH"]]];
+          p2 = {
+            name: p2Name,
+            takeTurn: sinon.stub().withArgs(board).returns(p2Turn),
+            notifyGameOver: sinon.stub().withArgs(endGameReason),
+            newGame: sinon.stub().withArgs(p1Name)
+          };
+
+          let boardAfterP2Turn = board.copy();
+          boardAfterP2Turn.applyTurn(p2Turn);
+
+          let p1Turn = [["move", {player:p1Name, id:1}, ["EAST", "PUT"]]];
+          p1 = {
+            name: p1Name,
+            takeTurn: sinon.stub().withArgs(boardAfterP2Turn).returns(p1Turn),
+            notifyGameOver: sinon.stub().withArgs(endGameReason),
+            newGame: sinon.stub().withArgs(p2Name)
+          };
+          referee = new Referee(p2, p1);
+          referee.board = board;
+          referee.setup = sinon.stub().returns(c.GameState.IN_PROGRESS);
+          gameResult = referee.playGame();
+        });
+        it('requests Turns from both', function () {
+          assert.deepEqual(gameResult, [p1Name, c.EndGameReason.WON]);
+          assert.isTrue(p1.takeTurn.calledOnce);
+          assert.isTrue(p2.takeTurn.calledOnce);
+        });
         it('notifies both Players that the winning Player won');
       });
       describe('when a Player provides an invalid Turn', function () {
@@ -77,8 +131,28 @@ describe('Referee', function () {
 
   describe('Data checking methods', function () {
     describe('isWellFormedTurn', function () {
-      it('rejects improperly formed Turn');
-      it('accepts properly formed Turn');
+      describe('rejects improperly formed Turn when', function () {
+        it('is not an Array', function () {
+          let turn = {};
+          assert.isFalse(Referee.isWellFormedTurn(turn));
+        });
+        it('is too short', function () {
+          let turn = [];
+          assert.isFalse(Referee.isWellFormedTurn(turn));
+        });
+        it('has an improperly formed move', function () {
+          let turn = [["move"]];
+          assert.isFalse(Referee.isWellFormedTurn(turn));
+        });
+        it('has an invalid build', function () {
+          let turn = [["move", {player:"wayne", id:1}, ["PUT", "SOUTH"]], ["build"]];
+          assert.isFalse(Referee.isWellFormedTurn(turn));
+        });
+      });
+      it('accepts properly formed Turn', function () {
+        let turn = [["move", {player:"bar", id:1}, ["PUT", "SOUTH"]], ["build", ["PUT", "SOUTH"]]];
+        assert.isTrue(Referee.isWellFormedTurn(turn));
+      });
     });
 
     describe('isWellFormedPlaceReq', function () {
