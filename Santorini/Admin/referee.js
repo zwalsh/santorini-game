@@ -1,4 +1,4 @@
-const Rulechecker = require('./rulechecker');
+const Rulechecker = require('../Common/rulechecker');
 const Board = require('../Common/board');
 const Direction = require('../Lib/direction');
 const c = require('../Lib/constants');

@@ -1,5 +1,5 @@
 let assert = require('chai').assert;
-let Referee = require('../Common/referee');
+let Referee = require('../Admin/referee');
 let Rulechecker = require('../Common/rulechecker');
 let Board = require('../Common/board');
 
