@@ -167,6 +167,21 @@ describe('Rulechecker Tests', function() {
     });
   });
 
+  describe('checkValidWorkerRequest', function () {
+    it('returns true when given a valid WorkerRequest', function () {
+      assert.isTrue(rulechecker.checkValidWorkerRequest(board,
+        { player: 'alfred', id: 1 }));
+    });
+    it('returns false when given a WorkerRequest with a nonexistent Player name', function () {
+      assert.isFalse(rulechecker.checkValidWorkerRequest(board,
+        { player: 'garth', id: 1 }));
+    });
+    it('returns false when given a WorkerRequest with a nonexistent worker ID', function () {
+      assert.isFalse(rulechecker.checkValidWorkerRequest(board,
+        { player: 'alfred', id: 0 }));
+    });
+  });
+
   /**
    * A WorkerRequest is a: {player: string , id: int}
    * A MoveRequest is a: ["move", WorkerRequest, Direction]

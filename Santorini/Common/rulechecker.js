@@ -48,7 +48,6 @@ class Rulechecker {
 
   /* Board Turn -> Boolean
     Given the current board, is the entire Turn valid?
-
    */
   isValidTurn(board, turn) {
     // 1. move valid?
@@ -115,22 +114,37 @@ class Rulechecker {
 
   // Returns true if the command satisfies common conditions between build and move, else false.
   // Checks common conditions:
+  // - WorkerRequest is valid in the given Board
   // - Target tile is not current workers own tile
   // - Target tile is a tile in-bounds
   // - Target tile is not occupied by another worker
   // - Target tile is less than max height
   // Board WorkerRequest Direction -> Boolean
   checkValid(board, workerRequest, direction) {
-    if (direction.join('') !== "PUTPUT") {
-      if (board.workerHasNeighbor(workerRequest, direction)) {
-        if (!board.workerNeighborIsOccupied(workerRequest, direction)) {
-          if (board.workerNeighborHeight(workerRequest, direction) < c.MAX_HEIGHT) {
-            return true;
+    if (this.checkValidWorkerRequest(board, workerRequest)) {
+      if (direction.join('') !== "PUTPUT") {
+        if (board.workerHasNeighbor(workerRequest, direction)) {
+          if (!board.workerNeighborIsOccupied(workerRequest, direction)) {
+            if (board.workerNeighborHeight(workerRequest, direction) < c.MAX_HEIGHT) {
+              return true;
+            }
           }
         }
       }
     }
     return false;
+  }
+
+  /* Board WorkerRequest -> Boolean
+    Does the given Board contain the worker denoted by the WorkerRequest?
+    The named player exists in the game, and it has a worker with the ID in the request.
+   */
+  checkValidWorkerRequest(board, workerRequest) {
+    let workers = board.getWorkers();
+    return workers.some((worker) => {
+      return worker.player === workerRequest.player &&
+        worker.id === workerRequest.id;
+    });
   }
 
   // Check the Santorini win condition to see if the given player has won.
