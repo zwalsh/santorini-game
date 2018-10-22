@@ -118,7 +118,7 @@ class Referee {
     while (gameState === c.GameState.IN_PROGRESS && initWorkerList.length < c.NUM_WORKERS) {
       let placeReq = activePlayer.placeInitialWorker(Board.copyInitWorkerList(initWorkerList));
 
-      if (this.checkPlaceReq(placeReq, initWorkerList)) {
+      if (Referee.checkPlaceReq(placeReq, initWorkerList)) {
         let initWorker = {
           player: activePlayer.name,
           x: placeReq[1],
@@ -138,7 +138,7 @@ class Referee {
     Return true if the input value is a well-formed PlaceRequest that
     the RuleChecker considers valid.
    */
-  checkPlaceReq(placeReq, initWorkerList) {
+  static checkPlaceReq(placeReq, initWorkerList) {
     return Referee.isWellFormedPlaceReq(placeReq) &&
       RC.isValidPlace(initWorkerList, placeReq[1], placeReq[2]);
   }
