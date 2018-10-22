@@ -172,7 +172,7 @@ class Referee {
    */
   checkTurn(turn, activePlayer) {
     return Referee.isWellFormedTurn(turn) &&
-      turn[1].player === activePlayer.name &&
+      turn[0][1].player === activePlayer.name &&
       RC.isValidTurn(this.board, turn);
   }
 
@@ -187,11 +187,17 @@ class Referee {
     Return true if the input is a well-formed Turn.
    */
   static isWellFormedTurn(turn) {
-    return Array.isArray(turn) &&
-      turn.length >= 1 &&
-      Referee.isWellFormedMoveReq(turn[0]) &&
-      (turn.length === 1 ||
-        Referee.isWellFormedBuildReq(turn[1]));
+    if (!Array.isArray(turn)) {
+      return false;
+    }
+    if (turn.length === 1) {
+      return Referee.isWellFormedMoveReq(turn[0]);
+    }
+    if (turn.length === 2) {
+      return Referee.isWellFormedMoveReq(turn[0]) &&
+        Referee.isWellFormedBuildReq(turn[1]);
+    }
+    return false;
   }
 
   /* Any -> Boolean
@@ -242,3 +248,5 @@ class Referee {
       Number.isInteger(req.id);
   }
 }
+
+module.exports = Referee;
