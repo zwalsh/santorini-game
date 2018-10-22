@@ -72,6 +72,6 @@ module.exports.coordToDirection = function (posn) {
 module.exports.isDirection = function (val) {
   return Array.isArray(val) &&
     val.length === 2 &&
-    val[0] in [EAST, WEST, PUT] &&
-    val[1] in [NORTH, SOUTH, PUT];
+    [EAST, WEST, PUT].includes(val[0]) &&
+    [NORTH, SOUTH, PUT].includes(val[1]);
 };
