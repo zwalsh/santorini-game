@@ -94,11 +94,9 @@ class Referee {
     Manages a given number of games of Santorini between the two given players.
     Returns a list of GameResults representing the winner of the game, and the reason they won.
     If a player breaks the rules in a game, that game is terminated and no further games are played.
+    The number of games in the series must be odd, or the behavior of this method is undefined.
    */
   playNGames(numGames) {
-    if (numGames % 2 === 0) {
-      throw `Series must be given an odd number of games, given ${numGames}`;
-    }
     let gameResults = [];
     let seriesState = c.GameState.IN_PROGRESS;
     while (seriesState === c.GameState.IN_PROGRESS) {
