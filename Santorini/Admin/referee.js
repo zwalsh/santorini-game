@@ -71,6 +71,7 @@ class Referee {
   Manages a game of Santorini between the two given players.
   Notifies players of game start and end, and returns a GameResult
   representing the winner of the game and the reason they won.
+  Cleanup: Reset referee board to null after the game is over.
  */
   playGame() {
     this.player1.newGame(this.player2.name);
@@ -85,6 +86,7 @@ class Referee {
 
     this.player1.notifyGameOver(gameState.slice());
     this.player2.notifyGameOver(gameState.slice());
+    this.board = null;
     return gameState;
   }
 
@@ -94,15 +96,39 @@ class Referee {
     If a player breaks the rules in a game, that game is terminated and no further games are played.
    */
   playNGames(numGames) {
+    if (numGames % 2 === 0) {
+      throw `Series must be given an odd number of games, given ${numGames}`;
+    }
     let gameResults = [];
-    for (let gameIdx = 0; gameIdx < numGames; gameIdx++) {
+    let seriesState = c.GameState.IN_PROGRESS;
+    while (seriesState === c.GameState.IN_PROGRESS) {
       let result = this.playGame();
       gameResults.push(result);
       if (result[1] === c.EndGameReason.BROKEN_RULE) {
-        break;
+        seriesState = result;
+      } else {
+        seriesState = this.getSeriesStatus(gameResults, numGames);
       }
     }
     return gameResults;
+  }
+
+  /* [GameResult, ...] Natural -> GameResult
+    Given the length of a series, determine if more than half of the
+    games in the series have been won by one player.
+  */
+  getSeriesStatus(gameResults, numGames) {
+    let p1WinCount = gameResults
+      .filter(gameResult => (gameResult[0] === this.player1.name))
+      .length;
+    let p2WinCount = gameResults.length - p1WinCount;
+    if (p1WinCount > numGames / 2) {
+      return [this.player1.name, c.EndGameReason.WON];
+    } else if (p2WinCount > numGames / 2) {
+      return [this.player2.name, c.EndGameReason.WON];
+    } else {
+      return c.GameState.IN_PROGRESS
+    }
   }
 
   /* Void -> GameState
