@@ -98,4 +98,59 @@ describe('Board Tests', function () {
     });
   });
 
+  describe('applyTurn', function () {
+    let board, playerName, workerId, turn;
+    beforeEach(function () {
+      playerName = "wayne";
+      workerId = 1;
+      board = new Board(null,
+        [[0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0],
+          [0, 0, 0, 0, 0, 0]],
+        [new Worker(0, 0, workerId, playerName)]);
+    });
+    describe('given a move-only Turn', function () {
+      beforeEach(function () {
+        turn = [["move", {player: playerName, id: workerId}, ["EAST", "SOUTH"]]];
+        board.applyTurn(turn);
+      });
+      it('applies the move to the Board', function () {
+        let worker = board.findWorker({player: playerName, id: workerId});
+        assert.equal(worker.posn.x, 1);
+        assert.equal(worker.posn.y, 1);
+      });
+      it('changes nothing else', function () {
+        board.board.forEach((row) =>
+          row.forEach((cell) =>
+            assert.equal(cell, 0)));
+      });
+    });
+    describe('given a move-build Turn', function () {
+      beforeEach(function () {
+        turn = [["move", {player: playerName, id: workerId}, ["EAST", "SOUTH"]],
+        ["build", ["WEST", "NORTH"]]];
+        board.applyTurn(turn);
+      });
+      it('applies the move and the build to the Board', function () {
+        let worker = board.findWorker({player: playerName, id: workerId});
+        assert.equal(worker.posn.x, 1);
+        assert.equal(worker.posn.y, 1);
+        assert.equal(board.board.heightAtTile(0, 0), 1);
+      });
+      it('changes nothing else', function () {
+        for (let x = 0; x < board.board[0].length; x++) {
+          for (let y = 0; y < board.board.length; y++) {
+            if (x === 0 && y === 0) {
+              continue;
+            }
+            assert.equal(board.heightAtTile(x, y), 0);
+          }
+        }
+      });
+    });
+  });
+
 });
