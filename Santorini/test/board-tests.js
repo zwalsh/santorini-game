@@ -138,7 +138,7 @@ describe('Board Tests', function () {
         let worker = board.findWorker({player: playerName, id: workerId});
         assert.equal(worker.posn.x, 1);
         assert.equal(worker.posn.y, 1);
-        assert.equal(board.board.heightAtTile(0, 0), 1);
+        assert.equal(board.heightAtTile(0, 0), 1);
       });
       it('changes nothing else', function () {
         for (let x = 0; x < board.board[0].length; x++) {
