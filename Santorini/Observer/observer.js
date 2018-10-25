@@ -17,7 +17,7 @@
    of a game.
 
    ------------- Data Definitions -------------
-   
+
     * A JsonBoard is a: [[Cell, ...], ... ]
     *
     * A Cell is one of:
@@ -35,8 +35,18 @@
     *      represent a move, and the second two represent a build following the move.
 */
 
+const c = require('../Lib/constants');
+
 class Observer {
   constructor() {
+
+  }
+
+  /* String String -> Void
+    Indicates to the observer that a new game has started between the
+    two Players with the given names.
+  */
+  startGame(playerName1, playerName2) {
 
   }
 
@@ -76,22 +86,51 @@ class Observer {
 
   }
 
-  /* Turn -> String
-    Convert the Turn data to an informative, printable representation
+  /* Turn -> JsonTurn
+    Convert the Turn data to an informative, printable representation.
+    Turn will be [MoveRequest,BuildRequest] or [MoveRequest]
+     * A MoveRequest is a: ["move", WorkerRequest, Direction]
+     * A BuildRequest is a: ["build", Direction]
+     * A JsonTurn is one of:
+    *  - [Worker,EastWest,NorthSouth], which represents a winning move
+    *  - [Worker,EastWest,NorthSouth,EastWest,NorthSouth], where the first pair of directions after the Worker
+    *      represent a move, and the second two represent a build following the move.
    */
-  turnToJson() {
-
+  turnToJson(turn) {
+    let move = turn[0];
+    let worker = move[1].player + move[1].id;
+    let jsonTurn = [worker].concat(move[2]);
+    if (turn.length === 2) {
+      let build = turn[1];
+      jsonTurn = jsonTurn.concat(build[1]);
+    }
+    return jsonTurn;
   }
 
   /* GameResult -> String
     Convert the GameResult to an informative printable representation
    */
+  gameResultToJson(gameResult) {
+    let playerName = gameResult[0];
+    let endGameReason = gameResult[1];
+    let message = "Player " + playerName + " ";
+    switch(endGameReason) {
+      case c.EndGameReason.WON:
+        message += "won the game!";
+        break;
+      case c.EndGameReason.BROKEN_RULE:
+        message += "won because the opponent broke the rules.";
+        break;
+      default:
+    }
+
+  }
 
   /* JSON -> Void
     Stringify and print the given JSON.
    */
-  printJson() {
-
+  printJson(json) {
+    process.stdout.write(JSON.stringify(json));
   }
 
 
@@ -100,13 +139,6 @@ class Observer {
   // Still debating whether or not to keep them in / add Referee support
   // for them for the future.
 
-  /* String String -> Void
-  Indicates to the observer that a new game has started between the
-  two Players with the given names.
- */
-  startGame(playerName1, playerName2) {
-
-  }
   /* String String OddNumber -> Void
     Notifies this observer that a new series has started between the
     two Players with the given names, and that it will be decided by
@@ -124,3 +156,5 @@ class Observer {
 
   }
 }
+
+module.exports = Observer;
