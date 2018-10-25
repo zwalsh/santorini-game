@@ -39,7 +39,8 @@ const c = require('../Lib/constants');
 
 class Observer {
   constructor() {
-
+    this.playerName1;
+    this.playerName2;
   }
 
   /* String String -> Void
@@ -47,7 +48,8 @@ class Observer {
     two Players with the given names.
   */
   startGame(playerName1, playerName2) {
-
+    this.playerName1 = playerName1;
+    this.playerName2 = playerName2;
   }
 
   /* PlaceRequest String Board -> Void
@@ -82,8 +84,31 @@ class Observer {
   /* Board -> JsonBoard
     Convert the Board object to a JSON representation.
    */
-  boardToJson() {
+  boardToJson(board) {
+    let jsonBoard = [];
+    let boardHeights = board.getBoard();
+    let workers = board.getWorkers();
+    for (let y = 0; y < boardHeights.length; y++) {
+      let row = [];
+      for (let x = 0; x < boardHeights.length; x++) {
+        let workerAtSquare = workers.find((w) => { return w.posn.x === x && w.posn.y === y });
+        if (workerAtSquare) {
+          row.push(this.workerToJson(workerAtSquare, boardHeights[y][x]));
+        } else {
+          row.push(boardHeights[y][x]);
+        }
+      }
+      jsonBoard.push(row);
+    }
+    return jsonBoard;
+  }
 
+  /* Worker Integer -> JSON
+     Produces the JSON representation of a Worker as will be included in the JsonBoard,
+     including the height of the cell that the Worker is on.
+   */
+  workerToJson(worker, height) {
+    return height + worker.player + worker.id;
   }
 
   /* Turn -> JsonTurn
@@ -112,6 +137,7 @@ class Observer {
    */
   gameResultToJson(gameResult) {
     let playerName = gameResult[0];
+    let opponentName = playerName === this.playerName1 ? this.playerName2 : this.playerName1;
     let endGameReason = gameResult[1];
     let message = "Player " + playerName + " ";
     switch(endGameReason) {
@@ -119,11 +145,11 @@ class Observer {
         message += "won the game!";
         break;
       case c.EndGameReason.BROKEN_RULE:
-        message += "won because the opponent broke the rules.";
+        message += "won because Player " + opponentName + " broke the rules.";
         break;
       default:
     }
-
+    return message;
   }
 
   /* JSON -> Void
