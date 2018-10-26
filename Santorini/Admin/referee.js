@@ -1,6 +1,6 @@
 const Rulechecker = require('../Common/rulechecker');
 const Board = require('../Common/board');
-const Direction = require('../Lib/direction');
+const RFC = require('../Lib/request-format-checker');
 const c = require('../Lib/constants');
 
 /**
@@ -142,7 +142,7 @@ class Referee {
     while (gameState === c.GameState.IN_PROGRESS && initWorkerList.length < c.NUM_WORKERS) {
       let placeReq = activePlayer.placeInitialWorker(Board.copyInitWorkerList(initWorkerList));
 
-      if (Referee.checkPlaceReq(placeReq, initWorkerList)) {
+      if (this.checkPlaceReq(placeReq, initWorkerList)) {
         let initWorker = {
           player: activePlayer.name,
           x: placeReq[1],
@@ -158,14 +158,6 @@ class Referee {
     return gameState;
   }
 
-  /* Any -> Boolean
-    Return true if the input value is a well-formed PlaceRequest that
-    the RuleChecker considers valid.
-   */
-  static checkPlaceReq(placeReq, initWorkerList) {
-    return Referee.isWellFormedPlaceReq(placeReq) &&
-      RC.isValidPlace(initWorkerList, placeReq[1], placeReq[2]);
-  }
 
   /* Player -> GameState
     Get the given Player's next Turn.
@@ -190,12 +182,22 @@ class Referee {
     }
   }
 
+  /* Any -> Boolean
+    Return true if the input value is a well-formed PlaceRequest that
+    the RuleChecker considers valid.
+   */
+  checkPlaceReq(placeReq, initWorkerList) {
+    return RFC.isWellFormedPlaceReq(placeReq) &&
+      RC.isValidPlace(initWorkerList, placeReq[1], placeReq[2]);
+  }
+
+
   /* Any Player -> Boolean
     Return true if the input value is a Turn that can be used by the Referee:
     well-formed, refers to the right Player, and valid per the Rulechecker.
    */
   checkTurn(turn, activePlayer) {
-    return Referee.isWellFormedTurn(turn) &&
+    return RFC.isWellFormedTurn(turn) &&
       turn[0][1].player === activePlayer.name &&
       RC.isValidTurn(this.board, turn);
   }
@@ -206,71 +208,7 @@ class Referee {
   flip(activePlayer) {
     return activePlayer === this.player1 ? this.player2 : this.player1;
   }
-
-  /* Any -> Boolean
-    Return true if the input is a well-formed Turn.
-   */
-  static isWellFormedTurn(turn) {
-    if (!Array.isArray(turn)) {
-      return false;
-    }
-    if (turn.length === 1) {
-      return Referee.isWellFormedMoveReq(turn[0]);
-    }
-    if (turn.length === 2) {
-      return Referee.isWellFormedMoveReq(turn[0]) &&
-        Referee.isWellFormedBuildReq(turn[1]);
-    }
-    return false;
-  }
-
-  /* Any -> Boolean
-    Return true if the input is a well-formed PlaceRequest.
-    PlaceRequest: ["place", x:Int, y:Int]
-   */
-  static isWellFormedPlaceReq(req) {
-    return Array.isArray(req) &&
-           req.length === 3 &&
-           req[0] === "place" &&
-           Number.isInteger(req[1]) &&
-           Number.isInteger(req[2]);
-  }
-
-  /* Any -> Boolean
-  Return true if the input is a well-formed MoveRequest.
-  MoveRequest: ["move", WorkerRequest, Direction]
- */
-  static isWellFormedMoveReq(req) {
-    return Array.isArray(req) &&
-      req.length === 3 &&
-      req[0] === "move" &&
-      Referee.isWellFormedWorkerReq(req[1]) &&
-      Direction.isDirection(req[2]);
-  }
-
-  /* Any -> Boolean
-    Return true if the input is a well-formed MoveRequest.
-    BuildRequest: ["build", Direction]
-  */
-  static isWellFormedBuildReq(req) {
-    return Array.isArray(req) &&
-      req.length === 2 &&
-      req[0] === "build" &&
-      Direction.isDirection(req[1]);
-  }
-
-  /* Any -> Boolean
-    Return true if the input is a well-formed WorkerRequest.
-    WorkerRequest: { player:String, id:Int }
-   */
-  static isWellFormedWorkerReq(req) {
-    let keys = Object.keys(req);
-    return keys.length === 2 &&
-      keys.includes('player') &&
-      typeof req.player === 'string' &&
-      keys.includes('id') &&
-      Number.isInteger(req.id);
-  }
+  
 }
 
 module.exports = Referee;
