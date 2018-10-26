@@ -11,6 +11,15 @@ describe('Observer tests', function () {
     observer = new Observer();
   });
 
+  // Note on Observer unit tests:
+  // workerPlaced, turnTaken, and gameOver methods simply call their corresponding
+  // JSON conversion methods on their input data, and send
+  // the results to printJson().
+  // printJson() stringifies its input and writes it to process.stdout,
+  // which is not a meaningful behavior to test.
+  // Therefore the only meaningful unit tests for this module are the JSON
+  // conversion methods themselves, below.
+
   describe('Json conversion methods', function () {
     describe('Turn to JSON', function () {
       let move, build, pName, workerId;
