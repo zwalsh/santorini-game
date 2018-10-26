@@ -53,6 +53,7 @@ class Observer {
    */
   turnTaken(turn, resultingBoard) {
   }
+
   /* GameResult -> Void
     This method is called when the game currently in progress comes
     to an end. It passes the result of that game to the Observer.
@@ -68,6 +69,7 @@ class Observer {
   startSeries(playerName1, playerName2, numGames) {
 
   }
+  
   /* [GameResult,  ...] -> Void
     When a series reaches its conclusion, the list of GameResults
     that occurred in the series are passed into the Observer via
