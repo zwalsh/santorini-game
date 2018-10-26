@@ -16,6 +16,19 @@
    new series can begin. A series cannot be started during the progress
    of a game.
 
+   =======  Data Definitions =======
+   An EndGameReason is one of:
+   - "WON"
+   - "BROKEN_RULE"
+   and represents whether a Player won legitimately, or because
+   their opponent broke the rules.
+
+   A GameResult is a [String, EndGameReason] where the string is
+   the name of the Player who won the game.
+
+   The data definitions for Turn and PlaceRequest are in rulechecker.js
+
+   The data definition for a Board is in board.js
 */
 
 class Observer {
@@ -55,7 +68,7 @@ class Observer {
   startSeries(playerName1, playerName2, numGames) {
 
   }
-  /* [GameResult] -> Void
+  /* [GameResult,  ...] -> Void
     When a series reaches its conclusion, the list of GameResults
     that occurred in the series are passed into the Observer via
     this method.

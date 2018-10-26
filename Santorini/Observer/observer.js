@@ -16,31 +16,31 @@
    new series can begin. A series cannot be started during the progress
    of a game.
 
-   ------------- Data Definitions -------------
+   ------------- Implementation-Specific Data Definitions -------------
 
-    * A JsonBoard is a: [[Cell, ...], ... ]
-    *
-    * A Cell is one of:
-    *  Height
-    *  BuildingWorker
-    *
-    * Height (H) is a: int from 0 to 4 representing height
-    *
-    * A BuildingWorker is a: String that starts with a int(height), followed by a string player name,
-    *                        and ends with a 1 or 2 - e.g. 'alfred1' or 'alfred2'
-    *
-    * A JsonTurn is one of:
-    *  - [Worker,EastWest,NorthSouth], which represents a winning move
-    *  - [Worker,EastWest,NorthSouth,EastWest,NorthSouth], where the first pair of directions after the Worker
-    *      represent a move, and the second two represent a build following the move.
+   A JsonBoard is a: [[Cell, ...], ... ]
+
+   A Cell is one of:
+    Height
+    BuildingWorker
+
+   Height (H) is a: int from 0 to 4 representing height
+
+   A BuildingWorker is a: String that starts with a int(height), followed by a string player name,
+                          and ends with a 1 or 2 - e.g. 'alfred1' or 'alfred2'
+
+   A JsonTurn is one of:
+    - [Worker,EastWest,NorthSouth], which represents a winning move
+    - [Worker,EastWest,NorthSouth,EastWest,NorthSouth], where the first pair of directions after the Worker
+        represent a move, and the second two represent a build following the move.
 */
 
 const c = require('../Lib/constants');
 
 class Observer {
   constructor() {
-    this.playerName1;
-    this.playerName2;
+    this.playerName1 = null;
+    this.playerName2 = null;
   }
 
   /* String String -> Void
@@ -57,28 +57,23 @@ class Observer {
     of a Worker on the Board.
    */
   workerPlaced(placeReq, playerName, resultingBoard) {
-    // Ignore the place request and player name here.
-    // Convert Board to JSON
-    // Print that JSON
+    this.printJson(this.boardToJson(resultingBoard));
   }
 
-  /* Turn String Board -> Void
+  /* Turn Board -> Void
     Tells the observer that the named Player took the given valid Turn,
     and that it resulted in the given Board state.
    */
-  turnTaken(turn, playerName, resultingBoard) {
-    // Convert the turn to JSON/string
-    // Print that JSON
-    // Convert Board to JSON
-    // Print that JSON
+  turnTaken(turn, resultingBoard) {
+    this.printJson(this.turnToJson(turn));
+    this.printJson(this.boardToJson(resultingBoard));
   }
   /* GameResult -> Void
     This method is called when the game currently in progress comes
     to an end. It passes the result of that game to the Observer.
    */
   gameOver(gameResult) {
-    // Convert the GameResult to JSON/string
-    // Print that JSON
+    this.printJson(this.gameResultToJson(gameResult));
   }
 
   /* Board -> JsonBoard
@@ -113,13 +108,6 @@ class Observer {
 
   /* Turn -> JsonTurn
     Convert the Turn data to an informative, printable representation.
-    Turn will be [MoveRequest,BuildRequest] or [MoveRequest]
-     * A MoveRequest is a: ["move", WorkerRequest, Direction]
-     * A BuildRequest is a: ["build", Direction]
-     * A JsonTurn is one of:
-    *  - [Worker,EastWest,NorthSouth], which represents a winning move
-    *  - [Worker,EastWest,NorthSouth,EastWest,NorthSouth], where the first pair of directions after the Worker
-    *      represent a move, and the second two represent a build following the move.
    */
   turnToJson(turn) {
     let move = turn[0];
@@ -159,27 +147,18 @@ class Observer {
     process.stdout.write(JSON.stringify(json));
   }
 
-
-  // ---------------- As-yet-unneeded methods -------------------
-  // Not necessary for the Assignment 10 observer task.
-  // Still debating whether or not to keep them in / add Referee support
-  // for them for the future.
-
   /* String String OddNumber -> Void
-    Notifies this observer that a new series has started between the
-    two Players with the given names, and that it will be decided by
-    the majority of the given number of games.
+    No-op
    */
   startSeries(playerName1, playerName2, numGames) {
-
+    // unneeded for this implementation
   }
-  /* [GameResult] -> Void
-    When a series reaches its conclusion, the list of GameResults
-    that occurred in the series are passed into the Observer via
-    this method.
+
+  /* [GameResult, ...] -> Void
+    No-op
    */
   seriesOver(gameResults) {
-
+    // unneeded for this implementation
   }
 }
 
