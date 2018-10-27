@@ -1,8 +1,8 @@
-/* Represents a Player of the game, which is carried through the various phases of the game.
-  Must be able to produce a Turn or place a Worker (as appropriate) when it is requested to do so (and is given
-  an update as to the current state of the game).
-
-  This implementation uses a Strategy to generate its Placements and Turns.
+/* Represents an interface for a Player in a game of Santorini.
+  This Player is carried through the various phases of the game.
+  Must be able to produce a Turn or place a Worker (as appropriate)
+  when it is requested to do so (and is given an update as to the
+  current state of the game).
 
   DATA DEFINITIONS:
 
@@ -11,12 +11,10 @@
   All request types (PlaceRequest, MoveRequest, BuildRequest) and Turn are defined in strategy.js
 */
 
-const Strategy = require('./strategy');
 
 class Player {
   // Instantiates a Player with their own given name.
   constructor (name) {
-    this.name = name;
   }
 
   /* [InitWorker, ...] -> PlaceRequest
@@ -25,7 +23,6 @@ class Player {
     their next Worker.
   */
   placeInitialWorker(existingWorkers) {
-    return this.strategy.getNextWorkerPlace(existingWorkers);
   }
 
   /* Board -> Turn
@@ -33,7 +30,6 @@ class Player {
     this Player wishes to take.
   */
   takeTurn(board) {
-    return this.strategy.getNextTurn(board);
   }
 
   /* String -> Player
@@ -41,7 +37,6 @@ class Player {
     so that internal information can be reset/updated as necessary
   */
   newGame(opponentName) {
-    this.strategy = new Strategy(this.name, opponentName, 4, 0);
   }
 
   /* GameResult -> Void
@@ -49,7 +44,6 @@ class Player {
     so that internal information can be reset/updated as necessary
   */
   notifyGameOver(gameResult) {
-    // Nothing to do here for now.
   }
 }
 
