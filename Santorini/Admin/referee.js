@@ -65,6 +65,10 @@ class Referee {
     // The 2 players that will play game(s) against each other
     this.player1 = player1;
     this.player2 = player2;
+    // List of Observers registered on this Referee.
+    // Observers are trusted components that are given
+    // references to essential game data (as opposed to copies).
+    this.observers = [];
   }
 
   /* Void -> GameResult
@@ -77,6 +81,8 @@ class Referee {
     this.player1.newGame(this.player2.name);
     this.player2.newGame(this.player1.name);
 
+    this.notifyAllObservers(o => { o.startGame(this.player1.name, this.player2.name) });
+
     let gameState = this.setup();
     let activePlayer = this.player1;
     while (gameState === c.GameState.IN_PROGRESS) {
@@ -86,6 +92,9 @@ class Referee {
 
     this.player1.notifyGameOver(gameState.slice());
     this.player2.notifyGameOver(gameState.slice());
+
+    this.notifyAllObservers(o => { o.gameOver(gameState) });
+
     this.board = null;
     return gameState;
   }
@@ -97,6 +106,8 @@ class Referee {
     The number of games in the series must be odd, or the behavior of this method is undefined.
    */
   playNGames(numGames) {
+    this.notifyAllObservers(o => { o.startSeries(this.player1.name, this.player2.name, numGames) });
+
     let gameResults = [];
     let seriesState = c.GameState.IN_PROGRESS;
     while (seriesState === c.GameState.IN_PROGRESS) {
@@ -108,6 +119,7 @@ class Referee {
         seriesState = this.getSeriesStatus(gameResults, numGames);
       }
     }
+    this.notifyAllObservers(o => { o.seriesOver(gameResults) });
     return gameResults;
   }
 
@@ -149,6 +161,8 @@ class Referee {
           y: placeReq[2]
         };
         initWorkerList.push(initWorker);
+
+        this.notifyAllObservers(o => { o.workerPlaced(placeReq, activePlayer.name, new Board(initWorkerList)) });
       } else {
         return [this.flip(activePlayer).name, c.EndGameReason.BROKEN_RULE];
       }
@@ -171,6 +185,8 @@ class Referee {
     let turn = activePlayer.takeTurn(this.board.copy());
     if (this.checkTurn(turn, activePlayer)) {
       this.board.applyTurn(turn);
+
+      this.notifyAllObservers(o => { o.turnTaken(turn, this.board) });
     } else {
       return [this.flip(activePlayer).name, c.EndGameReason.BROKEN_RULE];
     }
@@ -208,7 +224,20 @@ class Referee {
   flip(activePlayer) {
     return activePlayer === this.player1 ? this.player2 : this.player1;
   }
-  
+
+  /* [Observer -> Void] -> Void
+    Notifies all observers in the list using the given notifier function.
+  */
+  notifyAllObservers(notifier) {
+    this.observers.forEach((o) => notifier(o));
+  }
+
+  /* Observer -> Void
+    Add the given observer to the set of Observers that this Referee notifies of events.
+  */
+  addObserver(observer) {
+    this.observers.push(observer);
+  }
 }
 
 module.exports = Referee;
