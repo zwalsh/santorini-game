@@ -23,8 +23,8 @@
    and represents whether a Player won legitimately, or because
    their opponent broke the rules.
 
-   A GameResult is a [String, EndGameReason] where the string is
-   the name of the Player who won the game.
+   A GameResult is a [UUID, EndGameReason] where the UUID is
+   the identifier of the Player who won the game.
 
    The data definitions for Turn and PlaceRequest are in rulechecker.js
 
@@ -69,7 +69,7 @@ class Observer {
   startSeries(playerName1, playerName2, numGames) {
 
   }
-  
+
   /* [GameResult,  ...] -> Void
     When a series reaches its conclusion, the list of GameResults
     that occurred in the series are passed into the Observer via

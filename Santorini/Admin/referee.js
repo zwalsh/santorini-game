@@ -44,8 +44,8 @@ const c = require('../Lib/constants');
  * and represents whether a Player won legitimately, or because
  * their opponent broke the rules.
  *
- * A GameResult is a [String, EndGameReason] where the string is
- * the name of the Player who won the game.
+ * A GameResult is a [UUID, EndGameReason] where the UUID is
+ * the identifier of the Player who won the game.
  *
  * A GameState is one of:
  * - "IN_PROGRESS"
@@ -58,13 +58,20 @@ const RC = new Rulechecker();
 
 // A class to handle the different phases of the game - Initialization, Steady-State, and Game Over
 class Referee {
-
-  constructor(player1, player2) {
+  /* Player Player UUID UUID -> Referee
+    Construct a Referee to run game(s) between the given Players.
+    This Referee will use the given GUIDs to identify the Players as needed
+    internally, as well as in Board and Turn data it sends to other components.
+   */
+  constructor(player1, player2, p1Id, p2Id) {
     // Board holds the state of a game between the 2 players
     this.board = null;
     // The 2 players that will play game(s) against each other
     this.player1 = player1;
     this.player2 = player2;
+    // The UUID assigned to each player, respectively
+    this.p1Id = p1Id;
+    this.p2Id = p2Id;
     // List of Observers registered on this Referee.
     // Observers are trusted components that are given
     // references to essential game data (as opposed to copies).
@@ -78,10 +85,10 @@ class Referee {
   Cleanup: Reset referee board to null after the game is over.
  */
   playGame() {
-    this.player1.newGame(this.player2.name);
-    this.player2.newGame(this.player1.name);
+    this.player1.newGame(this.p1Id, this.p2Id);
+    this.player2.newGame(this.p2Id, this.p1Id);
 
-    this.notifyAllObservers(o => { o.startGame(this.player1.name, this.player2.name) });
+    this.notifyAllObservers(o => { o.startGame(this.p1Id, this.p2Id) });
 
     let gameState = this.setup();
     let activePlayer = this.player1;
@@ -106,7 +113,7 @@ class Referee {
     The number of games in the series must be odd, or the behavior of this method is undefined.
    */
   playNGames(numGames) {
-    this.notifyAllObservers(o => { o.startSeries(this.player1.name, this.player2.name, numGames) });
+    this.notifyAllObservers(o => { o.startSeries(this.p1Id, this.p2Id, numGames) });
 
     let gameResults = [];
     let seriesState = c.GameState.IN_PROGRESS;
@@ -129,13 +136,13 @@ class Referee {
   */
   getSeriesStatus(gameResults, numGames) {
     let p1WinCount = gameResults
-      .filter(gameResult => (gameResult[0] === this.player1.name))
+      .filter(gameResult => (gameResult[0] === this.p1Id))
       .length;
     let p2WinCount = gameResults.length - p1WinCount;
     if (p1WinCount > numGames / 2) {
-      return [this.player1.name, c.EndGameReason.WON];
+      return [this.p1Id, c.EndGameReason.WON];
     } else if (p2WinCount > numGames / 2) {
-      return [this.player2.name, c.EndGameReason.WON];
+      return [this.p2Id, c.EndGameReason.WON];
     } else {
       return c.GameState.IN_PROGRESS
     }
@@ -156,15 +163,15 @@ class Referee {
 
       if (this.checkPlaceReq(placeReq, initWorkerList)) {
         let initWorker = {
-          player: activePlayer.name,
+          player: this.playerId(activePlayer),
           x: placeReq[1],
           y: placeReq[2]
         };
         initWorkerList.push(initWorker);
 
-        this.notifyAllObservers(o => { o.workerPlaced(placeReq, activePlayer.name, new Board(initWorkerList)) });
+        this.notifyAllObservers(o => { o.workerPlaced(placeReq, this.playerId(activePlayer), new Board(initWorkerList)) });
       } else {
-        return [this.flip(activePlayer).name, c.EndGameReason.BROKEN_RULE];
+        return [this.playerId(this.flip(activePlayer)), c.EndGameReason.BROKEN_RULE];
       }
       activePlayer = this.flip(activePlayer);
     }
@@ -188,11 +195,11 @@ class Referee {
 
       this.notifyAllObservers(o => { o.turnTaken(turn, this.board) });
     } else {
-      return [this.flip(activePlayer).name, c.EndGameReason.BROKEN_RULE];
+      return [this.playerId(this.flip(activePlayer)), c.EndGameReason.BROKEN_RULE];
     }
 
-    if (RC.hasWon(this.board, activePlayer.name) || RC.hasLost(this.board, this.flip(activePlayer).name)) {
-      return [activePlayer.name, c.EndGameReason.WON];
+    if (RC.hasWon(this.board, this.playerId(activePlayer)) || RC.hasLost(this.board, this.playerId(this.flip(activePlayer)))) {
+      return [this.playerId(activePlayer), c.EndGameReason.WON];
     } else {
       return c.GameState.IN_PROGRESS;
     }
@@ -214,7 +221,7 @@ class Referee {
    */
   checkTurn(turn, activePlayer) {
     return RFC.isWellFormedTurn(turn) &&
-      turn[0][1].player === activePlayer.name &&
+      turn[0][1].player === this.playerId(activePlayer) &&
       RC.isValidTurn(this.board, turn);
   }
 
@@ -223,6 +230,13 @@ class Referee {
    */
   flip(activePlayer) {
     return activePlayer === this.player1 ? this.player2 : this.player1;
+  }
+  
+  /* Player -> UUID
+    Get the UUID that this Referee has associated with the given Player.
+   */
+  playerId(activePlayer) {
+    return activePlayer === this.player1 ? this.p1Id : this.p2Id;
   }
 
   /* [Observer -> Void] -> Void

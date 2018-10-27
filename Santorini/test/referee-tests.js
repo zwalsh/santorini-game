@@ -1,5 +1,6 @@
 let assert = require('chai').assert;
 let sinon = require('sinon');
+let uuid = require('uuid/v4');
 let Referee = require('../Admin/referee');
 let Worker = require('../Common/worker');
 let Board = require('../Common/board');
@@ -16,8 +17,8 @@ describe('Referee', function () {
 
   describe('playGame', function () {
     let board, referee, player2, player1, p1Turn, observer;
-    let p1Name = "garth";
-    let p2Name = "wayne";
+    let p1Id = uuid();
+    let p2Id = uuid();
     beforeEach(function () {
       let grid = [[2, 3, 0, 0, 0, 0],
         [3, 3, 0, 0, 0, 0],
@@ -26,30 +27,30 @@ describe('Referee', function () {
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0]];
 
-      let w11 = new Worker(0, 0, 1, p2Name);
-      let w12 = new Worker(4, 0, 2, p2Name);
-      let w21 = new Worker(5, 0, 1, p1Name);
-      let w22 = new Worker(6, 0, 2, p1Name);
+      let w11 = new Worker(0, 0, 1, p2Id);
+      let w12 = new Worker(4, 0, 2, p2Id);
+      let w21 = new Worker(5, 0, 1, p1Id);
+      let w22 = new Worker(6, 0, 2, p1Id);
       let workerList = [w11, w12, w21, w22];
 
       // The Referee will not ask for any PlaceRequests in this case, because we
       // initialize a Board with all of the Workers already on it.
       board = new Board(null, grid, workerList);
 
-      p1Turn = [["move", {player:p1Name, id:1}, ["PUT", "SOUTH"]], ["build", ["PUT", "SOUTH"]]];
+      p1Turn = [["move", {player:p1Id, id:1}, ["PUT", "SOUTH"]], ["build", ["PUT", "SOUTH"]]];
       player1 = {
-        name: p1Name,
+        name: p1Id,
         takeTurn: sinon.stub().withArgs(board).returns(p1Turn),
         notifyGameOver: sinon.stub(),
         newGame: sinon.stub()
       };
 
       player2 = {
-        name: p2Name,
+        name: p2Id,
         notifyGameOver: sinon.stub(),
         newGame: sinon.stub()
       };
-      referee = new Referee(player1, player2);
+      referee = new Referee(player1, player2, p1Id, p2Id);
       referee.board = board;
       referee.setup = sinon.stub().returns(c.GameState.IN_PROGRESS);
 
@@ -59,7 +60,7 @@ describe('Referee', function () {
     describe('when neither Player provides an invalid Turn', function () {
       let gameResult;
       beforeEach(function () {
-        let p2Turn = [["move", {player:p2Name, id:1}, ["EAST", "PUT"]]];
+        let p2Turn = [["move", {player:p2Id, id:1}, ["EAST", "PUT"]]];
         let boardAfterP1Turn = board.copy();
         boardAfterP1Turn.applyTurn(p1Turn);
 
@@ -67,22 +68,22 @@ describe('Referee', function () {
         gameResult = referee.playGame();
       });
       it('notifies both Players of the game start and opponent name', function () {
-        assert.isTrue(player2.newGame.calledWith(p1Name));
-        assert.isTrue(player1.newGame.calledWith(p2Name));
+        assert.isTrue(player2.newGame.calledWith(p2Id, p1Id));
+        assert.isTrue(player1.newGame.calledWith(p1Id, p2Id));
       });
       it('requests Turns from both', function () {
-        assert.deepEqual(gameResult, [p2Name, c.EndGameReason.WON]);
+        assert.deepEqual(gameResult, [p2Id, c.EndGameReason.WON]);
         assert.isTrue(player2.takeTurn.calledOnce);
         assert.isTrue(player1.takeTurn.calledOnce);
       });
       it('notifies both Players that the winning Player won', function () {
-        assert.deepEqual(gameResult, [p2Name, c.EndGameReason.WON]);
+        assert.deepEqual(gameResult, [p2Id, c.EndGameReason.WON]);
         assert.isTrue(player2.notifyGameOver.calledWith(gameResult));
         assert.isTrue(player1.notifyGameOver.calledWith(gameResult));
       });
       it('notifies the Observer that the game has begun', function () {
         assert.isTrue(observer[startGame].calledOnce);
-        assert.isTrue(observer[startGame].calledWith(p1Name, p2Name));
+        assert.isTrue(observer[startGame].calledWith(p1Id, p2Id));
       });
       it('notifies the Observer that the game has ended', function () {
         assert.isTrue(observer[gameOver].calledOnce);
@@ -92,7 +93,7 @@ describe('Referee', function () {
     describe('when a Player provides an invalid Turn', function () {
       let gameResult;
       beforeEach(function () {
-        let p2Turn = [["move", {player:p2Name, id:1}, ["EAST", "FALSE"]]];
+        let p2Turn = [["move", {player:p2Id, id:1}, ["EAST", "FALSE"]]];
         let boardAfterP2Turn = board.copy();
         boardAfterP2Turn.applyTurn(p1Turn);
 
@@ -100,7 +101,7 @@ describe('Referee', function () {
         gameResult = referee.playGame();
       });
       it('notifies both Players that the non-rule-breaking Player won', function () {
-        assert.deepEqual(gameResult, [p1Name, c.EndGameReason.BROKEN_RULE]);
+        assert.deepEqual(gameResult, [p1Id, c.EndGameReason.BROKEN_RULE]);
         assert.isTrue(player2.notifyGameOver.calledWith(gameResult));
         assert.isTrue(player1.notifyGameOver.calledWith(gameResult));
       });
@@ -108,14 +109,14 @@ describe('Referee', function () {
   });
 
   describe('playNGames', function () {
-    let player1, player2, p1Name, p2Name, workerId1, referee, observer;
+    let player1, player2, p1Id, p2Id, workerId1, referee, observer;
     beforeEach(function () {
       workerId1 = 1;
-      p1Name = "Wayne";
-      p2Name = "Garth";
-      player1 = { name: p1Name, strategy: null };
-      player2 = { name: p2Name, strategy: null };
-      referee = new Referee(player1, player2);
+      p1Id = uuid();
+      p2Id = uuid();
+      player1 = { id: p1Id, strategy: null };
+      player2 = { id: p2Id, strategy: null };
+      referee = new Referee(player1, player2, p1Id, p2Id);
 
       observer = testLib.createMockObject(startGame, workerPlaced, turnTaken, gameOver, startSeries, seriesOver);
       referee.addObserver(observer);
@@ -123,9 +124,9 @@ describe('Referee', function () {
     describe('when neither Player breaks a rule in any game', function () {
       let resultList, result1, result2, result3;
       beforeEach(function () {
-        result1 = [p1Name, c.EndGameReason.WON];
-        result2 = [p2Name, c.EndGameReason.WON];
-        result3 = [p1Name, c.EndGameReason.WON];
+        result1 = [p1Id, c.EndGameReason.WON];
+        result2 = [p2Id, c.EndGameReason.WON];
+        result3 = [p1Id, c.EndGameReason.WON];
         referee.playGame = sinon.stub()
           .onFirstCall().returns(result1)
           .onSecondCall().returns(result2)
@@ -143,7 +144,7 @@ describe('Referee', function () {
       });
       it('notifies the Observer that the series has started', function () {
         assert.isTrue(observer[startSeries].calledOnce);
-        assert.isTrue(observer[startSeries].calledWith(p1Name, p2Name));
+        assert.isTrue(observer[startSeries].calledWith(p1Id, p2Id));
       });
       it('notifies the Observer that the series has ended', function () {
         assert.isTrue(observer[seriesOver].calledOnce);
@@ -153,8 +154,8 @@ describe('Referee', function () {
     describe('when a Player wins a majority of games before the series is over', function () {
       let resultList, result1, result2;
       beforeEach(function () {
-        result1 = [p1Name, c.EndGameReason.WON];
-        result2 = [p1Name, c.EndGameReason.WON];
+        result1 = [p1Id, c.EndGameReason.WON];
+        result2 = [p1Id, c.EndGameReason.WON];
         referee.playGame = sinon.stub()
           .onFirstCall().returns(result1)
           .onSecondCall().returns(result2);
@@ -172,8 +173,8 @@ describe('Referee', function () {
     describe('when a Player breaks a rule in a game', function () {
       let resultList, result1, result2;
       beforeEach(function () {
-        result1 = [p1Name, c.EndGameReason.WON];
-        result2 = [p2Name, c.EndGameReason.BROKEN_RULE];
+        result1 = [p1Id, c.EndGameReason.WON];
+        result2 = [p2Id, c.EndGameReason.BROKEN_RULE];
         referee.playGame = sinon.stub()
           .onFirstCall().returns(result1)
           .onSecondCall().returns(result2);
@@ -191,41 +192,41 @@ describe('Referee', function () {
   });
 
   describe('getSeriesStatus', function () {
-    let player1, player2, p1Name, p2Name, workerId1, referee, gameResults;
+    let player1, player2, p1Id, p2Id, workerId1, referee, gameResults;
     beforeEach(function () {
       workerId1 = 1;
-      p1Name = "Wayne";
-      p2Name = "Garth";
-      player1 = { name: p1Name, strategy: null };
-      player2 = { name: p2Name, strategy: null };
-      referee = new Referee(player1, player2);
-      gameResults = [[p1Name, c.EndGameReason.WON]];
+      p1Id = uuid();
+      p2Id = uuid();
+      player1 = { id: p1Id, strategy: null };
+      player2 = { id: p2Id, strategy: null };
+      referee = new Referee(player1, player2, p1Id, p2Id);
+      gameResults = [[p1Id, c.EndGameReason.WON]];
     });
     it('indicates that the series is still in progress if neither player has won a majority', function () {
-      gameResults.push([p2Name, c.EndGameReason.WON]);
+      gameResults.push([p2Id, c.EndGameReason.WON]);
       let status = referee.getSeriesStatus(gameResults, 3);
       assert.equal(status, c.GameState.IN_PROGRESS);
     });
     it('if a player has won a majority, returns a GameState with that player as the winner', function () {
-      gameResults.push([p1Name, c.EndGameReason.WON]);
+      gameResults.push([p1Id, c.EndGameReason.WON]);
       let status = referee.getSeriesStatus(gameResults, 3);
-      assert.deepEqual(status, [p1Name, c.EndGameReason.WON]);
+      assert.deepEqual(status, [p1Id, c.EndGameReason.WON]);
     });
   });
 
   describe('setup', function () {
-    let player1, player2, p1Name, p2Name, workerId1, workerId2, referee, gameState, observer;
+    let player1, player2, p1Id, p2Id, workerId1, workerId2, referee, gameState, observer;
     let placeRequest0 = ["place", 0, 0];
     let placeRequest1 = ["place", 1, 1];
     let placeRequest2 = ["place", 2, 2];
     beforeEach(function () {
       workerId1 = 1;
       workerId2 = 2;
-      p1Name = "Wayne";
-      p2Name = "Garth";
-      player1 = { name: p1Name, strategy: null };
-      player2 = { name: p2Name, strategy: null };
-      referee = new Referee(player1, player2);
+      p1Id = uuid();
+      p2Id = uuid();
+      player1 = { id: p1Id, strategy: null };
+      player2 = { id: p2Id, strategy: null };
+      referee = new Referee(player1, player2, p1Id, p2Id);
       // Player 1 gives two valid PlaceRequests.
       player1.placeInitialWorker = sinon.stub()
         .onFirstCall().returns(placeRequest0)
@@ -244,7 +245,7 @@ describe('Referee', function () {
         gameState = referee.setup();
       });
       it('returns a GameState indicating that the other Player won', function () {
-        assert.deepEqual(gameState, [p1Name, c.EndGameReason.BROKEN_RULE]);
+        assert.deepEqual(gameState, [p1Id, c.EndGameReason.BROKEN_RULE]);
       });
       it('does not create a new Board for the Referee', function () {
         assert.isNull(referee.board);
@@ -262,10 +263,10 @@ describe('Referee', function () {
         assert.equal(player2.placeInitialWorker.callCount, 2);
       });
       it('creates a Board with all four workers correctly added to the Referee"s Board', function () {
-        let w1 = referee.board.findWorker({ player: p1Name, id: workerId1});
-        let w2 = referee.board.findWorker({ player: p2Name, id: workerId1});
-        let w3 = referee.board.findWorker({ player: p1Name, id: workerId2});
-        let w4 = referee.board.findWorker({ player: p2Name, id: workerId2});
+        let w1 = referee.board.findWorker({ player: p1Id, id: workerId1});
+        let w2 = referee.board.findWorker({ player: p2Id, id: workerId1});
+        let w3 = referee.board.findWorker({ player: p1Id, id: workerId2});
+        let w4 = referee.board.findWorker({ player: p2Id, id: workerId2});
         assert.equal(referee.board.getWorkers().length, 4);
         assert.equal(w1.posn.x, 0);
         assert.equal(w1.posn.y, 0);
@@ -296,48 +297,48 @@ describe('Referee', function () {
         }
 
         let boardWorkers = [];
-        checkPlaceNotification(0, placeRequest0, p1Name, workerId1, boardWorkers);
-        checkPlaceNotification(1, placeRequest1, p2Name, workerId1, boardWorkers);
-        checkPlaceNotification(2, placeRequest2, p1Name, workerId2, boardWorkers);
-        checkPlaceNotification(3, placeRequest3, p2Name, workerId2, boardWorkers);
+        checkPlaceNotification(0, placeRequest0, p1Id, workerId1, boardWorkers);
+        checkPlaceNotification(1, placeRequest1, p2Id, workerId1, boardWorkers);
+        checkPlaceNotification(2, placeRequest2, p1Id, workerId2, boardWorkers);
+        checkPlaceNotification(3, placeRequest3, p2Id, workerId2, boardWorkers);
       });
     });
   });
 
   describe('checkPlaceReq', function () {
-    let referee;
+    let p1Id, p2Id, referee;
     beforeEach(function () {
-      let p1Name = "Wayne";
-      let p2Name = "Garth";
-      let player1 = {name: p1Name, strategy: null};
-      let player2 = {name: p2Name, strategy: null};
-      referee = new Referee(player1, player2);
+      p1Id = uuid();
+      p2Id = uuid();
+      let player1 = {id: p1Id, strategy: null};
+      let player2 = {id: p2Id, strategy: null};
+      referee = new Referee(player1, player2, p1Id, p2Id);
     });
     it('rejects a PlaceRequest if it is improperly formed', function () {
       let placeReq = [3, 2, 3];
       assert.isFalse(referee.checkPlaceReq(placeReq, []));
     });
     it('rejects a PlaceRequest that is not valid', function () {
-      let initWorkerList = [{ player: 'wayne', x: 1, y: 1 }];
+      let initWorkerList = [{ player: p1Id, x: 1, y: 1 }];
       let placeReq = ["place", 1, 1];
       assert.isFalse(referee.checkPlaceReq(placeReq, initWorkerList));
     });
     it('accepts a properly formed, valid PlaceRequest', function () {
-      let initWorkerList = [{ player: 'wayne', x: 1, y: 1 }];
+      let initWorkerList = [{ player: p1Id, x: 1, y: 1 }];
       let placeReq = ["place", 0, 0];
       assert.isTrue(referee.checkPlaceReq(placeReq, initWorkerList));
     });
   });
 
   describe('Turn-related functionality', function () {
-    let player1, player2, p1Name, p2Name, workerId1, referee;
+    let player1, player2, p1Id, p2Id, workerId1, referee;
     beforeEach(function () {
       workerId1 = 1;
-      p1Name = "Wayne";
-      p2Name = "Garth";
-      player1 = { name: p1Name, strategy: null };
-      player2 = { name: p2Name, strategy: null };
-      referee = new Referee(player1, player2);
+      p1Id = uuid();
+      p2Id = uuid();
+      player1 = { id: p1Id, strategy: null };
+      player2 = { id: p2Id, strategy: null };
+      referee = new Referee(player1, player2, p1Id, p2Id);
 
       // Create a Board with the following heights, one Player1 worker
       // in the top left corner, and one Player2 worker in the top right corner.
@@ -347,8 +348,8 @@ describe('Referee', function () {
                     [0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 0, 0]];
-      let worker1 = new Worker(0,0,workerId1,p1Name);
-      let worker2 = new Worker(5,0,workerId1,p2Name);
+      let worker1 = new Worker(0,0,workerId1,p1Id);
+      let worker2 = new Worker(5,0,workerId1,p2Id);
       let board = new Board(null, heights, [worker1, worker2]);
       referee.board = board;
     });
@@ -357,7 +358,7 @@ describe('Referee', function () {
       describe('when the Player provides a valid non-winning Turn', function () {
         let observer;
         beforeEach(function () {
-          turn = [["move", { player:p1Name, id:workerId1 }, ["PUT", "SOUTH"]],
+          turn = [["move", { player:p1Id, id:workerId1 }, ["PUT", "SOUTH"]],
             ["build", ["PUT", "SOUTH"]]];
           player1.takeTurn = sinon.stub().returns(turn);
 
@@ -367,7 +368,7 @@ describe('Referee', function () {
           gameState = referee.getAndApplyTurn(player1);
         });
         it('applies the player"s turn to the Board', function () {
-          let worker = referee.board.findWorker({player:p1Name,id:workerId1});
+          let worker = referee.board.findWorker({player:p1Id,id:workerId1});
           assert.equal(worker.posn.x, 0);
           assert.equal(worker.posn.y, 1);
           assert.equal(referee.board.heightAtTile(0,2), 1);
@@ -387,25 +388,25 @@ describe('Referee', function () {
       });
       describe('when the Player provides a valid winning Turn', function () {
         beforeEach(function () {
-          turn = [["move", { player:p1Name, id:workerId1 }, ["EAST", "SOUTH"]]];
+          turn = [["move", { player:p1Id, id:workerId1 }, ["EAST", "SOUTH"]]];
           player1.takeTurn = sinon.stub().returns(turn);
           gameState = referee.getAndApplyTurn(player1);
         });
         it('applies the player"s turn to the Board', function () {
           // show that the worker moved to the expected location
-          let worker = referee.board.findWorker({player:p1Name,id:workerId1});
+          let worker = referee.board.findWorker({player:p1Id,id:workerId1});
           assert.equal(worker.posn.x, 1);
           assert.equal(worker.posn.y, 1);
         });
         it('returns a GameState indicating that the Player has won the game', function () {
-          assert.deepEqual(gameState, [p1Name, c.EndGameReason.WON]);
+          assert.deepEqual(gameState, [p1Id, c.EndGameReason.WON]);
         });
       });
       describe('when the Player provides an invalid Turn', function () {
         let boardCopy, observer;
         beforeEach(function () {
           boardCopy = referee.board.copy();
-          turn = [["move", { player:p1Name, id:workerId1 }, ["PUT", "PUT"]]];
+          turn = [["move", { player:p1Id, id:workerId1 }, ["PUT", "PUT"]]];
           player1.takeTurn = sinon.stub().returns(turn);
 
           observer = testLib.createMockObject(turnTaken);
@@ -418,7 +419,7 @@ describe('Referee', function () {
           assert.deepEqual(referee.board, boardCopy);
         });
         it('returns a GameState indicating that the other Player won', function () {
-          assert.deepEqual(gameState, [p2Name, c.EndGameReason.BROKEN_RULE]);
+          assert.deepEqual(gameState, [p2Id, c.EndGameReason.BROKEN_RULE]);
         });
         it('does not notify the Observer that any turn was taken', function () {
           assert.isFalse(observer[turnTaken].called);
@@ -432,17 +433,17 @@ describe('Referee', function () {
         assert.isFalse(referee.checkTurn(turn, player1));
       });
       it('rejects a Turn where the WorkerRequest does not match the active player', function () {
-        let turn = [["move", { player: p2Name, id: workerId1 }, ["EAST", "NORTH"]],
+        let turn = [["move", { player: p2Id, id: workerId1 }, ["EAST", "NORTH"]],
           ["build", ["EAST", "PUT"]]];
         assert.isFalse(referee.checkTurn(turn, player1));
       });
       it('rejects a Turn that is not valid', function () {
-        let turn = [["move", { player: p1Name, id: 1 }, ["WEST", "NORTH"]],
+        let turn = [["move", { player: p1Id, id: 1 }, ["WEST", "NORTH"]],
           ["build", ["EAST", "PUT"]]];
         assert.isFalse(referee.checkTurn(turn, player1));
       });
       it('accepts a properly formed, correct-player-referencing, valid Turn', function () {
-        let turn = [["move", { player: p1Name, id: 1 }, ["EAST", "PUT"]]];
+        let turn = [["move", { player: p1Id, id: 1 }, ["EAST", "PUT"]]];
         assert.isTrue(referee.checkTurn(turn, player1));
       });
     });
@@ -451,9 +452,11 @@ describe('Referee', function () {
   describe('flip', function () {
       let player1, player2, referee;
       beforeEach(function () {
-        player1 = { name: "Wayne", strategy: null };
-        player2 = { name: "Garth", strategy: null };
-        referee = new Referee(player1, player2);
+        let p1Id = uuid();
+        let p2Id = uuid();
+        player1 = { name: p1Id, strategy: null };
+        player2 = { name: p2Id, strategy: null };
+        referee = new Referee(player1, player2, p1Id, p2Id);
       });
       it('returns the opposite player', function () {
         assert.equal(referee.flip(player1), player2);
@@ -461,12 +464,29 @@ describe('Referee', function () {
       });
     });
 
-  describe('adding and notifying Observers', function () {
-    let referee, player1, player2, observer1, observer2, mockedMethodName;
+  describe('playerId', function () {
+    let player1, player2, p1Id, p2Id, referee;
     beforeEach(function () {
-      player1 = { name: "Wayne", strategy: null };
-      player2 = { name: "Garth", strategy: null };
-      referee = new Referee(player1, player2);
+      p1Id = uuid();
+      p2Id = uuid();
+      player1 = { name: p1Id, strategy: null };
+      player2 = { name: p2Id, strategy: null };
+      referee = new Referee(player1, player2, p1Id, p2Id);
+    });
+    it('gets the correct UUID for the given Player', function () {
+      assert.equal(referee.playerId(player1), p1Id);
+      assert.equal(referee.playerId(player2), p2Id);
+    });
+  });
+
+  describe('adding and notifying Observers', function () {
+    let referee, player1, player2, p1Id, p2Id, observer1, observer2, mockedMethodName;
+    beforeEach(function () {
+      p1Id = uuid();
+      p2Id = uuid();
+      player1 = { name: p1Id, strategy: null };
+      player2 = { name: p2Id, strategy: null };
+      referee = new Referee(player1, player2, p1Id, p2Id);
       mockedMethodName = 'test';
       observer1 = testLib.createMockObject(mockedMethodName);
       observer2 = testLib.createMockObject(mockedMethodName);

@@ -14,9 +14,9 @@
 const Strategy = require('./strategy');
 
 class Player {
-  // Instantiates a Player with their own given name.
-  constructor (name) {
-    this.name = name;
+  constructor () {
+    // Player has a UUID identifier and a Strategy to delegate
+    // place/turn generation to. Both are game-specific and set in newGame()
   }
 
   /* [InitWorker, ...] -> PlaceRequest
@@ -36,12 +36,14 @@ class Player {
     return this.strategy.getNextTurn(board);
   }
 
-  /* String -> Player
-    Notify this Player that they have been put into a new game, against the given opponent,
-    so that internal information can be reset/updated as necessary
+  /* UUID UUID -> Void
+    Notify this Player that they have been put into a new game.
+    The first UUID is this Player's ID for the game, and the second UUID
+    is the opponent's.
   */
-  newGame(opponentName) {
-    this.strategy = new Strategy(this.name, opponentName, 4, 0);
+  newGame(myId, opponentId) {
+    this.id = myId;
+    this.strategy = new Strategy(myId, opponentId, 4, 0);
   }
 
   /* GameResult -> Void
