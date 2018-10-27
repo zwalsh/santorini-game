@@ -251,9 +251,10 @@ describe('Referee', function () {
       });
     });
     describe('when both Players provide valid PlaceRequests', function () {
+      let placeRequest3 = ["place", 3, 3];
       beforeEach(function () {
         player2.placeInitialWorker
-          .onSecondCall().returns(["place", 3, 3]);
+          .onSecondCall().returns(placeRequest3);
         gameState = referee.setup();
       });
       it('requests two PlaceRequests from each Player', function () {
@@ -278,11 +279,27 @@ describe('Referee', function () {
       it('returns a GameState indicating that the game should continue', function () {
         assert.equal(gameState, c.GameState.IN_PROGRESS);
       });
-      it('notifies the Observer of both placements', function () {
-        let call0 = observer[workerPlaced].getCall(0);
-        assert.deepEqual(call0.args[0], placeRequest0);
-        assert.equal(call0.args[1], p1Name);
-        assert.deepEqual()
+      it('notifies the Observer of all placements', function () {
+        /* Natural PlaceRequest String Int [Worker, ...] -> Void
+          Given a call index n, check that the nth call of workerPlaced on the
+          Observer contains the expected information.
+          Calling this function adds a Worker (specified by the given PlaceRequest, player name,
+          and worker ID) to the list boardWorkers.
+         */
+        function checkPlaceNotification(callIdx, placeReq, pName, workerId, boardWorkers) {
+          let call = observer[workerPlaced].getCall(callIdx);
+          assert.deepEqual(call.args[0], placeReq);
+          assert.equal(call.args[1], pName);
+          boardWorkers.push(new Worker(placeReq[1], placeReq[2], workerId, pName));
+          let board = call.args[2];
+          assert.deepEqual(board.getWorkers(), boardWorkers);
+        }
+
+        let boardWorkers = [];
+        checkPlaceNotification(0, placeRequest0, p1Name, workerId1, boardWorkers);
+        checkPlaceNotification(1, placeRequest1, p2Name, workerId1, boardWorkers);
+        checkPlaceNotification(2, placeRequest2, p1Name, workerId2, boardWorkers);
+        checkPlaceNotification(3, placeRequest3, p2Name, workerId2, boardWorkers);
       });
     });
   });
@@ -338,10 +355,15 @@ describe('Referee', function () {
     describe('getAndApplyTurn', function () {
       let turn, gameState;
       describe('when the Player provides a valid non-winning Turn', function () {
+        let observer;
         beforeEach(function () {
           turn = [["move", { player:p1Name, id:workerId1 }, ["PUT", "SOUTH"]],
             ["build", ["PUT", "SOUTH"]]];
           player1.takeTurn = sinon.stub().returns(turn);
+
+          observer = testLib.createMockObject(turnTaken);
+          referee.addObserver(observer);
+
           gameState = referee.getAndApplyTurn(player1);
         });
         it('applies the player"s turn to the Board', function () {
@@ -352,6 +374,15 @@ describe('Referee', function () {
         });
         it('returns a GameState indicating that the game should continue', function () {
           assert.deepEqual(gameState, c.GameState.IN_PROGRESS);
+        });
+        it('notifies the Observer that a turn was taken', function () {
+          assert.isTrue(observer[turnTaken].calledOnce);
+          let call0Args = observer[turnTaken].getCall(0).args;
+          let observerTurn = call0Args[0];
+          let observerBoard = call0Args[1];
+
+          assert.deepEqual(observerTurn, turn);
+          assert.deepEqual(observerBoard, referee.board);
         });
       });
       describe('when the Player provides a valid winning Turn', function () {
@@ -371,11 +402,15 @@ describe('Referee', function () {
         });
       });
       describe('when the Player provides an invalid Turn', function () {
-        let boardCopy;
+        let boardCopy, observer;
         beforeEach(function () {
           boardCopy = referee.board.copy();
           turn = [["move", { player:p1Name, id:workerId1 }, ["PUT", "PUT"]]];
           player1.takeTurn = sinon.stub().returns(turn);
+
+          observer = testLib.createMockObject(turnTaken);
+          referee.addObserver(observer);
+
           gameState = referee.getAndApplyTurn(player1);
         });
         it('does not apply the Turn to the Board', function () {
@@ -385,6 +420,9 @@ describe('Referee', function () {
         it('returns a GameState indicating that the other Player won', function () {
           assert.deepEqual(gameState, [p2Name, c.EndGameReason.BROKEN_RULE]);
         });
+        it('does not notify the Observer that any turn was taken', function () {
+          assert.isFalse(observer[turnTaken].called);
+        })
       });
     });
 
