@@ -1,7 +1,6 @@
 const Referee = require('../../Admin/referee');
 const Observer = require('../../Observer/observer');
 const Player = require('../../Player/player');
-const uuid = require('uuid/v4');
 
 let player1 = new Player();
 let player2 = new Player();
