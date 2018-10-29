@@ -19,10 +19,12 @@ const testLib = require('./test-lib');
  * on the Promise value returned by the Referee method being tested.
  * it()s that call .then() on the Promise must return that call.
  *
- *  - expect(promise).to.eventually.[deep.]equal(val) is used for testing the promise value itself
+ *  - return expect(promise).to.eventually.[deep.]equal(val)
+ *    is used for testing the promise value itself
  *
- *  - return promise.then((promiseValue) => { ...assertions... }); is good for testing
- *    side effects of the Referee method, or for checking specific properties
+ *  - return promise.then((promiseValue) => { ...assertions... });
+ *    is good for testing side effects of the Referee method,
+ *    or for checking specific properties
  *    of the promiseValue that the promise resolves to.
  *
  *
@@ -113,7 +115,7 @@ describe('Referee', function () {
         });
       });
       it('returns a GameResult indicating that the winning player won', function () {
-        expect(gameResult).to.eventually.deep.equal([p2Id, c.EndGameReason.WON]);
+        return expect(gameResult).to.eventually.deep.equal([p2Id, c.EndGameReason.WON]);
       });
       it('notifies both Players that the winning Player won', function () {
         return gameResult.then((gr) => {
@@ -146,8 +148,10 @@ describe('Referee', function () {
         player2.takeTurn = sinon.stub().withArgs(boardAfterP2Turn).resolves(p2Turn);
         gameResult = referee.playGame();
       });
+      it('returns a GameResult indicating that the non-rule-breaking Player won', function () {
+        return expect(gameResult).to.eventually.deep.equal([p1Id, c.EndGameReason.BROKEN_RULE]);
+      });
       it('notifies both Players that the non-rule-breaking Player won', function () {
-        expect(gameResult).to.eventually.deep.equal([p1Id, c.EndGameReason.BROKEN_RULE]);
         return gameResult.then((gr) => {
           assert.isTrue(player2.notifyGameOver.calledWith(gr));
           assert.isTrue(player1.notifyGameOver.calledWith(gr));
@@ -350,7 +354,7 @@ describe('Referee', function () {
         });
       });
       it('returns a GameState indicating that the game should continue', function () {
-        expect(gameState).to.eventually.equal(c.GameState.IN_PROGRESS);
+        return expect(gameState).to.eventually.equal(c.GameState.IN_PROGRESS);
       });
       it('notifies the Observer of all placements', function () {
         /* Natural PlaceRequest String Int [Worker, ...] -> Void
@@ -450,7 +454,7 @@ describe('Referee', function () {
           });
         });
         it('returns a GameState indicating that the game should continue', function () {
-          expect(gameState).to.eventually.equal(c.GameState.IN_PROGRESS);
+          return expect(gameState).to.eventually.equal(c.GameState.IN_PROGRESS);
         });
         it('notifies the Observer that a turn was taken', function () {
           return gameState.then(() => {
@@ -479,7 +483,7 @@ describe('Referee', function () {
           });
         });
         it('returns a GameState indicating that the Player has won the game', function () {
-          expect(gameState).to.eventually.deep.equal([p1Id, c.EndGameReason.WON]);
+          return expect(gameState).to.eventually.deep.equal([p1Id, c.EndGameReason.WON]);
         });
       });
       describe('when the Player provides an invalid Turn', function () {
@@ -501,7 +505,7 @@ describe('Referee', function () {
           });
         });
         it('returns a GameState indicating that the other Player won', function () {
-          expect(gameState).to.eventually.deep.equal([p2Id, c.EndGameReason.BROKEN_RULE]);
+          return expect(gameState).to.eventually.deep.equal([p2Id, c.EndGameReason.BROKEN_RULE]);
         });
         it('does not notify the Observer that any turn was taken', function () {
           return gameState.then(() => {
