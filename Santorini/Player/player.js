@@ -19,39 +19,41 @@ class Player {
     // place/turn generation to. Both are game-specific and set in newGame()
   }
 
-  /* [InitWorker, ...] -> PlaceRequest
+  /* [InitWorker, ...] -> Promise<PlaceRequest>
     Given the list of worker locations that have already been claimed on the Board,
     produce a PlaceRequest representing where this Player would like to put
     their next Worker.
   */
   placeInitialWorker(existingWorkers) {
-    return this.strategy.getNextWorkerPlace(existingWorkers);
+    return Promise.resolve(this.strategy.getNextWorkerPlace(existingWorkers));
   }
 
-  /* Board -> Turn
+  /* Board -> Promise<Turn>
     Given the current state of the game board, produce the Turn that
     this Player wishes to take.
   */
   takeTurn(board) {
-    return this.strategy.getNextTurn(board);
+    return Promise.resolve(this.strategy.getNextTurn(board));
   }
 
-  /* UUID UUID -> Void
+  /* UUID UUID -> Promise<Void>
     Notify this Player that they have been put into a new game.
     The first UUID is this Player's ID for the game, and the second UUID
     is the opponent's.
   */
   newGame(myId, opponentId) {
     this.id = myId;
-    this.strategy = new Strategy(myId, opponentId, 4, 0);
+    this.strategy = new Strategy(myId, opponentId, 2, 0);
+    return Promise.resolve();
   }
 
-  /* GameResult -> Void
+  /* GameResult -> Promise<Void>
     Notify this Player of the result of a game they played,
     so that internal information can be reset/updated as necessary
   */
   notifyGameOver(gameResult) {
     // Nothing to do here for now.
+    return Promise.resolve();
   }
 }
 

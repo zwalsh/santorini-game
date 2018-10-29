@@ -1,10 +1,13 @@
 /*
     Test suite for the Player implementation that uses a Strategy.
  */
-let expect = require('chai').expect;
+let chai = require('chai');
 let sinon = require('sinon');
 let Player = require('../Player/player');
 let Board = require('../Common/board');
+const chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
+const expect = chai.expect;
 
 describe('Player', function () {
   let player, player1Name, player2Name;
@@ -32,14 +35,14 @@ describe('Player', function () {
     it('calls the strategy and returns its value', function () {
       let result = player.placeInitialWorker([initWorker]);
       expect(mockStrategy.getNextWorkerPlace.called).to.eql(true);
-      expect(result).to.eql(placeRequest);
+      expect(result).to.eventually.eql(placeRequest);
     });
   });
   describe('getTurn', function () {
     it('calls the strategy and returns its value', function () {
       let result = player.takeTurn(board);
       expect(mockStrategy.getNextTurn.called).to.eql(true);
-      expect(result).to.eql(turn);
+      expect(result).to.eventually.eql(turn);
     });
   });
 });
