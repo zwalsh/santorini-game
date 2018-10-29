@@ -144,7 +144,7 @@ class Observer {
     Stringify and print the given JSON.
    */
   printJson(json) {
-    process.stdout.write(JSON.stringify(json));
+    process.stdout.write(JSON.stringify(json) + '\n');
   }
 
   /* String String OddNumber -> Void
