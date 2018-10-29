@@ -334,6 +334,8 @@ describe('Referee', function () {
         return gameState.then(() => {
           assert.equal(player1.placeInitialWorker.callCount, 2);
           assert.equal(player2.placeInitialWorker.callCount, 2);
+          assert.deepEqual(player1.placeInitialWorker.getCall(0).args[0], []);
+          assert.deepEqual(player2.placeInitialWorker.getCall(0).args[0], [{player:p1Id, x: 0, y: 0}]);
         });
       });
       it('creates a Board with all four workers correctly added to the Referee"s Board', function () {

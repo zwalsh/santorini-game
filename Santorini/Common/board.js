@@ -81,7 +81,8 @@ class Board {
   static copyInitWorkerList(initWorkers) {
     return initWorkers.map(iw => ({
       player: iw.player,
-      id: iw.id
+      x: iw.x,
+      y: iw.y
     }));
   }
 
