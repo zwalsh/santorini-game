@@ -151,7 +151,8 @@ class Referee {
   }
 
   /* PositiveInteger [GameResult, ...] -> Promise<[GameResult, ...]>
-
+    Complete a series of numGames games between the players, given
+    the set of game results from any prior games in the series.
    */
   completePlayNGames(numGames, gameResults) {
     return this.playGame().then((result) => {
