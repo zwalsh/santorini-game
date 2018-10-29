@@ -266,5 +266,20 @@ describe('Strategy Test', function () {
       assert.equal(dec[0][0], 'move');
       assert.equal(strategyLoser.maxLookahead, 1);
     });
+
+    it('returns only a move if the move is a winning one', function () {
+      let board = [[0,0,0,0,0,0],
+        [0,1,0,0,0,0],
+        [1,1,0,0,0,0],
+        [2,4,0,0,0,0],
+        [3,4,1,0,0,0],
+        [4,4,0,1,0,0]];
+      let strategy = new Strategy('wayne', 'garth', 4, 1);
+      let listOfWorkers = [new Worker(0, 3, 1, "wayne")];
+      let aboutToWinBoard = new Board(null, board, listOfWorkers);
+      let decision = strategy.getNextTurn(aboutToWinBoard);
+      assert.equal(decision.length, 1);
+      assert.deepEqual(decision[0], ['move', {player: 'wayne', id:1}, ['PUT', 'SOUTH']]);
+    });
   });
 });
