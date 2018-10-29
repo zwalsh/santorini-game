@@ -43,7 +43,7 @@ class Player {
   */
   newGame(myId, opponentId) {
     this.id = myId;
-    this.strategy = new Strategy(myId, opponentId, 4, 0);
+    this.strategy = new Strategy(myId, opponentId, 2, 0);
     return Promise.resolve();
   }
 
