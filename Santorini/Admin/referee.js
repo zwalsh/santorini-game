@@ -85,7 +85,7 @@ class Referee {
     let p2Id = this.player2.getId();
 
     let playersNotifiedOfStart = this.player1.newGame(p1Id, p2Id).then(() => {
-      return this.player2.newGame(p1Id, p2Id);
+      return this.player2.newGame(p2Id, p1Id);
     });
 
     let gameSetUp = playersNotifiedOfStart.then(() => {
@@ -254,13 +254,13 @@ class Referee {
         return [this.flip(activePlayer).getId(), c.EndGameReason.BROKEN_RULE];
       }
 
-      if (RC.hasWon(this.board, activePlayer.getId()) || RC.hasLost(this.board, this.flip(activePlayer.getId()))) {
+      if (RC.hasWon(this.board, activePlayer.getId()) || RC.hasLost(this.board, this.flip(activePlayer).getId())) {
         return [activePlayer.getId(), c.EndGameReason.WON];
       } else {
         return c.GameState.IN_PROGRESS;
       }
     }).catch(() => {
-      return [this.flip(activePlayer.getId()), c.EndGameReason.BROKEN_RULE];
+      return [this.flip(activePlayer).getId(), c.EndGameReason.BROKEN_RULE];
     });
   }
 
