@@ -87,7 +87,7 @@ Stores the input files for use in the test fest. Each "in" file has a sequence o
 
 ### 10/
 
-* xobserver - Executable for running a complete game of Santorini between two Players, managed by a Referee, with an Observer on the Referee printing significant actions in the game to stdout.
+* xobserve - Executable for running a complete game of Santorini between two Players, managed by a Referee, with an Observer on the Referee printing significant actions in the game to stdout.
 
 #### Auxiliary/
 * observe-complete-ai-game.js - The file that xobserver runs.
