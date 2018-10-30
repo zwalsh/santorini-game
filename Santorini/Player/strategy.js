@@ -222,6 +222,11 @@ class Strategy {
         // Iterate through all possible combinations of Move Direction and Build Direction
         for (let moveCoord in dirs.directions) {
           let moveDir = dirs.coordToDirection(dirs.directions[moveCoord]);
+          if (board.workerHasNeighbor(wRequest, moveDir) &&
+            board.workerNeighborHeight(wRequest, moveDir) === c.WINNING_HEIGHT) {
+            decisions.push([["move", wRequest, moveDir]]);
+            continue;
+          }
           // todo use checkTurn and add just the move to the list of decisions
           for (let buildCoord in dirs.directions) {
             let buildDir = dirs.coordToDirection(dirs.directions[buildCoord]);
