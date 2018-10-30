@@ -1,7 +1,6 @@
 const Rulechecker = require('../Common/rulechecker');
 const Board = require('../Common/board');
 const RFC = require('../Lib/request-format-checker');
-const GuardedPlayer = require('./guarded-player');
 const c = require('../Lib/constants');
 
 /**
@@ -24,6 +23,12 @@ const c = require('../Lib/constants');
  A Referee may play one or n games. After each game, it will notify
  each Player of the result of each game. When the game (or games) is/are complete,
  it will return the result, or a length n list of each result in order.
+
+ All methods on the Referee that call methods on a player (GuardedPlayer)
+ return Promises to account for the asynchronous nature of interacting with Player components.
+
+ Clients may register observers on the Referee, and the Referee will notify
+ all its Observers of any significant events in the games or series of games it runs.
 
  * ======================== DATA DEFINITIONS ======================
  *
