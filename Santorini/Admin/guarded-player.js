@@ -12,13 +12,21 @@
 
 
 class GuardedPlayer {
-  /* Player Number -> GuardedPlayer
+  /* Player UUID Number -> GuardedPlayer
     Constructs a GuardedPlayer that protects calls to the given Player, always
     returning within the given timeout (in ms).
    */
-  constructor(player, timeout) {
+  constructor(player, id, timeout) {
     this.player = player;
+    this.id = id;
     this.timeout = timeout;
+  }
+
+  /* Void -> UUID
+    Returns the UUID of the Player on this GuardedPlayer.
+  */
+  getId() {
+    return this.id;
   }
 
   /* [Player -> Promise<X>] -> Promise<X>
