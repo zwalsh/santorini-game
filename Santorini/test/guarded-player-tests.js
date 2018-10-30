@@ -9,11 +9,12 @@ const testLib = require('./test-lib');
 const GuardedPlayer = require('../Admin/guarded-player');
 
 describe('GuardedPlayer tests', function () {
+
   describe('protectedPromise', function () {
     let guardedPlayer, timeout;
     beforeEach(function () {
       timeout = 25; // in milliseconds
-      guardedPlayer = new GuardedPlayer(null, timeout);
+      guardedPlayer = new GuardedPlayer(null, "id", timeout);
     });
     describe('the Promise from the Player resolves', function () {
       it('the GuardedPlayer\'s Promise resolves with the result from the Player', function () {
