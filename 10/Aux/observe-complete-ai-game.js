@@ -1,13 +1,16 @@
-const Referee = require('../../Admin/referee');
-const Observer = require('../../Observer/observer');
-const Player = require('../../Player/player');
+const Referee = require('../../Santorini/Admin/referee');
+const Observer = require('../../Santorini/Observer/observer');
+const Player = require('../../Santorini/Player/player');
+const GuardedPlayer = require('../../Santorini/Admin/guarded-player');
 
-let player1 = new Player();
-let player2 = new Player();
+let timeout = 10;
 let p1Id = 'Wayne';
 let p2Id = 'Garth';
 
-let referee = new Referee(player1, player2, p1Id, p2Id, 10);
+let player1 = new GuardedPlayer(new Player(), p1Id, timeout);
+let player2 = new GuardedPlayer(new Player(), p2Id, timeout);
+
+let referee = new Referee(player1, player2);
 let observer = new Observer();
 referee.addObserver(observer);
 referee.playGame();
