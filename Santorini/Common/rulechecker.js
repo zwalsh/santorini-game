@@ -1,6 +1,6 @@
-const direction = require('../Lib/direction');
+const direction = require('./direction');
 const dirs = direction.directions;
-const c = require('../Lib/constants');
+const c = require('./constants');
 
 /**
  * An InitWorker is a: {player: string, x: int, y: int}

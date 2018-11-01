@@ -8,7 +8,7 @@ const uuid = require('uuid/v4');
 const Referee = require('../Admin/referee');
 const Worker = require('../Common/worker');
 const Board = require('../Common/board');
-const c = require('../Lib/constants');
+const c = require('../Common/constants');
 const testLib = require('./test-lib');
 
 /** Note on testing with Promises:

@@ -35,7 +35,7 @@
         represent a move, and the second two represent a build following the move.
 */
 
-const c = require('../Lib/constants');
+const c = require('../Common/constants');
 
 class Observer {
   constructor() {

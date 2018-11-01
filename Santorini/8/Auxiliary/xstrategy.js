@@ -1,4 +1,4 @@
-const utility = require("../../Lib/utility");
+const utility = require("../../Common/json-to-component");
 const Strategy = require("../../Common/strategy");
 
 const process = require('process');

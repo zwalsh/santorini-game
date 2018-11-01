@@ -1,7 +1,7 @@
 let assert = require('chai').assert;
 let sinon = require('sinon');
 let Board = require('../Common/board');
-const c = require('../Lib/constants');
+const c = require('../Common/constants');
 let Observer = require('../Observer/observer');
 let Worker = require('../Common/worker');
 
