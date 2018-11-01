@@ -21,10 +21,12 @@ All code that both administrative components and player components need to acces
 * guarded-player.js - A wrapper for Player implementations that protects all calls to Players with timeouts and checks for exceptions.
 
 #### Player/
-* player.js - An interface (and here, implementation) for a Player that can 
+* player.js - Implementation of a working Player that can
 participate in a game of Santorini. This implementation uses a local AI Strategy
 to generate worker placements and turns.
 * strategy.js - Implements a strategy component for automatically choosing moves based on decision trees.
+* player-breaker.js - A Player implementation that only returns malformed game data when asked for worker placements or turns.
+* player-infinite.js - A Player implementation that only returns empty Promises, which never resolve into values, thereby simulating it entering an infinite loop.
 
 #### Design/
 Contains our specifications and interfaces for the design of the Santorini game.
