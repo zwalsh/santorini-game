@@ -1,6 +1,6 @@
 const Worker = require('./worker');
 const directionToCoordinate = require('../Lib/direction').directionToCoordinate;
-const c = require('../Lib/constants');
+const c = require('./constants');
 
 /**
  * Data Definitions:

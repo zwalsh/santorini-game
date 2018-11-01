@@ -5,7 +5,7 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const InfinitePlayer = require('../Player/player-infinite');
 const Board = require('../Common/board');
-const c = require('../Lib/constants');
+const c = require('../Common/constants');
 const uuid = require('uuid/v4');
 
 describe('InfinitePlayer', function () {

@@ -2,7 +2,7 @@ const Board = require('../../Santorini/Common/board');
 const Worker = require('../../Santorini/Common/worker');
 const nearley = require("nearley");
 const grammar = require("../../Santorini/Lib/jsongrammar.js");
-const c = require('./constants');
+const c = require('../Common/constants');
 let parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
 var exports = module.exports = {};
 

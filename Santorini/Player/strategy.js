@@ -1,4 +1,4 @@
-const c = require('../Lib/constants');
+const c = require('../Common/constants');
 const dirs = require('../Lib/direction');
 const Rulechecker = require('../Common/rulechecker');
 
