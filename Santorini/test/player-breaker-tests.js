@@ -1,6 +1,6 @@
 const chai = require('chai');
 const assert = chai.assert;
-const RFC = require('../Lib/request-format-checker');
+const RFC = require('../Common/request-format-checker');
 const Board = require('../Common/board');
 const BrokenPlayer = require('../Player/player-breaker');
 
