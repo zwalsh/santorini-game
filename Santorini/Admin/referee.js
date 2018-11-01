@@ -1,6 +1,6 @@
 const Rulechecker = require('../Common/rulechecker');
 const Board = require('../Common/board');
-const RFC = require('../Lib/request-format-checker');
+const RFC = require('../Common/request-format-checker');
 const c = require('../Common/constants');
 
 /**
