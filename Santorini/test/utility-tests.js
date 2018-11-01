@@ -1,5 +1,5 @@
 let assert = require('chai').assert;
-let Utility = require('../Lib/utility');
+let Utility = require('../Common/json-to-component');
 
 describe('utility tests', function() {
   let boardSpec = [[0, 1, 2, 3, 2, 1],

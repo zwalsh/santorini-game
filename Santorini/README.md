@@ -46,7 +46,7 @@ on cardinal directions. Also exposes some helper functions for parsing and conve
  between them.
 * json.ne - Defines a nearley grammar for parsing JSON strings.
 * jsongrammar.js - The compiled grammar from json.ne.
-* utility.js - Exposes a set of helper functions for use by test harnesses.
+* json-to-component.js - Exposes a set of helper functions for use by test harnesses.
  Includes a JSON parser, a Worker parser, and a BoardSpec parser.
 
 #### test/
