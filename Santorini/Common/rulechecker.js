@@ -1,4 +1,4 @@
-const direction = require('../Lib/direction');
+const direction = require('./direction');
 const dirs = direction.directions;
 const c = require('./constants');
 

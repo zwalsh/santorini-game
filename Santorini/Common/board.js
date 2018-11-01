@@ -1,5 +1,5 @@
 const Worker = require('./worker');
-const directionToCoordinate = require('../Lib/direction').directionToCoordinate;
+const directionToCoordinate = require('./direction').directionToCoordinate;
 const c = require('./constants');
 
 /**

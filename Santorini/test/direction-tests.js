@@ -1,5 +1,5 @@
 let assert = require('chai').assert;
-let Direction = require('../Lib/direction');
+let Direction = require('../Common/direction');
 
 describe('direction', function() {
 

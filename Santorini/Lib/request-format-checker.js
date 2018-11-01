@@ -11,7 +11,7 @@
  *
  */
 
-const Direction = require('./direction');
+const Direction = require('../Common/direction');
 /* Any -> Boolean
   Return true if the input is a well-formed Turn.
  */
