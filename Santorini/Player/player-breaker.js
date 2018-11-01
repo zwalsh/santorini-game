@@ -1,8 +1,7 @@
 /* Represents a Player in a game of Santorini, which is carried through the various phases of the game.
-  It produces Turns and places Workers (as appropriate) when it is requested to do so,
-  and when it is given an update on the current state of the game.
 
   This implementation returns only malformed PlaceRequests and Turns.
+
   It can be used to test Referees, tournament managers, and other components that
   are supposed to be able to gracefully handle misbehavior from Players like this one.
 

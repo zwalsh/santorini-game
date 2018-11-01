@@ -1,6 +1,10 @@
 /* Represents a Player in the game of Santorini that will produce a Promise that
   never resolves.
 
+  It can be used to test Referees, tournament managers, and other components that
+  are supposed to be able to gracefully Players that enter infinite loops
+  (or just pretend to, like this one).
+
   DATA DEFINITIONS:
 
   Board is defined in Common/board.js

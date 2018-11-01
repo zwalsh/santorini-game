@@ -1,6 +1,6 @@
-/* Represents a Player of the game, which is carried through the various phases of the game.
-  Must be able to produce a Turn or place a Worker (as appropriate) when it is requested to do so (and is given
-  an update as to the current state of the game).
+/* Represents a Player in a game of Santorini, which is carried through the various phases of the game.
+  It produces Turns and places Workers (as appropriate) when it is requested to do so,
+  and when it is given an update on the current state of the game.
 
   This implementation uses a Strategy to generate its Placements and Turns.
 
