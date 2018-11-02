@@ -19,6 +19,8 @@ All code that both administrative components and player components need to acces
 #### Admin/
 * referee.js - Contains the Referee component that manages a game (or series) between two Players.
 * guarded-player.js - A wrapper for Player implementations that protects all calls to Players with timeouts and checks for exceptions.
+* tournament-manager.js - A class that manages a round-robin tournament between a given list of Players. 
+* tournament-result.js - The result of a tournament, including all matches and all Players that cheated.
 
 #### Player/
 * player.js - Implementation of a working Player that can
