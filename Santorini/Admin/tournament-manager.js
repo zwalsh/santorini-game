@@ -24,39 +24,47 @@
 class TournamentManager {
 
   /* [GuardedPlayer, ..., GuardedPlayer] Number -> TournamentManager
-    Given a non-empty list of GuardedPlayers, and a positive odd number
+    Given a minimum length 2 list of GuardedPlayers, and a positive odd number
     of games to play between each of them, create a TournamentManager.
    */
   constructor(players, seriesLength) {
+    // Canonical ordering of players in this Tournament. This list should not be mutated.
     this.players = players;
     this.seriesLength = seriesLength;
 
-    // Players waiting to be put into a match
-    this.waitingPlayers = []
+    // Players waiting to be put into a match - any two players on the waitlist
+    // at any time must have already played each other, or they would be in a
+    // match.
+    this.waitingPlayers = [];
 
     // Players disqualified from the tournament for any reason
     this.badPlayers = [];
+
+    // Players that have played all necessary matches
+    this.donePlayers = [];
 
     // Record of interactions between all players.
     // Stores results of all series played, and used to help
     // schedule additional matches between players.
     this.matchTable = {};
+
+    this.tournamentResolutionPromise;
   }
 
-  /* Void -> Promise<TournamentResult???> TODO return type ??
-    Start the tournament, eventually promise to give back the results of the tournament??
-    TODO figure out how to deal with the promise thing
-
+  /* Void -> Promise<TournamentResult>
+    Start the tournament, eventually promise to give back the results of the tournament.
    */
   startTournament() {
-
+    return new Promise(resolve => {
+      this.tournamentResolutionPromise = resolve;
+    });
   }
 
   /* GP GP -> Void
     Start a series between the given Players. Construct a Referee to manage the game,
     and set the callback to handle the series result.
   */
-  startMatch() {
+  startMatch(player1, player2) {
 
   }
 
@@ -76,8 +84,50 @@ class TournamentManager {
 
    */
 
+  /* [GameResult, ..., GameResult] -> Void
+    Given a non-empty list of GameResults representing the result of a match
+    between two Players, add it to the matchTable.
 
+    If the GameResults indicate cheating, this function also updates past entries
+    in the matchTable to award the past wins of the cheater to its opponents.
+    If both players of any particular match have cheated, then that entry in the
+    match table is updated to remove the match from the tournament record entirely.
+   */
+  addMatchToTable(gameResults) {
 
+  }
+
+  /* GP GP -> Void
+    Checks if either of the two players cheated or broke in the match between the two of them.
+    If so, adds the offender(s) to this tournament's list of misbehaved players.
+  */
+  removeBadPlayers(player1, player2) {
+
+  }
+
+  /* GP -> [GP, ...]
+    Returns the list of all opponents that the given player still must play.
+  */
+  remainingOpponents(player) {
+
+  }
+
+  /* GP -> Void
+    Attempts to put the given player into a match with someone on the waitlist.
+    If they have already played everyone on the waitlist (or the waitlist is
+    empty), then place them on the waitlist too.
+  */
+  matchOrWaitlistPlayer(player) {
+
+  }
+
+  /* Void -> Boolean
+    Check if the tournament is over. This is the case when every player is
+    either in the done list or the cheater list.
+  */
+  isTournamentOver() {
+
+  }
 
 }
 
