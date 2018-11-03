@@ -54,8 +54,8 @@ describe('Referee', function () {
 
   describe('playGame', function () {
     let board, referee, player2, player1, p1Turn, observer;
-    let p1Id = "p1";//uuid();
-    let p2Id = "p2";//uuid();
+    let p1Id = "p1";
+    let p2Id = "p2";
     beforeEach(function () {
       let grid = [[2, 3, 0, 0, 0, 0],
         [3, 3, 0, 0, 0, 0],
@@ -110,17 +110,16 @@ describe('Referee', function () {
       });
       it('requests Turns from both', function () {
         return gameResult.then(() => {
-          //assert.isTrue(player2.takeTurn.called);//.calledOnce);
-          assert.isTrue(player1.takeTurn.called);//Once);
+          assert.isTrue(player2.takeTurn.calledOnce);
+          assert.isTrue(player1.takeTurn.calledOnce);
         });
       });
       it('returns a GameResult indicating that the winning player won', function () {
-        return expect(gameResult).to.eventually.deep.equal([p2Id, c.EndGameReason.WON]);
+        let expectedGameResult = new GameResult(p2Id, p1Id, c.EndGameReason.WON);
+        return expect(gameResult).to.eventually.deep.equal(expectedGameResult);
       });
       it('notifies both Players that the winning Player won', function () {
         return gameResult.then((gr) => {
-          // assert.isTrue(player2.notifyGameOver.called);
-          // assert.isTrue(player1.notifyGameOver.called);
           assert.isTrue(player2.notifyGameOver.calledWith(gr));
           assert.isTrue(player1.notifyGameOver.calledWith(gr));
         });
@@ -149,7 +148,8 @@ describe('Referee', function () {
         gameResult = referee.playGame();
       });
       it('returns a GameResult indicating that the non-rule-breaking Player won', function () {
-        return expect(gameResult).to.eventually.deep.equal([p1Id, c.EndGameReason.BROKEN_RULE]);
+        let expectedGameResult = new GameResult(p1Id, p2Id, c.EndGameReason.BROKEN_RULE);
+        return expect(gameResult).to.eventually.deep.equal(expectedGameResult);
       });
       it('notifies both Players that the non-rule-breaking Player won', function () {
         return gameResult.then((gr) => {
@@ -176,9 +176,9 @@ describe('Referee', function () {
     describe('when neither Player breaks a rule in any game', function () {
       let resultList, result1, result2, result3;
       beforeEach(function () {
-        result1 = [p1Id, c.EndGameReason.WON];
-        result2 = [p2Id, c.EndGameReason.WON];
-        result3 = [p1Id, c.EndGameReason.WON];
+        result1 = new GameResult(p1Id, p2Id, c.EndGameReason.WON);
+        result2 = new GameResult(p2Id, p1Id, c.EndGameReason.WON);
+        result3 = new GameResult(p1Id, p2Id, c.EndGameReason.WON);
         referee.playGame = sinon.stub()
           .onFirstCall().resolves(result1)
           .onSecondCall().resolves(result2)
@@ -193,7 +193,6 @@ describe('Referee', function () {
       it('returns the correct GameResult list', function () {
         return resultList.then((rl) => {
           assert.equal(rl.length, 3);
-          //assert.equal(rl,false);
           assert.deepEqual(rl[0], result1);
           assert.deepEqual(rl[1], result2);
           assert.deepEqual(rl[2], result3);
@@ -215,8 +214,8 @@ describe('Referee', function () {
     describe('when a Player wins a majority of games before the series is over', function () {
       let resultList, result1, result2;
       beforeEach(function () {
-        result1 = [p1Id, c.EndGameReason.WON];
-        result2 = [p1Id, c.EndGameReason.WON];
+        result1 = new GameResult(p1Id, p2Id, c.EndGameReason.WON);
+        result2 = new GameResult(p1Id, p2Id, c.EndGameReason.WON);
         referee.playGame = sinon.stub()
           .onFirstCall().resolves(result1)
           .onSecondCall().resolves(result2);
@@ -238,8 +237,8 @@ describe('Referee', function () {
     describe('when a Player breaks a rule in a game', function () {
       let resultList, result1, result2;
       beforeEach(function () {
-        result1 = [p1Id, c.EndGameReason.WON];
-        result2 = [p2Id, c.EndGameReason.BROKEN_RULE];
+        result1 = new GameResult(p1Id, p2Id, c.EndGameReason.WON);
+        result2 = new GameResult(p2Id, p1Id, c.EndGameReason.BROKEN_RULE);
         referee.playGame = sinon.stub()
           .onFirstCall().resolves(result1)
           .onSecondCall().resolves(result2);
@@ -315,7 +314,8 @@ describe('Referee', function () {
         gameState = referee.setup();
       });
       it('returns a GameState indicating that the other Player won', function () {
-        return expect(gameState).to.eventually.deep.equal([p1Id, c.EndGameReason.BROKEN_RULE]);
+        let expectedGameResult = new GameResult(p1Id, p2Id, c.EndGameReason.BROKEN_RULE)
+        return expect(gameState).to.eventually.deep.equal(expectedGameResult);
       });
       it('does not create a new Board for the Referee', function () {
         return gameState.then(() => {
@@ -365,7 +365,7 @@ describe('Referee', function () {
           Calling this function adds a Worker (specified by the given PlaceRequest, player name,
           and worker ID) to the list boardWorkers.
          */
-        function checkPlaceNotification(callIdx, placeReq, pName, workerId, boardWorkers) {
+        function verifyPlaceNotification(callIdx, placeReq, pName, workerId, boardWorkers) {
           let call = observer[workerPlaced].getCall(callIdx);
           assert.deepEqual(call.args[0], placeReq);
           assert.equal(call.args[1], pName);
@@ -376,10 +376,10 @@ describe('Referee', function () {
 
         return gameState.then(() => {
           let boardWorkers = [];
-          checkPlaceNotification(0, placeRequest0, p1Id, workerId1, boardWorkers);
-          checkPlaceNotification(1, placeRequest1, p2Id, workerId1, boardWorkers);
-          checkPlaceNotification(2, placeRequest2, p1Id, workerId2, boardWorkers);
-          checkPlaceNotification(3, placeRequest3, p2Id, workerId2, boardWorkers);
+          verifyPlaceNotification(0, placeRequest0, p1Id, workerId1, boardWorkers);
+          verifyPlaceNotification(1, placeRequest1, p2Id, workerId1, boardWorkers);
+          verifyPlaceNotification(2, placeRequest2, p1Id, workerId2, boardWorkers);
+          verifyPlaceNotification(3, placeRequest3, p2Id, workerId2, boardWorkers);
         });
       });
     });
@@ -485,7 +485,8 @@ describe('Referee', function () {
           });
         });
         it('returns a GameState indicating that the Player has won the game', function () {
-          return expect(gameState).to.eventually.deep.equal([p1Id, c.EndGameReason.WON]);
+          let expectedGameResult = new GameResult(p1Id, p2Id, c.EndGameReason.WON);
+          return expect(gameState).to.eventually.deep.equal(expectedGameResult);
         });
       });
       describe('when the Player provides an invalid Turn', function () {
@@ -507,7 +508,8 @@ describe('Referee', function () {
           });
         });
         it('returns a GameState indicating that the other Player won', function () {
-          return expect(gameState).to.eventually.deep.equal([p2Id, c.EndGameReason.BROKEN_RULE]);
+          let expectedGameResult = new GameResult(p2Id, p1Id, c.EndGameReason.BROKEN_RULE)
+          return expect(gameState).to.eventually.deep.equal(expectedGameResult);
         });
         it('does not notify the Observer that any turn was taken', function () {
           return gameState.then(() => {

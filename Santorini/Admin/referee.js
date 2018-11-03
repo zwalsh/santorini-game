@@ -209,7 +209,7 @@ class Referee {
 
         this.notifyAllObservers(o => { o.workerPlaced(placeReq, activePlayer.getId(), new Board(initWorkerList)) });
       } else {
-        return [this.flip(activePlayer).getId(), c.EndGameReason.BROKEN_RULE];
+        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), c.EndGameReason.BROKEN_RULE);
       }
 
       // Check for exit condition after worker is added to list of InitWorkers
@@ -220,7 +220,7 @@ class Referee {
         return this.completeSetup(this.flip(activePlayer), initWorkerList);
       }
     }).catch(() => {
-      return [this.flip(activePlayer).getId(), c.EndGameReason.BROKEN_RULE];
+      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), c.EndGameReason.BROKEN_RULE);
     });
   }
 
