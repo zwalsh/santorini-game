@@ -39,8 +39,6 @@ const c = require('../Common/constants');
 
 class Observer {
   constructor() {
-    this.playerName1 = null;
-    this.playerName2 = null;
   }
 
   /* String String -> Void
@@ -48,8 +46,7 @@ class Observer {
     two Players with the given names.
   */
   startGame(playerName1, playerName2) {
-    this.playerName1 = playerName1;
-    this.playerName2 = playerName2;
+    // Intentional no-op
   }
 
   /* PlaceRequest String Board -> Void
@@ -124,16 +121,13 @@ class Observer {
     Convert the GameResult to an informative printable representation
    */
   gameResultToJson(gameResult) {
-    let playerName = gameResult[0];
-    let opponentName = playerName === this.playerName1 ? this.playerName2 : this.playerName1;
-    let endGameReason = gameResult[1];
-    let message = "Player " + playerName + " ";
-    switch(endGameReason) {
+    let message = "Player " + gameResult.winner + " ";
+    switch(gameResult.reason) {
       case c.EndGameReason.WON:
         message += "won the game!";
         break;
       case c.EndGameReason.BROKEN_RULE:
-        message += "won because Player " + opponentName + " broke the rules.";
+        message += "won because Player " + gameResult.loser + " broke the rules.";
         break;
       default:
     }
