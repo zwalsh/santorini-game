@@ -44,14 +44,9 @@ const c = require('../Common/constants');
  *
  * An InitWorker is a: {player: string, x: int, y: int}
  *
- * An EndGameReason is one of:
- * - "WON"
- * - "BROKEN_RULE"
- * and represents whether a Player won legitimately, or because
- * their opponent broke the rules.
+ * GameResult is defined in game-result.js
  *
- * A GameResult is a [UUID, EndGameReason] where the UUID is
- * the identifier of the Player who won the game.
+ * EndGameReason is defined in game-result.js
  *
  * A GameState is one of:
  * - "IN_PROGRESS"
