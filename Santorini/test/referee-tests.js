@@ -8,6 +8,7 @@ const uuid = require('uuid/v4');
 const Referee = require('../Admin/referee');
 const Worker = require('../Common/worker');
 const Board = require('../Common/board');
+const GameResult = require('../Common/game-result');
 const c = require('../Common/constants');
 const testLib = require('./test-lib');
 
@@ -259,7 +260,7 @@ describe('Referee', function () {
     });
   });
 
-  describe('getSeriesStatus', function () {
+  describe('isSeriesOver', function () {
     let player1, player2, p1Id, p2Id, workerId1, referee, gameResults;
     beforeEach(function () {
       workerId1 = 1;
@@ -268,17 +269,17 @@ describe('Referee', function () {
       player1 = makePlayer(p1Id);
       player2 = makePlayer(p2Id);
       referee = new Referee(player1, player2);
-      gameResults = [[p1Id, c.EndGameReason.WON]];
+      gameResults = [new GameResult(p1Id, p2Id, c.EndGameReason.WON)];
     });
     it('indicates that the series is still in progress if neither player has won a majority', function () {
-      gameResults.push([p2Id, c.EndGameReason.WON]);
-      let status = referee.getSeriesStatus(gameResults, 3);
-      assert.equal(status, c.GameState.IN_PROGRESS);
+      gameResults.push(new GameResult(p2Id, p1Id, c.EndGameReason.WON));
+      let status = referee.isSeriesOver(gameResults, 3);
+      assert.isFalse(status);
     });
-    it('if a player has won a majority, returns a GameState with that player as the winner', function () {
-      gameResults.push([p1Id, c.EndGameReason.WON]);
-      let status = referee.getSeriesStatus(gameResults, 3);
-      assert.deepEqual(status, [p1Id, c.EndGameReason.WON]);
+    it('if a player has won a majority, indicates that the series is over', function () {
+      gameResults.push(new GameResult(p1Id, p2Id, c.EndGameReason.WON));
+      let status = referee.isSeriesOver(gameResults, 3);
+      assert.isTrue(status);
     });
   });
 

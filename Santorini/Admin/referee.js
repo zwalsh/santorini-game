@@ -2,6 +2,7 @@ const Rulechecker = require('../Common/rulechecker');
 const Board = require('../Common/board');
 const RFC = require('../Common/request-format-checker');
 const c = require('../Common/constants');
+const GameResult = require('../Common/game-result');
 
 /**
 
@@ -102,10 +103,10 @@ class Referee {
     });
 
     let playersNotifiedOfEnd = gamePlayed.then((gameResult) => {
-      let p1Notified = this.player1.notifyGameOver(gameResult.slice());
+      let p1Notified = this.player1.notifyGameOver(gameResult.copy());
 
       let p2Notified = p1Notified.then(() => {
-        return this.player2.notifyGameOver(gameResult.slice());
+        return this.player2.notifyGameOver(gameResult.copy());
       });
 
       let observersNotified = p2Notified.then(() => {
@@ -155,34 +156,27 @@ class Referee {
   completePlayNGames(numGames, gameResults) {
     return this.playGame().then((result) => {
       gameResults.push(result);
-      if (result[1] === c.EndGameReason.BROKEN_RULE) {
+      if (result.reason === c.EndGameReason.BROKEN_RULE) {
         return gameResults;
       }
-      let seriesState = this.getSeriesStatus(gameResults, numGames);
-      if (seriesState === c.GameState.IN_PROGRESS) {
-        return this.completePlayNGames(numGames, gameResults);
-      } else {
+      if (this.isSeriesOver(gameResults, numGames)) {
         return gameResults;
+      } else {
+        return this.completePlayNGames(numGames, gameResults);
       }
     });
   }
 
-  /* [GameResult, ...] Natural -> GameResult
+  /* [GameResult, ...] Natural -> Boolean
     Given the length of a series, determine if more than half of the
     games in the series have been won by one player.
   */
-  getSeriesStatus(gameResults, numGames) {
+  isSeriesOver(gameResults, numGames) {
     let p1WinCount = gameResults
-      .filter(gameResult => (gameResult[0] === this.player1.getId()))
+      .filter(gameResult => (gameResult.winner === this.player1.getId()))
       .length;
     let p2WinCount = gameResults.length - p1WinCount;
-    if (p1WinCount > numGames / 2) {
-      return [this.player1.getId(), c.EndGameReason.WON];
-    } else if (p2WinCount > numGames / 2) {
-      return [this.player2.getId(), c.EndGameReason.WON];
-    } else {
-      return c.GameState.IN_PROGRESS
-    }
+    return p1WinCount > numGames / 2 || p2WinCount > numGames / 2;
   }
 
   /* Void -> Promise<GameState>
@@ -251,16 +245,16 @@ class Referee {
           o.turnTaken(turn, this.board)
         });
       } else {
-        return [this.flip(activePlayer).getId(), c.EndGameReason.BROKEN_RULE];
+        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), c.EndGameReason.BROKEN_RULE);
       }
 
       if (RC.hasWon(this.board, activePlayer.getId()) || RC.hasLost(this.board, this.flip(activePlayer).getId())) {
-        return [activePlayer.getId(), c.EndGameReason.WON];
+        return new GameResult(activePlayer.getId(), this.flip(activePlayer).getId(), c.EndGameReason.WON);
       } else {
         return c.GameState.IN_PROGRESS;
       }
     }).catch(() => {
-      return [this.flip(activePlayer).getId(), c.EndGameReason.BROKEN_RULE];
+      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), c.EndGameReason.BROKEN_RULE);
     });
   }
 

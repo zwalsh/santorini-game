@@ -41,3 +41,5 @@ class GameResult {
     return new GameResult(this.winner, this.loser, this.reason);
   }
 }
+
+module.exports = GameResult;
