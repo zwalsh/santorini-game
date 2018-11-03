@@ -21,7 +21,7 @@ class GameResult {
     this._loser = loser;
     this._reason = reason;
   }
-  
+
   get winner() {
     return this._winner;
   }
@@ -32,5 +32,12 @@ class GameResult {
 
   get reason() {
     return this._reason;
+  }
+
+  /* Void -> GameResult
+    Returns a copy of this GameResult
+  */
+  copy() {
+    return new GameResult(this.winner, this.loser, this.reason);
   }
 }
