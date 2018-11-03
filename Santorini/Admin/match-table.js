@@ -37,8 +37,9 @@ class MatchTable {
   /* String String Match -> Void
     Sets the Match that has occurred between the two players.
 
-    If cheating occurred during the Match, then this method updates all past
-    Matches involving the cheater and awards those games to the opponent.
+    If cheating occurred during the Match, then this method updates all
+    games involving the cheater (including games in the given match) and
+    awards those games to the opponent.
 
     If both players in a Match are determined to be cheaters, then that match
     is set to be the empty array.
@@ -64,3 +65,5 @@ class MatchTable {
 
   }
 }
+
+module.exports = MatchTable;
