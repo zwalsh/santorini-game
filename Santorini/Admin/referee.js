@@ -1,8 +1,12 @@
 const Rulechecker = require('../Common/rulechecker');
 const Board = require('../Common/board');
 const RFC = require('../Common/request-format-checker');
-const c = require('../Common/constants');
+const constants = require('../Common/constants');
 const GameResult = require('../Common/game-result');
+
+const BROKEN_RULE = constants.EndGameReason.BROKEN_RULE;
+const WON = constants.EndGameReason.WON;
+const IN_PROGRESS = constants.GameState.IN_PROGRESS;
 
 /**
 
@@ -84,18 +88,35 @@ class Referee {
   playGame() {
     let p1Id = this.player1.getId();
     let p2Id = this.player2.getId();
-
-    let playersNotifiedOfStart = this.player1.newGame(p1Id, p2Id).then(() => {
-      return this.player2.newGame(p2Id, p1Id);
+    
+    let p1Notified = this.player1.newGame(p1Id, p2Id).then(() => {
+      return IN_PROGRESS;
+    }).catch(() => {
+      return new GameResult(p2Id, p1Id, BROKEN_RULE);
     });
 
-    let gameSetUp = playersNotifiedOfStart.then(() => {
+    let p2Notified = p1Notified.then((gameState) =>  {
+      if (gameState !== IN_PROGRESS) {
+        return gameState;
+      } else {
+        return this.player2.newGame(p2Id, p1Id).then(() => {
+          return IN_PROGRESS;
+        }).catch(() => {
+          return new GameResult(p1Id, p2Id, BROKEN_RULE);
+        });
+      }
+    });
+
+    let gameSetUp = p2Notified.then((gameState) => {
+      if (gameState !== IN_PROGRESS) {
+        return gameState;
+      }
       this.notifyAllObservers(o => { o.startGame(p1Id, p2Id) });
       return this.setup();
     });
 
     let gamePlayed = gameSetUp.then((gameState) => {
-      if (gameState !== c.GameState.IN_PROGRESS) {
+      if (gameState !== IN_PROGRESS) {
         return gameState;
       } else {
         return this.completePlayGame(this.player1);
@@ -103,13 +124,33 @@ class Referee {
     });
 
     let playersNotifiedOfEnd = gamePlayed.then((gameResult) => {
-      let p1Notified = this.player1.notifyGameOver(gameResult.copy());
-
-      let p2Notified = p1Notified.then(() => {
-        return this.player2.notifyGameOver(gameResult.copy());
+      // notify loser
+      let winner = gameResult.winner === this.player1.getId() ? this.player1 : this.player2;
+      let winnerNotified = winner.notifyGameOver(gameResult).then(() => {
+        if (gameResult.reason !== BROKEN_RULE) {
+          let loser = this.flip(winner);
+          return loser.notifyGameOver(gameResult).then(() => {
+            return gameResult;
+          }).catch(() => {
+            return new GameResult(gameResult.winner, gameResult.loser, BROKEN_RULE);
+          });
+        }
+        return gameResult;
+      }).catch(() => {
+        if (gameResult.reason !== BROKEN_RULE) {
+          let loser = this.flip(winner);
+          gameResult = new GameResult(gameResult.loser, gameResult.winner, BROKEN_RULE);
+          return loser.notifyGameOver(gameResult).then(() => {
+            return gameResult;
+          }).catch(() => {
+            return false;
+          });
+        } else {
+          return false;
+        }
       });
 
-      let observersNotified = p2Notified.then(() => {
+      let observersNotified = winnerNotified.then((gameResult) => {
         this.notifyAllObservers(o => { o.gameOver(gameResult) });
         this.board = null;
         return gameResult;
@@ -126,7 +167,7 @@ class Referee {
    */
   completePlayGame(activePlayer) {
     return this.getAndApplyTurn(activePlayer).then((gameState) => {
-      if (gameState === c.GameState.IN_PROGRESS) {
+      if (gameState === IN_PROGRESS) {
         return this.completePlayGame(this.flip(activePlayer));
       } else {
         return gameState;
@@ -156,7 +197,7 @@ class Referee {
   completePlayNGames(numGames, gameResults) {
     return this.playGame().then((result) => {
       gameResults.push(result);
-      if (result.reason === c.EndGameReason.BROKEN_RULE) {
+      if (result.reason === BROKEN_RULE) {
         return gameResults;
       }
       if (this.isSeriesOver(gameResults, numGames)) {
@@ -209,18 +250,18 @@ class Referee {
 
         this.notifyAllObservers(o => { o.workerPlaced(placeReq, activePlayer.getId(), new Board(initWorkerList)) });
       } else {
-        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), c.EndGameReason.BROKEN_RULE);
+        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
       }
 
       // Check for exit condition after worker is added to list of InitWorkers
-      if (initWorkerList.length >= c.NUM_WORKERS) {
+      if (initWorkerList.length >= constants.NUM_WORKERS) {
         this.board = new Board(initWorkerList);
-        return c.GameState.IN_PROGRESS;
+        return IN_PROGRESS;
       } else {
         return this.completeSetup(this.flip(activePlayer), initWorkerList);
       }
     }).catch(() => {
-      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), c.EndGameReason.BROKEN_RULE);
+      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
     });
   }
 
@@ -245,16 +286,16 @@ class Referee {
           o.turnTaken(turn, this.board)
         });
       } else {
-        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), c.EndGameReason.BROKEN_RULE);
+        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
       }
 
       if (RC.hasWon(this.board, activePlayer.getId()) || RC.hasLost(this.board, this.flip(activePlayer).getId())) {
-        return new GameResult(activePlayer.getId(), this.flip(activePlayer).getId(), c.EndGameReason.WON);
+        return new GameResult(activePlayer.getId(), this.flip(activePlayer).getId(), WON);
       } else {
-        return c.GameState.IN_PROGRESS;
+        return IN_PROGRESS;
       }
     }).catch(() => {
-      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), c.EndGameReason.BROKEN_RULE);
+      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
     });
   }
 

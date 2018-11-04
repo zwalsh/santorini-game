@@ -92,6 +92,28 @@ describe('Referee', function () {
       observer = testLib.createMockObject(startGame, workerPlaced, turnTaken, gameOver);
       referee.addObserver(observer);
     });
+    describe('when the first Player breaks when notified of the new game', function () {
+      let gameResult;
+      beforeEach(function ()  {
+        player1.newGame = sinon.stub().returns(Promise.reject());
+        gameResult = referee.playGame();
+      });
+      it('returns a GameResult indicating that the other Player won', function () {
+        let expectedGameResult = new GameResult(p2Id, p1Id, c.EndGameReason.BROKEN_RULE);
+        return expect(gameResult).to.eventually.deep.equal(expectedGameResult);
+      });
+    });
+    describe('when the second Player breaks when notified of the new game', function () {
+      let gameResult;
+      beforeEach(function ()  {
+        player2.newGame = sinon.stub().returns(Promise.reject());
+        gameResult = referee.playGame();
+      });
+      it('returns a GameResult indicating that the other Player won', function () {
+        let expectedGameResult = new GameResult(p1Id, p2Id, c.EndGameReason.BROKEN_RULE);
+        return expect(gameResult).to.eventually.deep.equal(expectedGameResult);
+      });
+    });
     describe('when neither Player provides an invalid Turn', function () {
       let gameResult;
       beforeEach(function () {
@@ -140,7 +162,7 @@ describe('Referee', function () {
     describe('when a Player provides an invalid Turn', function () {
       let gameResult;
       beforeEach(function () {
-        let p2Turn = [["move", {player:p2Id, id:1}, ["EAST", "FALSE"]]];
+        let p2Turn = [["move", {player: p2Id, id: 1}, ["EAST", "FALSE"]]];
         let boardAfterP2Turn = board.copy();
         boardAfterP2Turn.applyTurn(p1Turn);
 
@@ -151,10 +173,64 @@ describe('Referee', function () {
         let expectedGameResult = new GameResult(p1Id, p2Id, c.EndGameReason.BROKEN_RULE);
         return expect(gameResult).to.eventually.deep.equal(expectedGameResult);
       });
-      it('notifies both Players that the non-rule-breaking Player won', function () {
+      it('notifies only the non-rule-breaking Player that they won', function () {
         return gameResult.then((gr) => {
-          assert.isTrue(player2.notifyGameOver.calledWith(gr));
+          assert.isFalse(player2.notifyGameOver.called);
           assert.isTrue(player1.notifyGameOver.calledWith(gr));
+        });
+      });
+    });
+    describe('when the game finishes with no broken rules', function () {
+      let gameResult;
+      beforeEach(function () {
+        let p2Turn = [["move", {player:p2Id, id:1}, ["EAST", "PUT"]]];
+        let boardAfterP1Turn = board.copy();
+        boardAfterP1Turn.applyTurn(p1Turn);
+
+        player2.takeTurn = sinon.stub().withArgs(boardAfterP1Turn).resolves(p2Turn);
+      });
+      describe('when the first Player breaks when notified of the end of the game', function () {
+        beforeEach(function () {
+          player1.notifyGameOver = sinon.stub().returns(Promise.reject());
+          gameResult = referee.playGame();
+        });
+        it('returns a GameResult indicating that the other Player won', function () {
+          let expectedGameResult = new GameResult(p2Id, p1Id, c.EndGameReason.BROKEN_RULE);
+          return expect(gameResult).to.eventually.deep.equal(expectedGameResult);
+        });
+      });
+      describe('when the second Player breaks when notified of the end of the game', function () {
+        beforeEach(function () {
+          player2.notifyGameOver = sinon.stub().returns(Promise.reject());
+          gameResult = referee.playGame();
+        });
+        it('returns a GameResult indicating that the other Player won', function () {
+          let expectedGameResult = new GameResult(p1Id, p2Id, c.EndGameReason.BROKEN_RULE);
+          return expect(gameResult).to.eventually.deep.equal(expectedGameResult);
+        });
+      });
+    });
+    describe('when the game ends because of a broken rule', function () {
+      let gameResult;
+      beforeEach(function () {
+        let p2Turn = [["move", {player: p2Id, id: 1}, ["EAST", "FALSE"]]];
+        let boardAfterP2Turn = board.copy();
+        boardAfterP2Turn.applyTurn(p1Turn);
+
+        player2.takeTurn = sinon.stub().withArgs(boardAfterP2Turn).resolves(p2Turn);
+      });
+      it('does not notify the broken player of the end game', function () {
+        referee.playGame();
+        assert.isFalse(player2.notifyGameOver.called);
+      });
+      describe('when the other Player breaks when notified of the end game', function () {
+        beforeEach(function () {
+          player1.notifyGameOver = sinon.stub().returns(Promise.reject());
+          gameResult = referee.playGame();
+        });
+        it('returns false (instead of a GameResult) to indicate that both Players broke', function () {
+          let expectedGameResult = false;
+          return expect(gameResult).to.eventually.deep.equal(expectedGameResult);
         });
       });
     });
