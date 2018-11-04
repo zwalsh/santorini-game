@@ -37,6 +37,8 @@ const IN_PROGRESS = constants.GameState.IN_PROGRESS;
 
  * ======================== DATA DEFINITIONS ======================
  *
+ * GuardedPlayer (GP) is defined in guarded-player.js
+ *
  * A WorkerRequest is a: {player: string , id: int}
  *
  * A PlaceRequest is a: ["place", x:int, y:int]
@@ -79,10 +81,11 @@ class Referee {
     this.observers = [];
   }
 
-  /* Void -> Promise<GameResult>
+  /* Void -> Promise<[Maybe GameResult]>
   Manages a game of Santorini between the two given players.
   Notifies players of game start and end, and returns a Promise that resolves to a GameResult
-  representing the winner of the game and the reason they won.
+  representing the winner of the game and the reason they won, or false if both of the Players
+  fail in some phase of the game.
   Cleanup: Resets referee board to null after the game is over.
  */
   playGame() {
@@ -161,6 +164,29 @@ class Referee {
 
     return playersNotifiedOfEnd;
   }
+
+  /* GP GP -> Promise<GameState>
+    Notifies both of the given players that a game is starting.
+    If one of the Players breaks upon notification, then the GameState
+    will be a GameResult indicating that the other player won.
+  */
+  notifyPlayersOfStart(player1, player2) {
+    // todo
+  }
+
+  /* Promise<GameState> -> Promise<GameState>
+    Given a state where both players have been notified of a new game
+    (or the game is already over), sets up the game and returns an
+    in progress state. If the game is already over, or if a player breaks
+    a rule during setup, it will return a GameResult indicating that.
+  */
+  setUpGame(gameState) {
+    // todo
+  }
+
+
+
+
 
   /* Player -> Promise<GameResult>
     Given the current active player, play the game to completion.
