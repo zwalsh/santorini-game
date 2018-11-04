@@ -11,9 +11,21 @@ class TournamentResult {
     Produce the result of the tournament that had the given players, cheaters, and match table.
   */
   constructor(players, cheaters, matchTable) {
-    this.players = players;
-    this.cheaters = cheaters;
-    this.matchTable = matchTable;
+    this._players = players;
+    this._cheaters = cheaters;
+    this._matchTable = matchTable;
+  }
+
+  get players() {
+    return this._players;
+  }
+
+  get cheaters() {
+    return this._cheaters;
+  }
+
+  get matchTable() {
+    return this._matchTable;
   }
 }
 
