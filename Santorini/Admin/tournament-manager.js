@@ -20,6 +20,7 @@
   GameResult data definition is in Admin/referee.js
 
  */
+const MatchTable = require('./match-table');
 
 class TournamentManager {
 
@@ -43,11 +44,7 @@ class TournamentManager {
     // Players that have played all necessary matches
     this.donePlayers = [];
 
-    // Record of interactions between all players.
-    // Stores results of all series played, and used to help
-    // schedule additional matches between players.
-    this.matchTable = {};
-
+    this.matchTable = new MatchTable(players.map(player => player.getId()));
     this.tournamentResolutionPromise;
   }
 
@@ -58,6 +55,7 @@ class TournamentManager {
     return new Promise(resolve => {
       this.tournamentResolutionPromise = resolve;
     });
+    // todo also kick off a series of matches
   }
 
   /* GP GP -> Void
@@ -69,31 +67,13 @@ class TournamentManager {
   }
 
   /* [GameResult, ...] -> Void
-    TODO shall we try to break this function itself up besides just delegating to a bunch of helpers from within?
-  */
+     Handles the result of a match between two players. This involves the following:
+     - adding the match to the match table
+     - checking if a player cheated during the match
+     - matching the free players as necessary
+     - check if the tournament is over and if so, end it
+   */
   handleMatchResult(gameResults) {
-
-  }
-
-  /* Helpers for handleMatchResult:
-  - addMatchToTable: put a gameresult into the table
-  - function that tries to start match btwn players (using startMatch()) and puts them on waitlist if it can't
-  - function that handles a cheater
-  - function that checks if the tournament is now over
-  - function that cleans up when a tournament is over, and maybe calls the resolve function with tourney results
-
-   */
-
-  /* [GameResult, ..., GameResult] -> Void
-    Given a non-empty list of GameResults representing the result of a match
-    between two Players, add it to the matchTable.
-
-    If the GameResults indicate cheating, this function also updates past entries
-    in the matchTable to award the past wins of the cheater to its opponents.
-    If both players of any particular match have cheated, then that entry in the
-    match table is updated to remove the match from the tournament record entirely.
-   */
-  addMatchToTable(gameResults) {
 
   }
 
@@ -102,13 +82,6 @@ class TournamentManager {
     If so, adds the offender(s) to this tournament's list of misbehaved players.
   */
   removeBadPlayers(player1, player2) {
-
-  }
-
-  /* GP -> [GP, ...]
-    Returns the list of all opponents that the given player still must play.
-  */
-  remainingOpponents(player) {
 
   }
 
@@ -128,7 +101,6 @@ class TournamentManager {
   isTournamentOver() {
 
   }
-
 }
 
 module.exports = TournamentManager;
