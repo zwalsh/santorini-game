@@ -184,9 +184,24 @@ class Referee {
     // todo
   }
 
+  /* Promise<GameState> -> Promise<GameResult>
+    Given a state where the game has been set up (both players have placed
+    all their workers), this function carries the players through
+    the game until one wins or breaks a rule. It returns a Promise of the
+    final result of the game.
+  */
+  playUntilOver(gameSetUp) {
+    // todo
+  }
 
-
-
+  /* Promise<GameResult> -> Promise<[Maybe GameResult]>
+    Given the result of a fully-played game, notifies any players that
+    have not yet broken of the result of the game. If both players break
+    before this is possible, then no GameResult is returned.
+  */
+  notifyPlayersOfEndGame(finishedGame) {
+    // todo
+  }
 
   /* Player -> Promise<GameResult>
     Given the current active player, play the game to completion.
