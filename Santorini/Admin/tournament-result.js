@@ -8,11 +8,11 @@
 */
 class TournamentResult {
   /* [GuardedPlayer, ...] [GuardedPlayer, ...] MatchTable -> TournamentResult
-    Produce the result of the tournament that had the given players, cheaters, and match table.
+    Produce the result of the tournament that had the given players, bad players, and match table.
   */
-  constructor(players, cheaters, matchTable) {
+  constructor(players, badPlayers, matchTable) {
     this._players = players;
-    this._cheaters = cheaters;
+    this._badPlayers = badPlayers;
     this._matchTable = matchTable;
   }
 
@@ -20,8 +20,8 @@ class TournamentResult {
     return this._players;
   }
 
-  get cheaters() {
-    return this._cheaters;
+  get badPlayers() {
+    return this._badPlayers;
   }
 
   get matchTable() {
