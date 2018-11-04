@@ -47,27 +47,13 @@ class MatchTable {
   /* String String -> Maybe<Match>
     Returns the Match between the two players, or false if it has not occurred.
   */
-  getMatch(p1Name, p2Name) {
-    let p1Idx = this.playerIdxMap.get(p1Name);
-    let p2Idx = this.playerIdxMap.get(p2Name);
+  getMatch(player1, player2) {
+    let p1Idx = this.playerIdxMap.get(player1);
+    let p2Idx = this.playerIdxMap.get(player2);
     if (p1Idx < p2Idx) {
       return this.matches[p2Idx][p1Idx];
     } else {
       return this.matches[p1Idx][p2Idx];
-    }
-  }
-
-  /* String String Match -> Void
-    Sets the Match that has occurred between the two players.
-    Stores the data on the correct side of the triangular 2d array.
-  */
-  setMatchInternal(p1Name, p2Name, match) {
-    let p1Idx = this.playerIdxMap.get(p1Name);
-    let p2Idx = this.playerIdxMap.get(p2Name);
-    if (p1Idx < p2Idx) {
-      this.matches[p2Idx][p1Idx] = match;
-    } else {
-      this.matches[p1Idx][p2Idx] = match;
     }
   }
 
@@ -81,20 +67,71 @@ class MatchTable {
     If both players in a Match are determined to be rule-breakers, then that match
     is set to be the empty array.
   */
-  setMatch(p1Name, p2Name, match) {
-    this.setMatchInternal(p1Name, p2Name, match);
+  setMatch(player1, player2, match) {
+    this.setMatchInternal(player1, player2, match);
 
-    this.ruleBreakersInMatch(p1Name, p2Name, match).forEach((name) => {
+    this.ruleBreakersInMatch(player1, player2, match).forEach((name) => {
       this.awardMatchesToOpponent(name);
     });
   }
 
-  /* String String Match -> [String, ...]
-    Return the names of any players who broke a rule in the given match.
+  /* String -> [String, ...]
+    Returns the names of all opponents against whom the given player has not
+    yet played.
   */
-  ruleBreakersInMatch(p1Name, p2Name, match) {
+  getRemainingOpponents(player) {
+    return this.players.reduce((opponentList, opponent) => {
+      let match = this.getMatch(player, opponent);
+      if (!match && opponent !== player) {
+        return opponentList.concat(opponent);
+      } else {
+        return opponentList;
+      }
+    }, []);
+  }
+
+  /* Void -> [GameResult, ...]
+    Returns a list of all GameResults that have occurred in the tournament.
+    Sorted in order of the players as given to this MatchTable in the
+    constructor.
+  */
+  getAllGames() {
+    let games = [];
+    for (let player of this.players) {
+      let curPlayerIdx = this.playerIdxMap.get(player);
+      let opponents = this.players.slice(curPlayerIdx + 1);
+      for (let opponent of opponents) {
+        let match = this.getMatch(player, opponent);
+        if (match) {
+          games = games.concat(match);
+        }
+      }
+    }
+    return games;
+  }
+
+  // ========== Internal Helpers ==============
+
+  /* String String Match -> Void
+    Sets the Match that has occurred between the two players.
+    Stores the data on the correct side of the triangular 2d array.
+  */
+  setMatchInternal(player1, player2, match) {
+    let p1Idx = this.playerIdxMap.get(player1);
+    let p2Idx = this.playerIdxMap.get(player2);
+    if (p1Idx < p2Idx) {
+      this.matches[p2Idx][p1Idx] = match;
+    } else {
+      this.matches[p1Idx][p2Idx] = match;
+    }
+  }
+
+  /* String String Match -> [String, ...]
+  Return the names of any players who broke a rule in the given match.
+  */
+  ruleBreakersInMatch(player1, player2, match) {
     if (match.length === 0) {
-      return [p1Name, p2Name];
+      return [player1, player2];
     }
     let lastGame = match[match.length - 1];
     if (lastGame.reason === constants.EndGameReason.BROKEN_RULE) {
@@ -134,41 +171,6 @@ class MatchTable {
       match.forEach(() => { updatedMatch.push(gameResult.copy()) });
       return updatedMatch;
     }
-  }
-
-  /* String -> [String, ...]
-    Returns the names of all opponents against whom the given player has not
-    yet played.
-  */
-  getRemainingOpponents(player) {
-    return this.players.reduce((opponentList, opponent) => {
-      let match = this.getMatch(player, opponent);
-      if (!match && opponent !== player) {
-        return opponentList.concat(opponent);
-      } else {
-        return opponentList;
-      }
-    }, []);
-  }
-
-  /* Void -> [GameResult, ...]
-    Returns a list of all GameResults that have occurred in the tournament.
-    Sorted in order of the players as given to this MatchTable in the
-    constructor.
-  */
-  getAllGames() {
-    let games = [];
-    for (let player of this.players) {
-      let curPlayerIdx = this.playerIdxMap.get(player);
-      let opponents = this.players.slice(curPlayerIdx + 1);
-      for (let opponent of opponents) {
-        let match = this.getMatch(player, opponent);
-        if (match) {
-          games = games.concat(match);
-        }
-      }
-    }
-    return games;
   }
 }
 
