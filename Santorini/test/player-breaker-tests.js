@@ -7,8 +7,9 @@ const BrokenPlayer = require('../Player/player-breaker');
 describe('Broken Player', function () {
   let player, initWorkers;
   beforeEach(function () {
-    player = new BrokenPlayer();
-    player.newGame("me", "you");
+    let playerId = "you";
+    player = new BrokenPlayer(playerId);
+    player.newGame(playerId);
     initWorkers = [];
   });
 

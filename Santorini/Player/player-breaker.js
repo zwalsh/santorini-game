@@ -13,8 +13,17 @@
 */
 
 class BrokenPlayer {
-  constructor () {
-    // Player has a UUID identifier, which is game-specific and set in newGame()
+  constructor (id) {
+    this.id = id;
+  }
+
+  /* String -> Promise<Void>
+    Set this player's ID to the given identifier.
+    Return a Promise that resolves to indicate receipt of the name.
+  */
+  setId(id) {
+    this.id = id;
+    return Promise.resolve();
   }
 
   /* [InitWorker, ...] -> Promise<PlaceRequest>
@@ -34,13 +43,11 @@ class BrokenPlayer {
     return Promise.resolve(malformedTurn);
   }
 
-  /* UUID UUID -> Promise<Void>
-    Notify this Player that they have been put into a new game.
-    The first UUID is this Player's ID for the game, and the second UUID
-    is the opponent's.
+  /* String -> Promise<Void>
+    Notify this Player that they have been put into a new game,
+    against an opponent with the given ID.
   */
-  newGame(myId, opponentId) {
-    this.id = myId;
+  newGame(opponentId) {
     return Promise.resolve();
   }
 

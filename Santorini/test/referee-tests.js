@@ -126,8 +126,8 @@ describe('Referee', function () {
       });
       it('notifies both Players of the game start and opponent name', function () {
         return gameResult.then(() => {
-          assert.isTrue(player2.newGame.calledWith(p2Id, p1Id));
-          assert.isTrue(player1.newGame.calledWith(p1Id, p2Id));
+          assert.isTrue(player2.newGame.calledWith(p1Id));
+          assert.isTrue(player1.newGame.calledWith(p2Id));
         });
       });
       it('requests Turns from both', function () {

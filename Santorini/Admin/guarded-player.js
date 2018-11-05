@@ -21,6 +21,8 @@ class GuardedPlayer {
     this.player = player;
     this.id = id;
     this.timeout = timeout;
+
+
   }
 
   /* Void -> UUID
@@ -51,14 +53,13 @@ class GuardedPlayer {
     }, this.timeout);
   }
 
-  /* UUID UUID -> Promise<Void>
-    Notify this Player that they have been put into a new game.
-    The first UUID is this Player's ID for the game, and the second UUID
-    is the opponent's.
+  /* String -> Promise<Void>
+    Notify this Player that they have been put into a new game,
+    against an opponent with the given name.
   */
-  newGame(myId, opponentId) {
+  newGame(opponentId) {
     return protectedPromise(this.player, (p) => {
-      return p.newGame(myId, opponentId)
+      return p.newGame(opponentId)
     }, this.timeout);
   }
 

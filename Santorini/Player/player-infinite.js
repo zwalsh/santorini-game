@@ -14,10 +14,19 @@
 
 class InfinitePlayer {
   // Instantiates a Player with their own given name.
-  constructor (name) {
+  constructor (id) {
+    this.id = id;
     this.infLoop = new Promise(resolve => {
       // this promise will never resolve
     });
+  }
+
+  /* String -> Promise<Void>
+    Set this player's ID to the given identifier.
+    Return a Promise that resolves to indicate receipt of the name.
+  */
+  setId(id) {
+    return this.infLoop;
   }
 
   /* [InitWorker, ...] -> Promise<PlaceRequest>
@@ -37,12 +46,11 @@ class InfinitePlayer {
     return this.infLoop;
   }
 
-  /* UUID UUID -> Promise<Void>
-    Notify this Player that they have been put into a new game.
-    The first UUID is this Player's ID for the game, and the second UUID
-    is the opponent's.
+  /* String -> Promise<Void>
+    Notify this Player that they have been put into a new game,
+    against an opponent with the given name.
   */
-  newGame(myId, opponentId) {
+  newGame(opponentId) {
     return this.infLoop;
   }
 

@@ -121,11 +121,11 @@ class Referee {
     continue, or if the player failed to handle the notification.
    */
   notifyPlayerOfStart(player) {
-    let playerId = player.getId();
     let opponentId = this.flip(player).getId();
-    return player.newGame(playerId, opponentId).then(() => {
+    return player.newGame(opponentId).then(() => {
       return IN_PROGRESS;
     }).catch(() => {
+      let playerId = player.getId();
       return new GameResult(opponentId, playerId, BROKEN_RULE);
     });
   }

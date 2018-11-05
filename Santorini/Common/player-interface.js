@@ -11,8 +11,15 @@
 
 
 class Player {
-  // Instantiates a Player with their own given name.
-  constructor (name) {
+  // Instantiates a Player.
+  constructor () {
+  }
+
+  /* String -> Promise<Void>
+    Set this player's ID to the given identifier.
+    Return a Promise that resolves to indicate receipt of the name.
+  */
+  setId(id) {
   }
 
   /* [InitWorker, ...] -> Promise<PlaceRequest>

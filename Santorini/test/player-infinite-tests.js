@@ -23,7 +23,7 @@ describe('InfinitePlayer', function () {
       assert.isTrue(value instanceof Promise);
     });
     it('newGame', function () {
-      let value = infinitePlayer.newGame("a", "b");
+      let value = infinitePlayer.newGame();
       assert.isTrue(value instanceof Promise);
     });
     it('notifyGameOver', function () {
@@ -53,7 +53,7 @@ describe('InfinitePlayer', function () {
       return promiseDoesNotResolve(promise);
     });
     it('newGame', function () {
-      let promise = infinitePlayer.newGame("a", "b");
+      let promise = infinitePlayer.newGame("a");
       return promiseDoesNotResolve(promise);
     });
     it('notifyGameOver', function () {

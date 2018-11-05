@@ -25,9 +25,9 @@ describe('TournamentManager', function () {
   describe('startTournament', function () {
     let startTournamentPromise;
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(), p3Id, timeout);
+      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
+      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
+      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
       tm.matchOrWaitlistPlayer = sinon.stub();
       startTournamentPromise = tm.startTournament();
@@ -51,8 +51,8 @@ describe('TournamentManager', function () {
   describe('startMatch', function () {
     let mockRef,matchPromise, p1p2MatchResult;
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(), p2Id, timeout);
+      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
+      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
 
       // create a mock referee and have createReferee return it,
       // so that we can access the callback given to its .then() call
@@ -80,9 +80,9 @@ describe('TournamentManager', function () {
   describe('handleMatchResult', function () {
     let setMatchMock, dqBadPlayersMock, matchOrWaitlistMock, isTourneyOverMock, endTourneyMock;
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(), p3Id, timeout);
+      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
+      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
+      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
       setMatchMock = sinon.stub();
       dqBadPlayersMock = sinon.stub();
@@ -141,9 +141,9 @@ describe('TournamentManager', function () {
 
   describe('disqualifyBadPlayers', function () {
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(), p3Id, timeout);
+      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
+      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
+      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
     });
     it('if neither player broke or cheated, does not return them', function () {
@@ -168,9 +168,9 @@ describe('TournamentManager', function () {
 
   describe('matchOrWaitlistPlayer', function () {
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(), p3Id, timeout);
+      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
+      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
+      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
     });
 
@@ -216,9 +216,9 @@ describe('TournamentManager', function () {
 
   describe('isTournamentOver', function () {
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(), p3Id, timeout);
+      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
+      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
+      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
     });
 
@@ -237,9 +237,9 @@ describe('TournamentManager', function () {
     describe('calls the resolution function', function () {
       let tournamentResult, p1p2Match, p1p3Match, p2p3Match;
       beforeEach(function () {
-        p1 = new GuardedPlayer(new Player(), p1Id, timeout);
-        p2 = new GuardedPlayer(new Player(), p2Id, timeout);
-        p3 = new GuardedPlayer(new Player(), p3Id, timeout);
+        p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
+        p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
+        p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
         tm = new TournamentManager([p1, p2, p3], 3);
         p1p2Match = [new GameResult(p1Id, p2Id, WON)];
         p1p3Match = [new GameResult(p1Id, p3Id, BROKEN_RULE)];

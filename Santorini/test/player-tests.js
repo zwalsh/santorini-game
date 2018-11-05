@@ -16,7 +16,7 @@ describe('Player', function () {
   beforeEach(function () {
     player1Name = "wayne";
     player2Name = "garth";
-    player = new Player(player1Name, player2Name);
+    player = new Player(player1Name);
 
     initWorker = {player: player1Name, x:0, y:0};
     placeRequest = ["place", 1, 1];
