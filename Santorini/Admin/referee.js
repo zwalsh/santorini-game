@@ -89,122 +89,133 @@ class Referee {
   Cleanup: Resets referee board to null after the game is over.
  */
   playGame() {
-    let p1Id = this.player1.getId();
-    let p2Id = this.player2.getId();
-    
-    let p1Notified = this.player1.newGame(p1Id, p2Id).then(() => {
-      return IN_PROGRESS;
-    }).catch(() => {
-      return new GameResult(p2Id, p1Id, BROKEN_RULE);
-    });
-
-    let p2Notified = p1Notified.then((gameState) =>  {
-      if (gameState !== IN_PROGRESS) {
-        return gameState;
-      } else {
-        return this.player2.newGame(p2Id, p1Id).then(() => {
-          return IN_PROGRESS;
-        }).catch(() => {
-          return new GameResult(p1Id, p2Id, BROKEN_RULE);
-        });
-      }
-    });
-
-    let gameSetUp = p2Notified.then((gameState) => {
-      if (gameState !== IN_PROGRESS) {
-        return gameState;
-      }
-      this.notifyAllObservers(o => { o.startGame(p1Id, p2Id) });
-      return this.setup();
-    });
-
-    let gamePlayed = gameSetUp.then((gameState) => {
-      if (gameState !== IN_PROGRESS) {
-        return gameState;
-      } else {
-        return this.completePlayGame(this.player1);
-      }
-    });
-
-    let playersNotifiedOfEnd = gamePlayed.then((gameResult) => {
-      // notify loser
-      let winner = gameResult.winner === this.player1.getId() ? this.player1 : this.player2;
-      let winnerNotified = winner.notifyGameOver(gameResult).then(() => {
-        if (gameResult.reason !== BROKEN_RULE) {
-          let loser = this.flip(winner);
-          return loser.notifyGameOver(gameResult).then(() => {
-            return gameResult;
-          }).catch(() => {
-            return new GameResult(gameResult.winner, gameResult.loser, BROKEN_RULE);
-          });
-        }
-        return gameResult;
-      }).catch(() => {
-        if (gameResult.reason !== BROKEN_RULE) {
-          let loser = this.flip(winner);
-          gameResult = new GameResult(gameResult.loser, gameResult.winner, BROKEN_RULE);
-          return loser.notifyGameOver(gameResult).then(() => {
-            return gameResult;
-          }).catch(() => {
-            return false;
-          });
-        } else {
-          return false;
-        }
-      });
-
-      let observersNotified = winnerNotified.then((gameResult) => {
-        this.notifyAllObservers(o => { o.gameOver(gameResult) });
-        this.board = null;
-        return gameResult;
-      });
-
-      return observersNotified;
-    });
-
-    return playersNotifiedOfEnd;
+    return this.notifyPlayersOfStart()
+      .then(gs => this.setup(gs))
+      .then(gs => this.playUntilOver(gs))
+      .then(gr => this.notifyPlayersOfEndGame(gr));
   }
 
-  /* GP GP -> Promise<GameState>
-    Notifies both of the given players that a game is starting.
+  /* Void -> Promise<GameState>
+    Notifies both of the players that a game is starting.
     If one of the Players breaks upon notification, then the GameState
     will be a GameResult indicating that the other player won.
   */
-  notifyPlayersOfStart(player1, player2) {
-    // todo
+  notifyPlayersOfStart() {
+    let p1Notified = this.notifyPlayerOfStart(this.player1);
+    return p1Notified.then((gameState) =>  {
+      if (gameState !== IN_PROGRESS) {
+        return gameState;
+      } else {
+        return this.notifyPlayerOfStart(this.player2);
+      }
+    });
   }
 
-  /* Promise<GameState> -> Promise<GameState>
+  /* GP -> Promise<GameState>
+    Notifies the given player of the start of a game against the given
+    opponent. Returns a GameState indicating whether the game should
+    continue, or if the player failed to handle the notification.
+   */
+  notifyPlayerOfStart(player) {
+    let playerId = player.getId();
+    let opponentId = this.flip(player).getId();
+    return player.newGame(playerId, opponentId).then(() => {
+      return IN_PROGRESS;
+    }).catch(() => {
+      return new GameResult(opponentId, playerId, BROKEN_RULE);
+    });
+  }
+
+  /* GameState -> Promise<GameState>
     Given a state where both players have been notified of a new game
     (or the game is already over), sets up the game and returns an
     in progress state. If the game is already over, or if a player breaks
     a rule during setup, it will return a GameResult indicating that.
   */
-  setUpGame(gameState) {
-    // todo
+  setup(gameState) {
+    if (gameState !== IN_PROGRESS) {
+      return Promise.resolve(gameState);
+    }
+    let p1Id = this.player1.getId();
+    let p2Id = this.player2.getId();
+    this.notifyAllObservers(o => { o.startGame(p1Id, p2Id) });
+    return this.completeSetup(this.player1, []);
   }
 
-  /* Promise<GameState> -> Promise<GameResult>
+  /* GameState -> Promise<GameResult>
     Given a state where the game has been set up (both players have placed
     all their workers), this function carries the players through
     the game until one wins or breaks a rule. It returns a Promise of the
     final result of the game.
   */
-  playUntilOver(gameSetUp) {
-    // todo
+  playUntilOver(gameStateAfterSetUp) {
+    if (gameStateAfterSetUp !== IN_PROGRESS) {
+      return Promise.resolve(gameStateAfterSetUp);
+    } else {
+      return this.completePlayGame(this.player1);
+    }
   }
 
-  /* Promise<GameResult> -> Promise<[Maybe GameResult]>
+  /* GameResult -> Promise<[Maybe GameResult]>
     Given the result of a fully-played game, notifies any players that
     have not yet broken of the result of the game. If both players break
     before this is possible, then no GameResult is returned.
   */
-  notifyPlayersOfEndGame(finishedGame) {
-    // todo
+  notifyPlayersOfEndGame(finishedGameResult) {
+    let winner = finishedGameResult.winner === this.player1.getId() ? this.player1 : this.player2;
+    let loser = this.flip(winner);
+
+    let winnerNotified = winner.notifyGameOver(finishedGameResult).then(() => {
+      return this.notifyLoserPostSuccess(winner, loser, finishedGameResult);
+    }).catch(() => {
+      return this.notifyLoserPostFailure(loser, finishedGameResult);
+    });
+
+    return winnerNotified.then((gameResult) => {
+      this.notifyAllObservers(o => { o.gameOver(gameResult) });
+      this.board = null;
+      return gameResult;
+    });
+  }
+
+  /* GP GP GameResult -> Promise<GameResult>
+    Notify loser of game result after successfully notifying winner
+  */
+  notifyLoserPostSuccess(winner, loser, gameResult) {
+    if (gameResult.reason === BROKEN_RULE) {
+      // Don't notify loser if they already broke.
+      return Promise.resolve(gameResult);
+    } else {
+      return loser.notifyGameOver(gameResult).then(() => {
+        return gameResult;
+      }).catch(() => {
+        // Loser broke, so the end game reason must change to broken rule
+        return new GameResult(gameResult.winner, gameResult.loser, BROKEN_RULE);
+      });
+    }
+  }
+
+  /* GP GameResult -> Promise<[Maybe GameResult]>
+    Notify loser of game result after failing to notify winner
+  */
+  notifyLoserPostFailure(loser, gameResult) {
+    if (gameResult.reason === BROKEN_RULE) {
+      // Don't notify loser either if they already broke
+      return Promise.resolve(false);
+    } else {
+      gameResult = new GameResult(gameResult.loser, gameResult.winner, BROKEN_RULE);
+      return loser.notifyGameOver(gameResult).then(() => {
+        return gameResult;
+      }).catch(() => {
+        return false;
+      });
+    }
   }
 
   /* Player -> Promise<GameResult>
     Given the current active player, play the game to completion.
+    Take a turn for the given player, then call this method again
+    with the opposing player if the game is not over.
    */
   completePlayGame(activePlayer) {
     return this.getAndApplyTurn(activePlayer).then((gameState) => {
@@ -261,23 +272,13 @@ class Referee {
     return p1WinCount > numGames / 2 || p2WinCount > numGames / 2;
   }
 
-  /* Void -> Promise<GameState>
-    Takes two players through the setup state of a Santorini game:
-    placing workers on the board. Initializes the board field on this Referee
-    with the completed Board, unless a player provides an invalid PlaceRequest.
-    In that case, returns a Promise that resolves to a GameResult indicating that the other player won.
-   */
-  setup() {
-    return this.completeSetup(this.player1, []);
-  }
-
   /* GuardedPlayer [InitWorker, ...] -> Promise<GameState>
     Completes the setup of a game of Santorini, where it's the given player's
     turn to place a Worker on the board, given the list of locations
     on the board that already contain workers.
 
     This method calls itself recursively until 4 workers have been placed
-    or a player breaks a rule.
+    or a player breaks a rule. When all workers are placed, initializes this Referee's board.
    */
   completeSetup(activePlayer, initWorkerList) {
     return activePlayer.placeInitialWorker(Board.copyInitWorkerList(initWorkerList)).then((placeReq) => {
@@ -350,7 +351,6 @@ class Referee {
     return RFC.isWellFormedPlaceReq(placeReq) &&
       RC.isValidPlace(initWorkerList, placeReq[1], placeReq[2]);
   }
-
 
   /* Any Player -> Boolean
     Return true if the input value is a Turn that can be used by the Referee:

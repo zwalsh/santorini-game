@@ -87,7 +87,6 @@ describe('Referee', function () {
       });
       referee = new Referee(player1, player2);
       referee.board = board;
-      referee.setup = sinon.stub().resolves(c.GameState.IN_PROGRESS);
 
       observer = testLib.createMockObject(startGame, workerPlaced, turnTaken, gameOver);
       referee.addObserver(observer);
@@ -122,6 +121,7 @@ describe('Referee', function () {
         boardAfterP1Turn.applyTurn(p1Turn);
 
         player2.takeTurn = sinon.stub().withArgs(boardAfterP1Turn).resolves(p2Turn);
+        referee.setup = sinon.stub().resolves(c.GameState.IN_PROGRESS);
         gameResult = referee.playGame();
       });
       it('notifies both Players of the game start and opponent name', function () {
@@ -146,12 +146,6 @@ describe('Referee', function () {
           assert.isTrue(player1.notifyGameOver.calledWith(gr));
         });
       });
-      it('notifies the Observer that the game has begun', function () {
-        return gameResult.then(() => {
-          assert.isTrue(observer[startGame].calledOnce);
-          assert.isTrue(observer[startGame].calledWith(p1Id, p2Id));
-        });
-      });
       it('notifies the Observer that the game has ended', function () {
         return gameResult.then((gr) => {
           assert.isTrue(observer[gameOver].calledOnce);
@@ -167,6 +161,7 @@ describe('Referee', function () {
         boardAfterP2Turn.applyTurn(p1Turn);
 
         player2.takeTurn = sinon.stub().withArgs(boardAfterP2Turn).resolves(p2Turn);
+        referee.setup = sinon.stub().resolves(c.GameState.IN_PROGRESS);
         gameResult = referee.playGame();
       });
       it('returns a GameResult indicating that the non-rule-breaking Player won', function () {
@@ -186,8 +181,9 @@ describe('Referee', function () {
         let p2Turn = [["move", {player:p2Id, id:1}, ["EAST", "PUT"]]];
         let boardAfterP1Turn = board.copy();
         boardAfterP1Turn.applyTurn(p1Turn);
-
         player2.takeTurn = sinon.stub().withArgs(boardAfterP1Turn).resolves(p2Turn);
+
+        referee.setup = sinon.stub().resolves(c.GameState.IN_PROGRESS);
       });
       describe('when the first Player breaks when notified of the end of the game', function () {
         beforeEach(function () {
@@ -216,8 +212,9 @@ describe('Referee', function () {
         let p2Turn = [["move", {player: p2Id, id: 1}, ["EAST", "FALSE"]]];
         let boardAfterP2Turn = board.copy();
         boardAfterP2Turn.applyTurn(p1Turn);
-
         player2.takeTurn = sinon.stub().withArgs(boardAfterP2Turn).resolves(p2Turn);
+
+        referee.setup = sinon.stub().resolves(c.GameState.IN_PROGRESS);
       });
       it('does not notify the broken player of the end game', function () {
         referee.playGame();
@@ -379,15 +376,27 @@ describe('Referee', function () {
       player2.placeInitialWorker = sinon.stub()
         .onFirstCall().resolves(placeRequest1);
 
-      observer = testLib.createMockObject(workerPlaced);
+      observer = testLib.createMockObject(startGame, workerPlaced);
       referee.addObserver(observer);
+    });
+    describe('before players are asked for PlaceRequests', function () {
+      beforeEach(function () {
+        referee.completeSetup = sinon.stub().resolves(c.GameState.IN_PROGRESS);
+        gameState = referee.setup(c.GameState.IN_PROGRESS);
+      });
+      it('notifies the Observer that the game has begun', function () {
+        return gameState.then(() => {
+          assert.isTrue(observer[startGame].calledOnce);
+          assert.isTrue(observer[startGame].calledWith(p1Id, p2Id));
+        });
+      });
     });
     describe('when a Player provides an invalid PlaceRequest', function () {
       beforeEach(function () {
         player2.placeInitialWorker
           .onSecondCall().resolves(["place", 2, 2]);
         // gameState is a Promise<GameState>
-        gameState = referee.setup();
+        gameState = referee.setup(c.GameState.IN_PROGRESS);
       });
       it('returns a GameState indicating that the other Player won', function () {
         let expectedGameResult = new GameResult(p1Id, p2Id, c.EndGameReason.BROKEN_RULE)
@@ -404,7 +413,7 @@ describe('Referee', function () {
       beforeEach(function () {
         player2.placeInitialWorker
           .onSecondCall().resolves(placeRequest3);
-        gameState = referee.setup();
+        gameState = referee.setup(c.GameState.IN_PROGRESS);
       });
       it('requests two PlaceRequests from each Player', function () {
         return gameState.then(() => {
