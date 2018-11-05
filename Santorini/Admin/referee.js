@@ -95,6 +95,8 @@ class Referee {
       .then(gr => this.notifyPlayersOfEndGame(gr));
   }
 
+  // ========== Notify of Game Start ==========
+
   /* Void -> Promise<GameState>
     Notifies both of the players that a game is starting.
     If one of the Players breaks upon notification, then the GameState
@@ -126,6 +128,8 @@ class Referee {
     });
   }
 
+  // ========== Setup (Worker Placement) ==========
+
   /* GameState -> Promise<GameState>
     Given a state where both players have been notified of a new game
     (or the game is already over), sets up the game and returns an
@@ -142,6 +146,43 @@ class Referee {
     return this.completeSetup(this.player1, []);
   }
 
+  /* GuardedPlayer [InitWorker, ...] -> Promise<GameState>
+    Completes the setup of a game of Santorini, where it's the given player's
+    turn to place a Worker on the board, given the list of locations
+    on the board that already contain workers.
+
+    This method calls itself recursively until 4 workers have been placed
+    or a player breaks a rule. When all workers are placed, initializes this Referee's board.
+   */
+  completeSetup(activePlayer, initWorkerList) {
+    return activePlayer.placeInitialWorker(Board.copyInitWorkerList(initWorkerList)).then((placeReq) => {
+      if (this.checkPlaceReq(placeReq, initWorkerList)) {
+        let initWorker = {
+          player: activePlayer.getId(),
+          x: placeReq[1],
+          y: placeReq[2]
+        };
+        initWorkerList.push(initWorker);
+
+        this.notifyAllObservers(o => { o.workerPlaced(placeReq, activePlayer.getId(), new Board(initWorkerList)) });
+      } else {
+        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
+      }
+
+      // Check for exit condition after worker is added to list of InitWorkers
+      if (initWorkerList.length >= constants.NUM_WORKERS) {
+        this.board = new Board(initWorkerList);
+        return IN_PROGRESS;
+      } else {
+        return this.completeSetup(this.flip(activePlayer), initWorkerList);
+      }
+    }).catch(() => {
+      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
+    });
+  }
+
+  // ========== Play Game ==========
+
   /* GameState -> Promise<GameResult>
     Given a state where the game has been set up (both players have placed
     all their workers), this function carries the players through
@@ -155,6 +196,57 @@ class Referee {
       return this.completePlayGame(this.player1);
     }
   }
+
+  /* Player -> Promise<GameResult>
+    Given the current active player, play the game to completion.
+    Take a turn for the given player, then call this method again
+    with the opposing player if the game is not over.
+   */
+  completePlayGame(activePlayer) {
+    return this.getAndApplyTurn(activePlayer).then((gameState) => {
+      if (gameState === IN_PROGRESS) {
+        return this.completePlayGame(this.flip(activePlayer));
+      } else {
+        return gameState;
+      }
+    });
+  }
+
+  /* Player -> Promise<GameState>
+    Get a Promise from the given Player, containing their next Turn.
+    Apply the Turn to this Referee's Board if it:
+      - is well-formed
+      - refers to themself and not the other player
+      - and is valid according to the Rulechecker
+    If the Turn was applied to the Board, return a Promise resolving to either
+      - a GameResult indicating that the game should continue
+      - or a GameResult where the given Player won.
+    Otherwise, return a Promise that resolves to a GameResult indicating
+    that the given Player broke the rules.
+   */
+  getAndApplyTurn(activePlayer) {
+    return activePlayer.takeTurn(this.board.copy()).then((turn) => {
+      if (this.checkTurn(turn, activePlayer)) {
+        this.board.applyTurn(turn);
+
+        this.notifyAllObservers(o => {
+          o.turnTaken(turn, this.board)
+        });
+      } else {
+        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
+      }
+
+      if (RC.hasWon(this.board, activePlayer.getId()) || RC.hasLost(this.board, this.flip(activePlayer).getId())) {
+        return new GameResult(activePlayer.getId(), this.flip(activePlayer).getId(), WON);
+      } else {
+        return IN_PROGRESS;
+      }
+    }).catch(() => {
+      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
+    });
+  }
+
+  // ========== Notify of Game End ==========
 
   /* GameResult -> Promise<[Maybe GameResult]>
     Given the result of a fully-played game, notifies any players that
@@ -212,20 +304,7 @@ class Referee {
     }
   }
 
-  /* Player -> Promise<GameResult>
-    Given the current active player, play the game to completion.
-    Take a turn for the given player, then call this method again
-    with the opposing player if the game is not over.
-   */
-  completePlayGame(activePlayer) {
-    return this.getAndApplyTurn(activePlayer).then((gameState) => {
-      if (gameState === IN_PROGRESS) {
-        return this.completePlayGame(this.flip(activePlayer));
-      } else {
-        return gameState;
-      }
-    });
-  }
+  // ========== Play Series ==========
 
   /* PositiveInteger -> Promise<[GameResult, ...]>
     Manages a given number of games of Santorini between the two given players.
@@ -272,76 +351,7 @@ class Referee {
     return p1WinCount > numGames / 2 || p2WinCount > numGames / 2;
   }
 
-  /* GuardedPlayer [InitWorker, ...] -> Promise<GameState>
-    Completes the setup of a game of Santorini, where it's the given player's
-    turn to place a Worker on the board, given the list of locations
-    on the board that already contain workers.
-
-    This method calls itself recursively until 4 workers have been placed
-    or a player breaks a rule. When all workers are placed, initializes this Referee's board.
-   */
-  completeSetup(activePlayer, initWorkerList) {
-    return activePlayer.placeInitialWorker(Board.copyInitWorkerList(initWorkerList)).then((placeReq) => {
-      if (this.checkPlaceReq(placeReq, initWorkerList)) {
-        let initWorker = {
-          player: activePlayer.getId(),
-          x: placeReq[1],
-          y: placeReq[2]
-        };
-        initWorkerList.push(initWorker);
-
-        this.notifyAllObservers(o => { o.workerPlaced(placeReq, activePlayer.getId(), new Board(initWorkerList)) });
-      } else {
-        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
-      }
-
-      // Check for exit condition after worker is added to list of InitWorkers
-      if (initWorkerList.length >= constants.NUM_WORKERS) {
-        this.board = new Board(initWorkerList);
-        return IN_PROGRESS;
-      } else {
-        return this.completeSetup(this.flip(activePlayer), initWorkerList);
-      }
-    }).catch(() => {
-      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
-    });
-  }
-
-  /* Player -> Promise<GameState>
-    Get a Promise from the given Player, containing their next Turn.
-    Apply the Turn to this Referee's Board if it:
-      - is well-formed
-      - refers to themself and not the other player
-      - and is valid according to the Rulechecker
-    If the Turn was applied to the Board, return a Promise resolving to either
-      - a GameResult indicating that the game should continue
-      - or a GameResult where the given Player won.
-    Otherwise, return a Promise that resolves to a GameResult indicating
-    that the given Player broke the rules.
-   */
-  getAndApplyTurn(activePlayer) {
-    return activePlayer.takeTurn(this.board.copy()).then((turn) => {
-      if (this.checkTurn(turn, activePlayer)) {
-        this.board.applyTurn(turn);
-
-        this.notifyAllObservers(o => {
-          o.turnTaken(turn, this.board)
-        });
-      } else {
-        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
-      }
-
-      if (RC.hasWon(this.board, activePlayer.getId()) || RC.hasLost(this.board, this.flip(activePlayer).getId())) {
-        return new GameResult(activePlayer.getId(), this.flip(activePlayer).getId(), WON);
-      } else {
-        return IN_PROGRESS;
-      }
-    }).catch(() => {
-      return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
-    });
-  }
-
-
+  //  ========== General Helpers ==========
 
   /* Any -> Boolean
     Return true if the input value is a well-formed PlaceRequest that
@@ -368,6 +378,8 @@ class Referee {
   flip(activePlayer) {
     return activePlayer === this.player1 ? this.player2 : this.player1;
   }
+
+  // ========== Observers ==========
 
   /* [Observer -> Void] -> Void
     Notifies all observers in the list using the given notifier function.
