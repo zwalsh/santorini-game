@@ -64,9 +64,11 @@ class TournamentManager {
     });
   }
 
-  /* GP GP -> Void
+  /* GP GP -> Promise<[GameResult, ...]>
     Start a series between the given Players. Construct a Referee to manage the game,
     and set the callback to handle the series result.
+
+    Returns the result of the series for testing purposes only.
   */
   startMatch(player1, player2) {
     let ref = this.createReferee(player1, player2);
