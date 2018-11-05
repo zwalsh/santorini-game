@@ -3,6 +3,7 @@ const Board = require('../Common/board');
 const RFC = require('../Common/request-format-checker');
 const constants = require('../Common/constants');
 const GameResult = require('../Common/game-result');
+const protectedPromise = require('../Lib/promise-protector');
 
 const BROKEN_RULE = constants.EndGameReason.BROKEN_RULE;
 const WON = constants.EndGameReason.WON;
@@ -79,6 +80,7 @@ class Referee {
     // Observers are trusted components that are given
     // references to essential game data (as opposed to copies).
     this.observers = [];
+    this.timeout = timeout;
   }
 
   /* Void -> Promise<[Maybe GameResult]>
@@ -142,7 +144,7 @@ class Referee {
     }
     let p1Id = this.player1.getId();
     let p2Id = this.player2.getId();
-    this.notifyAllObservers(o => { o.startGame(p1Id, p2Id) });
+    this.notifyAllObservers(o => { return o.startGame(p1Id, p2Id) });
     return this.completeSetup(this.player1, []);
   }
 
@@ -163,8 +165,9 @@ class Referee {
           y: placeReq[2]
         };
         initWorkerList.push(initWorker);
+        let initWorkerListCopy = initWorkerList.slice();
 
-        this.notifyAllObservers(o => { o.workerPlaced(placeReq, activePlayer.getId(), new Board(initWorkerList)) });
+        this.notifyAllObservers(o => { return o.workerPlaced(placeReq.slice(), activePlayer.getId(), new Board(initWorkerListCopy.slice())) });
       } else {
         return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
       }
@@ -228,9 +231,11 @@ class Referee {
     return activePlayer.takeTurn(this.board.copy()).then((turn) => {
       if (this.checkTurn(turn, activePlayer)) {
         this.board.applyTurn(turn);
+        let curBoardCopy = this.board.copy();
 
         this.notifyAllObservers(o => {
-          o.turnTaken(turn, this.board)
+          let turnCopy = JSON.parse(JSON.stringify(turn));
+          return o.turnTaken(turnCopy, curBoardCopy);
         });
       } else {
         return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), BROKEN_RULE);
@@ -264,7 +269,7 @@ class Referee {
     });
 
     return winnerNotified.then((gameResult) => {
-      this.notifyAllObservers(o => { o.gameOver(gameResult) });
+      this.notifyAllObservers(o => { return o.gameOver(gameResult.copy()) });
       this.board = null;
       return gameResult;
     });
@@ -313,10 +318,10 @@ class Referee {
     The number of games in the series must be odd, or the behavior of this method is undefined.
    */
   playNGames(numGames) {
-    this.notifyAllObservers(o => { o.startSeries(this.player1.getId(), this.player2.getId(), numGames) });
+    this.notifyAllObservers(o => { return o.startSeries(this.player1.getId(), this.player2.getId(), numGames); });
 
     return this.completePlayNGames(numGames, []).then((gameResults) => {
-      this.notifyAllObservers(o => { o.seriesOver(gameResults) });
+      this.notifyAllObservers(o => { return o.seriesOver(gameResults.map(gr => gr.copy())); });
       return gameResults;
     });
   }
@@ -381,11 +386,27 @@ class Referee {
 
   // ========== Observers ==========
 
-  /* [Observer -> Void] -> Void
+  /* [Observer -> Promise<Void>] -> [Promise<Void>]
     Notifies all observers in the list using the given notifier function.
+    If an observer fails to be notified within this Referee's timeout,
+    removes it from the list of observers.
+
+    Returns a list of the resulting Promises from each notification
+    for testing purposes only.
   */
   notifyAllObservers(notifier) {
-    this.observers.forEach((o) => notifier(o));
+    return this.observers.map((o) => {
+      return this.promiseNotifyObserver(o, notifier).catch(() => {
+        this.removeObserver(o);
+      });
+    });
+  }
+
+  /* Observer [Observer -> Promise<Void>] -> Promise<Void>
+    Return a protected call to notify the observer using the given notifier function.
+  */
+  promiseNotifyObserver(o, notifier) {
+    return protectedPromise(o, notifier, this.timeout);
   }
 
   /* Observer -> Void
@@ -393,6 +414,18 @@ class Referee {
   */
   addObserver(observer) {
     this.observers.push(observer);
+  }
+
+  /* Observer -> Void
+    Remove the given Observer from the observer list.
+  */
+  removeObserver(observer) {
+    let index = this.observers.indexOf(observer);
+    if (index >= 0) {
+      let beforeRemoved = this.observers.slice(0, index);
+      let afterRemoved = this.observers.slice(index + 1);
+      this.observers = beforeRemoved.concat(afterRemoved);
+    }
   }
 }
 
