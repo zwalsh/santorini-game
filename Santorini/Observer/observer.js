@@ -58,7 +58,7 @@ class Observer {
   workerPlaced(placeReq, playerName, resultingBoard) {
     return new Promise(resolve => {
       this.printJson(this.boardToJson(resultingBoard));
-      resolve();
+      return resolve();
     });
   }
 
@@ -70,7 +70,7 @@ class Observer {
     return new Promise(resolve => {
       this.printJson(this.turnToJson(turn));
       this.printJson(this.boardToJson(resultingBoard));
-      resolve();
+      return resolve();
     });
   }
   /* GameResult -> Promise<Void>
@@ -80,7 +80,7 @@ class Observer {
   gameOver(gameResult) {
     return new Promise(resolve => {
       this.printJson(this.gameResultToJson(gameResult));
-      resolve();
+      return resolve();
     });
   }
 

@@ -44,7 +44,7 @@ describe('TournamentManager', function () {
       // which we are trying to use another Promise to do
       return new Promise(resolve => {
         assert.isNotNull(tm.resolveTournament);
-        resolve();
+        return resolve();
       });
     });
   });
@@ -59,7 +59,7 @@ describe('TournamentManager', function () {
       mockRef = testlib.createMockObject('playNGames');
       p1p2MatchResult = [new GameResult(p1Id, p2Id, WON)];
       let playNGamesResult = new Promise((resolve) => {
-        resolve(p1p2MatchResult);
+        return resolve(p1p2MatchResult);
       });
       mockRef.playNGames.returns(playNGamesResult);
       tm.createReferee = sinon.stub().returns(mockRef);
@@ -73,7 +73,7 @@ describe('TournamentManager', function () {
     });
     it('calls the handleMatchResult callback when the referee finishes the series', function () {
       return matchPromise.then(() => {
-        assert.isTrue(tm.handleMatchResult.calledWith(p1, p2, p1p2MatchResult));
+        return assert.isTrue(tm.handleMatchResult.calledWith(p1, p2, p1p2MatchResult));
       });
     });
   });

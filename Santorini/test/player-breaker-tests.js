@@ -16,7 +16,7 @@ describe('Broken Player', function () {
   describe('when asked for a PlaceRequest', function () {
     it('returns an invalid PlaceRequest', function () {
       return player.placeInitialWorker(initWorkers).then((placeReq) => {
-        assert.isFalse(RFC.isWellFormedPlaceReq(placeReq));
+        return assert.isFalse(RFC.isWellFormedPlaceReq(placeReq));
       });
     });
   });
@@ -24,7 +24,7 @@ describe('Broken Player', function () {
   describe('when asked for a Turn', function () {
     it('returns an invalid Turn', function () {
       return player.takeTurn(new Board(initWorkers)).then((turn) => {
-        assert.isFalse(RFC.isWellFormedTurn(turn));
+        return assert.isFalse(RFC.isWellFormedTurn(turn));
       });
     });
   });

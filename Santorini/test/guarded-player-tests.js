@@ -15,7 +15,7 @@ describe('GuardedPlayer tests', function () {
       player = testLib.createMockObject('takeTurn');
       guardedPlayer = new GuardedPlayer(player, 10);
       turn = "fake turn";
-      player.takeTurn.returns(Promise.resolve(turn));
+      player.takeTurn.resolves(turn);
     });
     it('returns the value given by the player', function () {
       let guardedPromise = guardedPlayer.takeTurn("board");

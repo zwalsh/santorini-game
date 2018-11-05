@@ -1,4 +1,4 @@
-const timeoutDefault = 30000;
+const timeoutDefault = 3000;
 
 /* X [X -> Promise<Y>] Natural -> Promise<Y>
   Calls the given function on the given subject to produce a Promise.
@@ -9,7 +9,10 @@ const timeoutDefault = 30000;
 */
 function protectedPromise(subject, promiseFunction, timeout = timeoutDefault) {
   let timeoutPromise = new Promise((resolve, reject) => {
-    setTimeout(reject, timeout);
+    return setTimeout(() => {
+      console.log('timeout func finally timed out');
+      return reject();
+    }, timeout);
   });
   try {
     let promise = promiseFunction(subject);

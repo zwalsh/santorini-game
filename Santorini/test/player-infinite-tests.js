@@ -36,11 +36,11 @@ describe('InfinitePlayer', function () {
       let resolveUUID = uuid();
       let timeout = new Promise(resolve => {
         setTimeout(function () {
-          resolve(resolveUUID);
+          return resolve(resolveUUID);
         }, 50); // only checking with a timeout of 50ms to avoid slow unit tests
       });
       return Promise.race([p, timeout]).then((val) => {
-        assert.equal(val, resolveUUID);
+        return assert.equal(val, resolveUUID);
       });
     }
 

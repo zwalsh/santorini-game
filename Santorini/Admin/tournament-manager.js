@@ -61,6 +61,7 @@ class TournamentManager {
     }
     return new Promise(resolve => {
       this.resolveTournament = resolve;
+      return;
     });
   }
 
@@ -73,7 +74,7 @@ class TournamentManager {
   startMatch(player1, player2) {
     let ref = this.createReferee(player1, player2);
     return ref.playNGames(this.seriesLength).then((gameResults) => {
-      this.handleMatchResult(player1, player2, gameResults);
+      return this.handleMatchResult(player1, player2, gameResults);
     });
   }
 

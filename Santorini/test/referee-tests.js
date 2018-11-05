@@ -128,12 +128,14 @@ describe('Referee', function () {
         return gameResult.then(() => {
           assert.isTrue(player2.newGame.calledWith(p1Id));
           assert.isTrue(player1.newGame.calledWith(p2Id));
+          return;
         });
       });
       it('requests Turns from both', function () {
         return gameResult.then(() => {
           assert.isTrue(player2.takeTurn.calledOnce);
           assert.isTrue(player1.takeTurn.calledOnce);
+          return;
         });
       });
       it('returns a GameResult indicating that the winning player won', function () {
@@ -144,6 +146,7 @@ describe('Referee', function () {
         return gameResult.then((gr) => {
           assert.isTrue(player2.notifyGameOver.calledWith(gr));
           assert.isTrue(player1.notifyGameOver.calledWith(gr));
+          return;
         });
       });
       // This is important to test maybe, but too difficult within the scenario set up here.
@@ -151,6 +154,7 @@ describe('Referee', function () {
         return gameResult.then((gr) => {
           assert.isTrue(observer[gameOver].calledOnce);
           assert.isTrue(observer[gameOver].calledWith(gr));
+          return;
         });
       });
     });
@@ -173,6 +177,7 @@ describe('Referee', function () {
         return gameResult.then((gr) => {
           assert.isFalse(player2.notifyGameOver.called);
           assert.isTrue(player1.notifyGameOver.calledWith(gr));
+          return;
         });
       });
     });
@@ -261,7 +266,7 @@ describe('Referee', function () {
       });
       it('plays the necessary number of games to determine a winner', function () {
         return resultList.then(() => {
-          assert.equal(referee.playGame.callCount, 3);
+          return assert.equal(referee.playGame.callCount, 3);
         });
       });
       it('returns the correct GameResult list', function () {
@@ -270,12 +275,14 @@ describe('Referee', function () {
           assert.deepEqual(rl[0], result1);
           assert.deepEqual(rl[1], result2);
           assert.deepEqual(rl[2], result3);
+          return;
         });
       });
       it('notifies the Observer that the series has started', function () {
         return resultList.then(() => {
           assert.isTrue(observer[startSeries].calledOnce);
           assert.isTrue(observer[startSeries].calledWith(p1Id, p2Id));
+          return;
         });
       });
       // This is important to test, but too difficult given the scenario we have set up currently.
@@ -283,6 +290,7 @@ describe('Referee', function () {
         return resultList.then((rl) => {
           assert.isTrue(observer[seriesOver].calledOnce);
           assert.isTrue(observer[seriesOver].calledWith(rl));
+          return;
         });
       });
     });
@@ -298,7 +306,7 @@ describe('Referee', function () {
       });
       it('plays the necessary number of games to determine a winner', function () {
         return resultList.then(() => {
-          assert.equal(referee.playGame.callCount, 2);
+          return assert.equal(referee.playGame.callCount, 2);
         });
       });
       it('returns the correct GameResult list', function () {
@@ -306,6 +314,7 @@ describe('Referee', function () {
           assert.equal(rl.length, 2);
           assert.deepEqual(rl[0], result1);
           assert.deepEqual(rl[1], result2);
+          return;
         });
       });
     });
@@ -321,7 +330,7 @@ describe('Referee', function () {
       });
       it('terminates that game and does not play any more games', function () {
         return resultList.then(() => {
-          assert.equal(referee.playGame.callCount, 2);
+          return assert.equal(referee.playGame.callCount, 2);
         });
       });
       it('returns the correct GameResult list', function () {
@@ -329,6 +338,7 @@ describe('Referee', function () {
           assert.equal(rl.length, 2);
           assert.deepEqual(rl[0], result1);
           assert.deepEqual(rl[1], result2);
+          return;
         });
       });
     });
@@ -392,6 +402,7 @@ describe('Referee', function () {
         return gameState.then(() => {
           assert.isTrue(observer[startGame].calledOnce);
           assert.isTrue(observer[startGame].calledWith(p1Id, p2Id));
+          return;
         });
       });
     });
@@ -409,6 +420,7 @@ describe('Referee', function () {
       it('does not create a new Board for the Referee', function () {
         return gameState.then(() => {
           assert.isNull(referee.board);
+          return;
         });
       });
     });
@@ -427,6 +439,7 @@ describe('Referee', function () {
           assert.equal(player2.placeInitialWorker.callCount, 2);
           assert.deepEqual(player1.placeInitialWorker.getCall(0).args[0], []);
           assert.deepEqual(player2.placeInitialWorker.getCall(0).args[0], [{player:p1Id, x: 0, y: 0}]);
+          return;
         });
       });
       it('creates a Board with all four workers correctly added to the Referee"s Board', function () {
@@ -444,6 +457,7 @@ describe('Referee', function () {
           assert.equal(w3.posn.y, 2);
           assert.equal(w4.posn.x, 3);
           assert.equal(w4.posn.y, 3);
+          return;
         });
       });
       it('returns a GameState indicating that the game should continue', function () {
@@ -468,7 +482,7 @@ describe('Referee', function () {
           let placeNotifier0 = referee.notifyAllObservers.getCall(1).args[0];
 
           return placeNotifier0(observer).then(() => {
-            verifyPlaceNotification(0, placeRequest0, p1Id, workerId1);
+            return verifyPlaceNotification(0, placeRequest0, p1Id, workerId1);
           });
         });
       });
@@ -543,6 +557,7 @@ describe('Referee', function () {
             assert.equal(worker.posn.x, 0);
             assert.equal(worker.posn.y, 1);
             assert.equal(referee.board.heightAtTile(0,2), 1);
+            return;
           });
         });
         it('returns a GameState indicating that the game should continue', function () {
@@ -557,6 +572,7 @@ describe('Referee', function () {
 
             assert.deepEqual(observerTurn, turn);
             assert.deepEqual(observerBoard, referee.board);
+            return;
           });
         });
       });
@@ -572,6 +588,7 @@ describe('Referee', function () {
             let worker = referee.board.findWorker({player:p1Id,id:workerId1});
             assert.equal(worker.posn.x, 1);
             assert.equal(worker.posn.y, 1);
+            return;
           });
         });
         it('returns a GameState indicating that the Player has won the game', function () {
@@ -594,7 +611,7 @@ describe('Referee', function () {
         it('does not apply the Turn to the Board', function () {
           return gameState.then(() => {
             // Referee's new board is the same as a copy of the board made before turn
-            assert.deepEqual(referee.board, boardCopy);
+            return assert.deepEqual(referee.board, boardCopy);
           });
         });
         it('returns a GameState indicating that the other Player won', function () {
@@ -603,7 +620,7 @@ describe('Referee', function () {
         });
         it('does not notify the Observer that any turn was taken', function () {
           return gameState.then(() => {
-            assert.isFalse(observer[turnTaken].called);
+            return assert.isFalse(observer[turnTaken].called);
           });
         })
       });
@@ -688,7 +705,7 @@ describe('Referee', function () {
       });
       it('removes an observer that does not respond as expected', function () {
         return Promise.all(observerPromises).then(() => {
-          assert.deepEqual(referee.observers, [observer1]);
+          return assert.deepEqual(referee.observers, [observer1]);
         });
       });
     });
