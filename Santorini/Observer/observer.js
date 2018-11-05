@@ -41,37 +41,64 @@ class Observer {
   constructor() {
   }
 
-  /* String String -> Void
+  // ================ Observer interface methods ==================
+
+  /* String String -> Promise<Void>
     Indicates to the observer that a new game has started between the
     two Players with the given names.
   */
   startGame(playerName1, playerName2) {
-    // Intentional no-op
+    return Promise.resolve();
   }
 
-  /* PlaceRequest String Board -> Void
+  /* PlaceRequest String Board -> Promise<Void>
     Tells the observer that the named Player made the given placement
     of a Worker on the Board.
    */
   workerPlaced(placeReq, playerName, resultingBoard) {
-    this.printJson(this.boardToJson(resultingBoard));
+    return new Promise(resolve => {
+      this.printJson(this.boardToJson(resultingBoard));
+      resolve();
+    });
   }
 
-  /* Turn Board -> Void
+  /* Turn Board -> Promise<Void>
     Tells the observer that the named Player took the given valid Turn,
     and that it resulted in the given Board state.
    */
   turnTaken(turn, resultingBoard) {
-    this.printJson(this.turnToJson(turn));
-    this.printJson(this.boardToJson(resultingBoard));
+    return new Promise(resolve => {
+      this.printJson(this.turnToJson(turn));
+      this.printJson(this.boardToJson(resultingBoard));
+      resolve();
+    });
   }
-  /* GameResult -> Void
+  /* GameResult -> Promise<Void>
     This method is called when the game currently in progress comes
     to an end. It passes the result of that game to the Observer.
    */
   gameOver(gameResult) {
-    this.printJson(this.gameResultToJson(gameResult));
+    return new Promise(resolve => {
+      this.printJson(this.gameResultToJson(gameResult));
+      resolve();
+    });
   }
+
+  /* String String OddNumber -> Promise<Void>
+    No-op
+   */
+  startSeries(playerName1, playerName2, numGames) {
+    return Promise.resolve();
+  }
+
+  /* [GameResult, ...] -> Promise<Void>
+    No-op
+   */
+  seriesOver(gameResults) {
+    return Promise.resolve();
+  }
+
+  // ================ Helpers ==================
 
   /* Board -> JsonBoard
     Convert the Board object to a JSON representation.
@@ -139,20 +166,6 @@ class Observer {
    */
   printJson(json) {
     process.stdout.write(JSON.stringify(json) + '\n');
-  }
-
-  /* String String OddNumber -> Void
-    No-op
-   */
-  startSeries(playerName1, playerName2, numGames) {
-    // unneeded for this implementation
-  }
-
-  /* [GameResult, ...] -> Void
-    No-op
-   */
-  seriesOver(gameResults) {
-    // unneeded for this implementation
   }
 }
 

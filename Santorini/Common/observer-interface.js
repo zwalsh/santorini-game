@@ -33,35 +33,35 @@
 
 class Observer {
 
-  /* String String -> Void
+  /* String String -> Promise<Void>
     Indicates to the observer that a new game has started between the
     two Players with the given names.
   */
   startGame(playerName1, playerName2) {
   }
 
-  /* PlaceRequest String Board -> Void
+  /* PlaceRequest String Board -> Promise<Void>
     Tells the observer that the named Player made the given placement
     of a Worker on the Board.
    */
   workerPlaced(placeReq, playerName, resultingBoard) {
   }
 
-  /* Turn Board -> Void
+  /* Turn Board -> Promise<Void>
     Tells the observer that a Player took the given valid Turn,
     and that it resulted in the given Board state.
    */
   turnTaken(turn, resultingBoard) {
   }
 
-  /* GameResult -> Void
+  /* GameResult -> Promise<Void>
     This method is called when the game currently in progress comes
     to an end. It passes the result of that game to the Observer.
    */
   gameOver(gameResult) {
   }
 
-  /* String String OddNumber -> Void
+  /* String String OddNumber -> Promise<Void>
     Notifies this observer that a new series has started between the
     two Players with the given names, and that it will be decided by
     the majority of the given number of games.
@@ -70,7 +70,7 @@ class Observer {
 
   }
 
-  /* [GameResult,  ...] -> Void
+  /* [GameResult,  ...] -> Promise<Void>
     When a series reaches its conclusion, the list of GameResults
     that occurred in the series are passed into the Observer via
     this method.
