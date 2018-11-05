@@ -8,8 +8,16 @@ const promiseProtector = require('../Lib/promise-protector');
 const timeout = 25;
 
 describe('promiseProtector', function () {
-  describe('the promise function resolves to a value', function () {
-    it('the Promise resolves with the result of the call', function () {
+  it('calls the promise function on the given subject', function () {
+    let promiseFn = (subj) => {
+      return Promise.resolve(subj.value);
+    };
+    let subject = { value: 5 };
+    let protectedPromise = promiseProtector(subject, promiseFn, timeout);
+    return expect(protectedPromise).to.eventually.eql(5);
+  });
+  describe('when the promise function resolves to a value', function () {
+    it('promiseProtector resolves with that value', function () {
       let promiseFn = (p) => {
         return new Promise((resolve => {
           setTimeout(resolve, timeout / 2, "succeeded");
@@ -19,8 +27,8 @@ describe('promiseProtector', function () {
       return expect(protectedPromise).to.eventually.eql("succeeded");
     });
   });
-  describe('the promise function times out', function () {
-    it('the Promise rejects with the result from the timeout Promise', function () {
+  describe('when the promise function times out', function () {
+    it('promiseProtector rejects', function () {
       let promiseFn = (p) => {
         return new Promise((resolve => {
           setTimeout(resolve, timeout * 420, "succeeded");
@@ -31,8 +39,8 @@ describe('promiseProtector', function () {
     });
   });
   // this test passes but warns about an unhandled Promise rejection (reason unknown)
-  xdescribe('the promise function errors when called', function () {
-    it('the Promise rejects', function () {
+  xdescribe('when the promise function errors when called', function () {
+    it('promiseProtector rejects', function () {
       let promiseFn = (p) => {
         throw new Error('this is not a Promise!');
       };
@@ -41,8 +49,8 @@ describe('promiseProtector', function () {
     });
   });
   // this test passes but warns about an unhandled Promise rejection (reason unknown)
-  xdescribe('the promise function returns something other than a Promise', function () {
-    it('the Promise rejects with the result from the timeout Promise', function () {
+  xdescribe('when the promise function returns something other than a Promise', function () {
+    it('promiseProtector rejects', function () {
       let promiseFn = (p) => {
         return 5; // 5 is not a promise
       };
