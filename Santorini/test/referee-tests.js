@@ -654,13 +654,15 @@ describe('Referee', function () {
       player1 = { name: p1Id, strategy: null };
       player2 = { name: p2Id, strategy: null };
       referee = new Referee(player1, player2, p1Id, p2Id);
-      mockedMethodName = 'test';
-      observer1 = testLib.createMockObject(mockedMethodName);
-      observer2 = testLib.createMockObject(mockedMethodName);
-      referee.addObserver(observer1);
-      referee.addObserver(observer2);
     });
     describe('adding and notifying', function () {
+      beforeEach(function () {
+        mockedMethodName = 'test';
+        observer1 = testLib.createMockObject(mockedMethodName);
+        observer2 = testLib.createMockObject(mockedMethodName);
+        referee.addObserver(observer1);
+        referee.addObserver(observer2);
+      });
       it('adds the observers to the observer list', function () {
         assert.equal(2, referee.observers.length);
       });
@@ -673,8 +675,21 @@ describe('Referee', function () {
     });
 
     describe('removing upon failure', function () {
+      let observerPromises;
+      beforeEach(function () {
+        observer1 = testLib.createMockObject('test');
+        observer2 = testLib.createMockObject('test');
+        observer1.test.returns(Promise.resolve());
+        observer2.test.returns(Promise.reject());
+        referee.addObserver(observer1);
+        referee.addObserver(observer2);
+        let notifierFn = (o) => { return o.test() };
+        observerPromises = referee.notifyAllObservers(notifierFn);
+      });
       it('removes an observer that does not respond as expected', function () {
-
+        return Promise.all(observerPromises).then(() => {
+          assert.deepEqual(referee.observers, [observer1]);
+        });
       });
     });
   });
