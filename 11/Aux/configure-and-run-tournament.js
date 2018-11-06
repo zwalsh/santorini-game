@@ -44,7 +44,7 @@ function configureAndRunTournament(configString) {
 */
 function printTournamentResult(tr) {
   let badPlayers = tr.badPlayers.map(player => player.getId());
-  let allGames = tr.matchTable.getAllGames(); 
+  let allGames = tr.matchTable.getAllGames(); //.map(gr => [gr.winner, gr.loser]);
   process.stdout.write(JSON.stringify(badPlayers) + '\n');
   process.stdout.write(JSON.stringify(allGames) + '\n');
 }
