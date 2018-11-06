@@ -396,11 +396,7 @@ class Referee {
   */
   notifyAllObservers(notifier) {
     return this.observers.map((o) => {
-      return this.promiseNotifyObserver(o, notifier).then(() => {
-        console.log('An observer finished');
-        return;
-      }).catch(() => {
-        console.log('An observer timed out');
+      return this.promiseNotifyObserver(o, notifier).catch(() => {
         this.removeObserver(o);
         return;
       });

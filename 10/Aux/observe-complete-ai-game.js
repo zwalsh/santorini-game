@@ -13,8 +13,4 @@ let player2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
 let referee = new Referee(player1, player2);
 let observer = new Observer();
 referee.addObserver(observer);
-referee.playGame().then((mgr) => {
-  console.log(JSON.stringify(mgr));
-  return;
-});
-
+referee.playGame();
