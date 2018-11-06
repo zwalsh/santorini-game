@@ -21,8 +21,6 @@ class GuardedPlayer {
     this.player = player;
     this.id = id;
     this.timeout = timeout;
-
-
   }
 
   /* Void -> UUID
