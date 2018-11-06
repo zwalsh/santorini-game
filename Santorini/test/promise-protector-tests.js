@@ -58,4 +58,13 @@ describe('promiseProtector', function () {
       return assert.isRejected(protectedPromise);
     });
   });
+  describe('when the promise function returns a Promise that rejects', function () {
+    it('promiseProtector rejects', function () {
+      let promiseFn = (p) => {
+        return Promise.reject();
+      };
+      let protectedPromise = promiseProtector({}, promiseFn, timeout);
+      return assert.isRejected(protectedPromise);
+    });
+  });
 });
