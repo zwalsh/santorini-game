@@ -102,3 +102,13 @@ Stores the input files for use in the test fest. Each "in" file has a sequence o
 
 #### Auxiliary/
 * observe-complete-ai-game.js - The file that xobserver runs.
+
+### 11/
+
+* xrun - Executable for configuring and running a complete tournament, according to a configuration file piped through STDIN.
+
+#### santorini.rc/
+* 1-in.json, 1-out.json - Test input and output for the executable.
+
+#### Aux/
+* observe-complete-ai-game.js - The file that xrun runs.
