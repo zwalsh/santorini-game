@@ -43,8 +43,9 @@ function configureAndRunTournament(configString) {
   then a list of games.
 */
 function printTournamentResult(tr) {
-  let badPlayers = tr.badPlayers;
-  let allGames = tr.matchTable.getAllGames();
+  let badPlayers = tr.badPlayers.map(player => player.getId());
+  let allGames = tr.matchTable.getAllGames(); 
   process.stdout.write(JSON.stringify(badPlayers) + '\n');
   process.stdout.write(JSON.stringify(allGames) + '\n');
 }
+
