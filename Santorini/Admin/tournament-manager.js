@@ -24,7 +24,7 @@ const constants = require('../Common/constants');
 const MatchTable = require('./match-table');
 const TournamentResult = require('./tournament-result');
 const Referee = require('./referee');
-const TIMEOUT = 30000;
+const TIMEOUT = 2000;
 
 class TournamentManager {
 
@@ -96,6 +96,7 @@ class TournamentManager {
     this.matchTable.setMatch(player1.getId(), player2.getId(), gameResults);
     let badPlayersInMatch = this.disqualifyBadPlayers(player1, player2);
     this.badPlayers = this.badPlayers.concat(badPlayersInMatch);
+    this.addPlayersToDoneList();
     [player1, player2].forEach((player) => {
       if (!badPlayersInMatch.includes(player)) {
         this.matchOrWaitlistPlayer(player);
@@ -104,6 +105,19 @@ class TournamentManager {
     if (this.isTournamentOver()) {
       this.endTournament();
     }
+  }
+
+  /* Void -> Void
+    After a player or players broke in a match, add any waiting players
+    to the done list if their remaining opponents were added to the broken list.
+   */
+  addPlayersToDoneList() {
+    this.waitingPlayers.forEach((player) => {
+      if (this.getPlayerRemainingOpponents(player).length === 0) {
+        this.removeFromWaitlist(player);
+        this.donePlayers.push(player);
+      }
+    });
   }
 
   /* GP GP -> [GP, ...]
@@ -132,13 +146,13 @@ class TournamentManager {
     empty), then place them on the waitlist too.
   */
   matchOrWaitlistPlayer(player) {
-    let remainingOpponentNames = this.matchTable.getRemainingOpponents(player.getId());
-    if (remainingOpponentNames.length === 0) {
+    let remainingOpponents = this.getPlayerRemainingOpponents(player);
+    if (remainingOpponents.length === 0) {
       this.donePlayers.push(player);
       return;
     }
     let maybeOpponent = this.waitingPlayers.find(player => {
-      return remainingOpponentNames.includes(player.getId());
+      return remainingOpponents.includes(player);
     });
     if (maybeOpponent) {
       this.removeFromWaitlist(maybeOpponent);
@@ -146,6 +160,18 @@ class TournamentManager {
     } else {
       this.waitingPlayers.push(player);
     }
+  }
+
+  /* GP -> [GP, ...]
+    Return a list of all non-disqualified players that the given
+    player still needs to play against.
+  */
+  getPlayerRemainingOpponents(player) {
+    let remainingOpponentNames = this.matchTable.getRemainingOpponents(player.getId());
+    return this.players.filter((p) => {
+      return remainingOpponentNames.includes(p.getId()) &&
+        !this.badPlayers.includes(p);
+    });
   }
 
   /* GP -> Void
