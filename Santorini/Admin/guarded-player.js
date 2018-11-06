@@ -30,6 +30,17 @@ class GuardedPlayer {
     return this.id;
   }
 
+  /* String -> Promise<Void>
+  Set this player's ID to the given identifier.
+  Return a Promise that resolves to indicate receipt of the name.
+*/
+  setId(id) {
+    this.id = id;
+    return protectedPromise(this.player, (p) => {
+      return p.setId(id);
+    }, this.timeout);
+  }
+
   /* [InitWorker, ...] -> Promise<PlaceRequest>
     Given the list of worker locations that have already been claimed on the Board,
     produce a PlaceRequest representing where this Player would like to put
