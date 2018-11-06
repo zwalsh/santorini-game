@@ -1,0 +1,29 @@
+{
+  "players": [
+    [
+      "good",
+      "suzanne",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "zach",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "infinite",
+      "neitherzachnorsuzanne",
+      "../../Santorini/Player/player-infinite.js"
+    ]
+  ],
+  "observers": [
+    [
+      "watchmewhip",
+      "../../Santorini/Observer/observer.js"
+    ],
+    [
+      "watchmenaynay",
+      "../../Santorini/Observer/observer.js"
+    ]
+  ]
+}
