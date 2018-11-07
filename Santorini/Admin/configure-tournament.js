@@ -2,7 +2,7 @@
   This component accepts a Santorini tournament configuration as a string, and creates
   a TournamentManager with the players and observers specified in that configuration.
 
-  All player names must alphanumeric, lowercase only, and unique.
+  All player names must alphabetic, lowercase only, and unique.
   It uses the player name checking component to ensure that all players have unique
   and well-formed names before giving the players to the TournamentManager.
 
@@ -12,10 +12,12 @@
 
 
   ============= Data Definitions ================
+
   The definition of GuardedPlayer is in guarded-player.js
   The definition of Player is in Player/player.js
   The definition of BrokenPlayer is in Player/player-breaker.js
   The definition of InfinitePlayer is in Player/player-infinite.js
+  The definition of TournamentManager is in tournament-manager.js
 
   A PlayerConfig is a [Kind, Name, PathString]
   An ObserverConfig is a [Name, PathString]

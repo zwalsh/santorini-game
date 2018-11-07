@@ -64,6 +64,7 @@ describe('TournamentManager', function () {
       mockRef.playNGames.returns(playNGamesResult);
       tm.createReferee = sinon.stub().returns(mockRef);
 
+
       tm.handleMatchResult = sinon.stub();
       matchPromise = tm.startMatch(p1, p2);
     });

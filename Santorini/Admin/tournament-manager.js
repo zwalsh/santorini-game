@@ -29,7 +29,7 @@ const TIMEOUT = 2000;
 class TournamentManager {
 
   /* [GuardedPlayer, ..., GuardedPlayer] Number -> TournamentManager
-    Given a minimum length 2 list of GuardedPlayers, and a positive odd number
+    Given a minimum length 2 list of (uniquely named) GuardedPlayers, and a positive odd number
     of games to play between each of them, create a TournamentManager.
    */
   constructor(players, seriesLength) {
@@ -49,6 +49,8 @@ class TournamentManager {
     this.donePlayers = [];
 
     this.matchTable = new MatchTable(players.map(player => player.getId()));
+    // The resolve function for the Promise created and returned in startTournament.
+    // Called when the tournament is over, so that startTournament resolves to a value.
     this.resolveTournament = null;
   }
 
