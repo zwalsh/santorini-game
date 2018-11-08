@@ -98,7 +98,7 @@ class TournamentManager {
     this.matchTable.setMatch(player1.getId(), player2.getId(), gameResults);
     let badPlayersInMatch = this.disqualifyBadPlayers(player1, player2);
     this.badPlayers = this.badPlayers.concat(badPlayersInMatch);
-    this.addPlayersToDoneList();
+    this.addWaitingPlayersToDoneList();
     [player1, player2].forEach((player) => {
       if (!badPlayersInMatch.includes(player)) {
         this.matchOrWaitlistPlayer(player);
@@ -113,7 +113,7 @@ class TournamentManager {
     After a player or players broke in a match, add any waiting players
     to the done list if their remaining opponents were added to the broken list.
    */
-  addPlayersToDoneList() {
+  addWaitingPlayersToDoneList() {
     this.waitingPlayers.forEach((player) => {
       if (this.getPlayerRemainingOpponents(player).length === 0) {
         this.removeFromWaitlist(player);
