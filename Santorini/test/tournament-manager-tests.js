@@ -48,6 +48,7 @@ describe('TournamentManager', function () {
       });
     });
   });
+
   describe('startMatch', function () {
     let mockRef,matchPromise, p1p2MatchResult;
     beforeEach(function () {
@@ -78,6 +79,7 @@ describe('TournamentManager', function () {
       });
     });
   });
+
   describe('handleMatchResult', function () {
     let setMatchMock, dqBadPlayersMock, matchOrWaitlistMock, isTourneyOverMock, endTourneyMock;
     beforeEach(function () {
@@ -138,6 +140,10 @@ describe('TournamentManager', function () {
         assert.isFalse(endTourneyMock.called);
       });
     });
+  });
+
+  describe('addWaitingPlayersToDoneList', function () {
+
   });
 
   describe('disqualifyBadPlayers', function () {
@@ -215,6 +221,10 @@ describe('TournamentManager', function () {
     });
   });
 
+  describe('getPlayerRemainingOpponents', function () {
+
+  });
+
   describe('isTournamentOver', function () {
     beforeEach(function () {
       p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
@@ -234,6 +244,7 @@ describe('TournamentManager', function () {
       assert.isTrue(tm.isTournamentOver());
     });
   });
+
   describe('endTournament', function () {
     describe('calls the resolution function', function () {
       let tournamentResult, p1p2Match, p1p3Match, p2p3Match;
