@@ -59,7 +59,7 @@ class TournamentManager {
    */
   startTournament() {
     for (let player of this.players) {
-      this.matchOrWaitlistPlayer(player);
+      this.matchOrStorePlayer(player);
     }
     return new Promise(resolve => {
       this.resolveTournament = resolve;
@@ -101,7 +101,7 @@ class TournamentManager {
     this.addWaitingPlayersToDoneList();
     [player1, player2].forEach((player) => {
       if (!badPlayersInMatch.includes(player)) {
-        this.matchOrWaitlistPlayer(player);
+        this.matchOrStorePlayer(player);
       }
     });
     if (this.isTournamentOver()) {
@@ -143,11 +143,13 @@ class TournamentManager {
   }
 
   /* GP -> Void
-    Attempts to put the given player into a match with someone on the waitlist.
+    Attempts to put the given player into a match with someone on the waitlist,
+    unless they have played all games, in which case put them on the done list.
+
     If they have already played everyone on the waitlist (or the waitlist is
     empty), then place them on the waitlist too.
   */
-  matchOrWaitlistPlayer(player) {
+  matchOrStorePlayer(player) {
     let remainingOpponents = this.getPlayerRemainingOpponents(player);
     if (remainingOpponents.length === 0) {
       this.donePlayers.push(player);

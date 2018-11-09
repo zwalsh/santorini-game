@@ -20,23 +20,23 @@ describe('TournamentManager', function () {
     p1Id = 'crosby';
     p2Id = 'stills';
     p3Id = 'nash';
+    p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
+    p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
+    p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
   });
 
   describe('startTournament', function () {
     let startTournamentPromise;
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
-      tm.matchOrWaitlistPlayer = sinon.stub();
+      tm.matchOrStorePlayer = sinon.stub();
       startTournamentPromise = tm.startTournament();
     });
-    it('calls matchOrWaitlistPlayer with each player in the tournament', function () {
-      assert.equal(tm.matchOrWaitlistPlayer.callCount, 3);
-      assert.isTrue(tm.matchOrWaitlistPlayer.calledWith(p1));
-      assert.isTrue(tm.matchOrWaitlistPlayer.calledWith(p2));
-      assert.isTrue(tm.matchOrWaitlistPlayer.calledWith(p3));
+    it('calls matchOrStorePlayer with each player in the tournament', function () {
+      assert.equal(tm.matchOrStorePlayer.callCount, 3);
+      assert.isTrue(tm.matchOrStorePlayer.calledWith(p1));
+      assert.isTrue(tm.matchOrStorePlayer.calledWith(p2));
+      assert.isTrue(tm.matchOrStorePlayer.calledWith(p3));
     });
     it('sets the resolveTournament callback', function () {
       // Since resolveTournament is set inside of a Promise,
@@ -52,9 +52,6 @@ describe('TournamentManager', function () {
   describe('startMatch', function () {
     let mockRef,matchPromise, p1p2MatchResult;
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
-
       // create a mock referee and have createReferee return it,
       // so that we can access the callback given to its .then() call
       mockRef = testlib.createMockObject('playNGames');
@@ -83,9 +80,6 @@ describe('TournamentManager', function () {
   describe('handleMatchResult', function () {
     let setMatchMock, dqBadPlayersMock, matchOrWaitlistMock, isTourneyOverMock, endTourneyMock;
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
       setMatchMock = sinon.stub();
       dqBadPlayersMock = sinon.stub();
@@ -95,7 +89,7 @@ describe('TournamentManager', function () {
 
       tm.matchTable.setMatch = setMatchMock;
       tm.disqualifyBadPlayers = dqBadPlayersMock;
-      tm.matchOrWaitlistPlayer = matchOrWaitlistMock;
+      tm.matchOrStorePlayer = matchOrWaitlistMock;
       tm.isTournamentOver = isTourneyOverMock;
       tm.endTournament = endTourneyMock;
     });
@@ -143,14 +137,37 @@ describe('TournamentManager', function () {
   });
 
   describe('addWaitingPlayersToDoneList', function () {
+    let p4Id, p4;
+    /* Scenario:
+      p1-p4, p1-p2 clean matches already finished
+      p3-p4 dirty match just finished.
+      p3 cheated and was added to bad players list
+     */
+    beforeEach(function () {
+      p4Id = 'young';
+      p4 = new GuardedPlayer(new Player(p4Id), p4Id, timeout);
+      tm = new TournamentManager([p1, p2, p3, p4], 3);
+      let remainingOppsFn = sinon.stub();
+      remainingOppsFn.withArgs(p1).returns([]);
+      remainingOppsFn.withArgs(p2).returns([p4]);
+      tm.getPlayerRemainingOpponents = remainingOppsFn;
+      tm.waitingPlayers = [p1, p2];
+      tm.badPlayers = [p3];
 
+      tm.addWaitingPlayersToDoneList();
+    });
+    it('moves players to done list if they have no remaining opponents', function () {
+      assert.isTrue(tm.donePlayers.includes(p1));
+      assert.isFalse(tm.waitingPlayers.includes(p1));
+    });
+    it('leaves players with remaining opponents on the wait list', function () {
+      assert.isFalse(tm.donePlayers.includes(p2));
+      assert.isTrue(tm.waitingPlayers.includes(p2));
+    });
   });
 
   describe('disqualifyBadPlayers', function () {
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
     });
     it('if neither player broke or cheated, does not return them', function () {
@@ -173,23 +190,20 @@ describe('TournamentManager', function () {
     });
   });
 
-  describe('matchOrWaitlistPlayer', function () {
+  describe('matchOrStorePlayer', function () {
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
     });
 
     it('puts player on waitlist if the waitlist is empty', function () {
-      tm.matchOrWaitlistPlayer(p1);
+      tm.matchOrStorePlayer(p1);
       assert.deepEqual(tm.waitingPlayers, [p1]);
     });
 
     it('puts player on waitlist if they have played everyone else on waitlist', function () {
       tm.matchTable.setMatch(p1Id, p2Id, [new GameResult(p1Id, p2Id, WON)]);
       tm.waitingPlayers = [p1];
-      tm.matchOrWaitlistPlayer(p2);
+      tm.matchOrStorePlayer(p2);
       assert.deepEqual(tm.waitingPlayers, [p1, p2]);
     });
 
@@ -198,7 +212,7 @@ describe('TournamentManager', function () {
       tm.matchTable.setMatch(p1Id, p2Id, [new GameResult(p1Id, p2Id, WON)]);
       tm.waitingPlayers = [p1, p3];
 
-      tm.matchOrWaitlistPlayer(p2);
+      tm.matchOrStorePlayer(p2);
 
       assert.isTrue(tm.startMatch.called);
       let args = tm.startMatch.getCall(0).args;
@@ -212,8 +226,8 @@ describe('TournamentManager', function () {
 
     it('puts player on the done list if they have no more opponents to play', function () {
       tm.startMatch = sinon.stub();
-      tm.matchTable.getRemainingOpponents = sinon.stub().returns([]);
-      tm.matchOrWaitlistPlayer(p1);
+      tm.getPlayerRemainingOpponents = sinon.stub().returns([]);
+      tm.matchOrStorePlayer(p1);
 
       assert.deepEqual(tm.donePlayers, [p1]);
       assert.isFalse(tm.waitingPlayers.includes(p1));
@@ -222,14 +236,35 @@ describe('TournamentManager', function () {
   });
 
   describe('getPlayerRemainingOpponents', function () {
+    beforeEach(function () {
+      tm = new TournamentManager([p1, p2, p3], 3);
+    });
 
+    describe('when none of the player\'s remaining opponents are bad players', function () {
+      beforeEach(function () {
+        tm.badPlayers = [p3];
+        tm.matchTable.getRemainingOpponents = sinon.stub().returns([p2Id]);
+      });
+
+      it('returns all opponents from the match table', function () {
+        assert.deepEqual(tm.getPlayerRemainingOpponents(p1), [p2]);
+      });
+    });
+
+    describe('when some of the player\'s opponents are bad players', function () {
+      beforeEach(function () {
+        tm.badPlayers = [p3];
+        tm.matchTable.getRemainingOpponents = sinon.stub().returns([p2Id, p3Id]);
+      });
+
+      it('filters the bad players from the opponent list', function () {
+        assert.deepEqual(tm.getPlayerRemainingOpponents(p1), [p2]);
+      });
+    });
   });
 
   describe('isTournamentOver', function () {
     beforeEach(function () {
-      p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
-      p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
-      p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
       tm = new TournamentManager([p1, p2, p3], 3);
     });
 
@@ -249,9 +284,6 @@ describe('TournamentManager', function () {
     describe('calls the resolution function', function () {
       let tournamentResult, p1p2Match, p1p3Match, p2p3Match;
       beforeEach(function () {
-        p1 = new GuardedPlayer(new Player(p1Id), p1Id, timeout);
-        p2 = new GuardedPlayer(new Player(p2Id), p2Id, timeout);
-        p3 = new GuardedPlayer(new Player(p3Id), p3Id, timeout);
         tm = new TournamentManager([p1, p2, p3], 3);
         p1p2Match = [new GameResult(p1Id, p2Id, WON)];
         p1p3Match = [new GameResult(p1Id, p3Id, BROKEN_RULE)];
