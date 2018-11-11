@@ -5,11 +5,7 @@
   It can be used to test Referees, tournament managers, and other components that
   are supposed to be able to gracefully handle misbehavior from Players like this one.
 
-  DATA DEFINITIONS:
-
-  Board is defined in Common/board.js
-  InitWorker is defined in Common/board.js
-  All request types (PlaceRequest, MoveRequest, BuildRequest) and Turn are defined in strategy.js
+  Data Definitions: See Common/player-interface.js
 */
 
 class BrokenTurnPlayer {

@@ -17,14 +17,8 @@
    of a game.
 
    =======  Data Definitions =======
-   An EndGameReason is one of:
-   - "WON"
-   - "BROKEN_RULE"
-   and represents whether a Player won legitimately, or because
-   their opponent broke the rules.
 
-   A GameResult is a [UUID, EndGameReason] where the UUID is
-   the identifier of the Player who won the game.
+   GameResult is defined in game-result.js
 
    The data definitions for Turn and PlaceRequest are in rulechecker.js
 

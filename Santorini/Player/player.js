@@ -4,11 +4,7 @@
 
   This implementation uses a Strategy to generate its Placements and Turns.
 
-  DATA DEFINITIONS:
-
-  Board is defined in Common/board.js
-  InitWorker is defined in Common/board.js
-  All request types (PlaceRequest, MoveRequest, BuildRequest) and Turn are defined in strategy.js
+  Data Definitions: See Common/player-interface.js
 */
 
 const Strategy = require('./strategy');

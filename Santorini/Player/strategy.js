@@ -5,18 +5,10 @@ const Rulechecker = require('../Common/rulechecker');
 /**
  * Data Definitions:
  *
- * A WorkerRequest is a: {player: string , id: int}
+ * WorkerRequest, PlaceRequest, MoveRequest, BuildRequest, and Turn
+ *  are defined in Common/player-interface.js
  *
- * A PlaceRequest is a: ["place", x:int, y:int]
- *
- * A MoveRequest is a: ["move", WorkerRequest, Direction]
- *
- * A BuildRequest is a: ["build", Direction]
- *
- * A Turn is a [MoveRequest(, BuildRequest)]
- *
- * An InitWorker is a: {player: string, x: int, y: int}
- * Init workers come from the referee on startup of the game.
+ * InitWorker is defined in Common/board.js
  *
  */
 
@@ -38,7 +30,7 @@ class Strategy {
   }
 
   // Retrieve the desired coordinates for placement of workers during the setup phase.
-  // ListOfInitWorker -> PlaceRequest
+  // [InitWorker, ...] -> PlaceRequest
   getNextWorkerPlace(workerList) {
     if (this.placementStrategy === 0) {
       return this.getNextWorkerPlaceDiagonal(workerList);
@@ -49,7 +41,7 @@ class Strategy {
 
   // Retrieve the desired coordinates for placement of workers during the setup phase
   // determined by placement on a board diagonal.
-  // ListOfInitWorker -> PlaceRequest
+  // [InitWorker, ...] -> PlaceRequest
   getNextWorkerPlaceDiagonal(workerList) {
     for (let i = 0; i < c.BOARD_HEIGHT; i++) {
       let p = {x:i, y:i};
@@ -61,7 +53,7 @@ class Strategy {
 
   // Retrieve the desired coordinates for placement of workers during the setup phase determined my distance
   // from opponent workers.
-  // ListOfInitWorker -> PlaceRequest
+  // [InitWorker, ...] -> PlaceRequest
   getNextWorkerPlaceDistance(workerList) {
     if (workerList.length === 0) {
       return ["place", 0, 0];
@@ -108,7 +100,7 @@ class Strategy {
   }
 
   // Checks if the given posn is occupied by a worker in the workerList
-  // ListOfInitWorkers Posn -> Boolean
+  // [InitWorker, ...] Posn -> Boolean
   tileIsOccupied(workerList, posn) {
     return workerList.some(function (iw) {
       return iw.x === posn.x && iw.y === posn.y;
@@ -208,7 +200,7 @@ class Strategy {
   }
 
   // Generate all the possible valid decisions that the given player can make at the given board state.
-  // Board String -> Listof Turn
+  // Board String -> [Turn, ...]
   genDecisions(board, playerID) {
     let decisions= [];
 

@@ -5,11 +5,7 @@
   are supposed to be able to gracefully Players that enter infinite loops
   (or just pretend to, like this one).
 
-  DATA DEFINITIONS:
-
-  Board is defined in Common/board.js
-  InitWorker is defined in Common/board.js
-  All request types (PlaceRequest, MoveRequest, BuildRequest) and Turn are defined in strategy.js
+  Data Definitions: See Common/player-interface.js
 */
 
 class InfinitePlayer {

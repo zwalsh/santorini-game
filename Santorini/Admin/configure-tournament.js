@@ -13,11 +13,11 @@
 
   ============= Data Definitions ================
 
-  The definition of GuardedPlayer is in guarded-player.js
-  The definition of Player is in Player/player.js
-  The definition of BrokenPlayer is in Player/player-all-breaker.js
-  The definition of InfinitePlayer is in Player/player-infinite.js
-  The definition of TournamentManager is in tournament-manager.js
+  GuardedPlayer is defined in guarded-player.js
+  Player is defined in Player/player.js
+  BrokenPlayer is defined in Player/player-all-breaker.js
+  InfinitePlayer is defined in Player/player-infinite.js
+  TournamentManager is defined in tournament-manager.js
 
   A PlayerConfig is a [Kind, Name, PathString]
   An ObserverConfig is a [Name, PathString]

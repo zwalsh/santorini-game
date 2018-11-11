@@ -11,17 +11,12 @@ const c = require('./constants');
  *   [[H, ...],
  *    ...     ]
  *
- * An InitWorker is a: {player: string, x: int, y: int}
- * Init workers come from the referee on startup of the game.
- *
+ * An InitWorker is a: {player: string, x: int, y: int},
+ * representing where a player wants to place a worker at the start of the game.
  *
  * A WorkerRequest is a: {player: string , id: int}
  *
- * A Direction is a: [EastWest, NorthSouth]
- * A EastWest is one of: "EAST" "PUT" "WEST"
- * A NorthSouth is one of: "NORTH" "PUT" "SOUTH".
- *
- * A Posn is a: {x:int, y:int}
+ * Direction and Posn are defined in direction.js
  */
 
 // Encapsulates the data of the game board, offering any necessary methods to access or interact with the board itself.

@@ -16,9 +16,10 @@
   ================= Data Definitions =================
 
   GP stands for GuardedPlayer, the data definition for which can be found in Player/guarded-player.js
-  Referee data definition is in Admin/referee.js
-  GameResult data definition is in Admin/referee.js
-  Match data definition is in
+  Referee data definition is in referee.js
+  GameResult data definition is in Common/game-result.js
+  Match data definition is in match-table.js
+  TournamentResult is defined in tournament-result.js
 
  */
 const constants = require('../Common/constants');

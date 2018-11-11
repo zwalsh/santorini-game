@@ -3,24 +3,14 @@ const dirs = direction.directions;
 const c = require('./constants');
 
 /**
- * An InitWorker is a: {player: string, x: int, y: int}
- * Init workers come from the referee on startup of the game.
+ * Data Definitions:
  *
- * A WorkerRequest is a: {player: string , id: int}
+ * WorkerRequest, PlaceRequest, MoveRequest, BuildRequest, and Turn
+ *  are defined in Common/player-interface.js
  *
- * A MoveRequest is a: ["move", WorkerRequest, Direction]
+ * Height and InitWorker are defined in board.js
  *
- * A BuildRequest is a: ["build", Direction]
- *
- * A Turn is a [MoveRequest, BuildRequest]
- *
- * Height (H) is a: int from 0 to 4 representing height
- *
- * A Direction is a: [EastWest, NorthSouth]
- * A EastWest is one of: "EAST" "PUT" "WEST"
- * A NorthSouth is one of: "NORTH" "PUT" "SOUTH".
- *
- * A Target Tile is a: Tile in the given direction relative to the given worker
+ * Direction is defined in direction.js
  */
 
 // Contains methods checking if given place, build, and move commands are valid. Also checks if the game is over.

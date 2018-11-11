@@ -4,9 +4,19 @@
 
   DATA DEFINITIONS:
 
+  A WorkerRequest is a: {player: string , id: int}
+
+  A PlaceRequest is a: ["place", x:int, y:int]
+
+  A MoveRequest is a: ["move", WorkerRequest, Direction]
+
+  A BuildRequest is a: ["build", Direction]
+
+  A Turn is a [MoveRequest(, BuildRequest)]
+
   Board is defined in Common/board.js
+
   InitWorker is defined in Common/board.js
-  All request types (PlaceRequest, MoveRequest, BuildRequest) and Turn are defined in strategy.js
 */
 
 

@@ -40,17 +40,8 @@ const IN_PROGRESS = constants.GameState.IN_PROGRESS;
  *
  * GuardedPlayer (GP) is defined in guarded-player.js
  *
- * A WorkerRequest is a: {player: string , id: int}
- *
- * A PlaceRequest is a: ["place", x:int, y:int]
- *
- * A MoveRequest is a: ["move", WorkerRequest, Direction]
- *
- * A BuildRequest is a: ["build", Direction]
- *
- * A Turn is a [MoveRequest(, BuildRequest)]
- *
- * An InitWorker is a: {player: string, x: int, y: int}
+ * WorkerRequest, PlaceRequest, MoveRequest, BuildRequest, and Turn
+ *  are defined in Common/player-interface.js
  *
  * GameResult is defined in game-result.js
  *
@@ -67,7 +58,6 @@ const IN_PROGRESS = constants.GameState.IN_PROGRESS;
 
 const RC = new Rulechecker();
 
-// A class to handle the different phases of the game - Initialization, Steady-State, and Game Over
 class Referee {
   /* GuardedPlayer GuardedPlayer -> Referee
     Construct a Referee to run game(s) between the given players.
