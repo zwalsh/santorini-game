@@ -1,6 +1,6 @@
 const direction = require('./direction');
 const dirs = direction.directions;
-const c = require('./constants');
+const constants = require('./constants');
 
 /**
  * Data Definitions:
@@ -33,7 +33,7 @@ class Rulechecker {
   // Determines if the given x and y coordinates are within the board's boundaries.
   // Int Int -> Boolean
   tileIsInBounds(x, y) {
-    return x >= 0 && x < c.BOARD_WIDTH && y >= 0 && y < c.BOARD_HEIGHT;
+    return x >= 0 && x < constants.BOARD_WIDTH && y >= 0 && y < constants.BOARD_HEIGHT;
   }
 
   /* Board Turn -> Boolean
@@ -50,7 +50,7 @@ class Rulechecker {
       return false;
     }
     // If moving to a winning height, the turn is only valid if there is no build.
-    let isMoveToWinningHeight = board.workerNeighborHeight(workerReq, moveDir) === c.WINNING_HEIGHT;
+    let isMoveToWinningHeight = board.workerNeighborHeight(workerReq, moveDir) === constants.WINNING_HEIGHT;
     if (turn.length === 1) {
       return isMoveToWinningHeight;
     }
@@ -68,7 +68,7 @@ class Rulechecker {
   isValidMove(board, workerRequest, direction) {
     if (this.checkValid(board, workerRequest, direction)) {
       if (board.workerNeighborHeight(workerRequest, direction) -
-          board.workerNeighborHeight(workerRequest, ["PUT", "PUT"]) <= c.MAX_FLOORS_PER_MOVE) {
+          board.workerNeighborHeight(workerRequest, ["PUT", "PUT"]) <= constants.MAX_FLOORS_PER_MOVE) {
         return true;
       }
     }
@@ -115,7 +115,7 @@ class Rulechecker {
       if (direction.join('') !== "PUTPUT") {
         if (board.workerHasNeighbor(workerRequest, direction)) {
           if (!board.workerNeighborIsOccupied(workerRequest, direction)) {
-            if (board.workerNeighborHeight(workerRequest, direction) < c.MAX_HEIGHT) {
+            if (board.workerNeighborHeight(workerRequest, direction) < constants.MAX_HEIGHT) {
               return true;
             }
           }
@@ -153,7 +153,7 @@ class Rulechecker {
   // Board String -> Boolean
   workerIsOnWinningHeight(board, playerID) {
     return board.workers.filter((w) => w.player === playerID).some((w) => {
-      return board.heightAtTile(w.posn.x, w.posn.y) === c.MAX_HEIGHT - 1;
+      return board.heightAtTile(w.posn.x, w.posn.y) === constants.MAX_HEIGHT - 1;
     });
   }
 
@@ -169,7 +169,7 @@ class Rulechecker {
   // Worker Board -> Boolean
   checkBoxedIn(worker, board) {
     return this.getAdjacentTiles(worker, board).every((h) => {
-      return h - board.heightAtTile(worker.posn.x, worker.posn.y) > c.MAX_FLOORS_PER_MOVE;
+      return h - board.heightAtTile(worker.posn.x, worker.posn.y) > constants.MAX_FLOORS_PER_MOVE;
     });
   }
 

@@ -1,8 +1,5 @@
 let assert = require('chai').assert;
-let sinon = require('sinon');
-let Board = require('../Common/board');
 const RFC = require('../Common/request-format-checker');
-let c = require('../Common/constants');
 
 describe('Data checking methods', function () {
   describe('isWellFormedTurn', function () {

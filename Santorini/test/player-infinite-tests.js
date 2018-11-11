@@ -5,7 +5,7 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const InfinitePlayer = require('../Player/player-infinite');
 const Board = require('../Common/board');
-const c = require('../Common/constants');
+const constants = require('../Common/constants');
 const uuid = require('uuid/v4');
 
 describe('InfinitePlayer', function () {
@@ -27,7 +27,7 @@ describe('InfinitePlayer', function () {
       assert.isTrue(value instanceof Promise);
     });
     it('notifyGameOver', function () {
-      let value = infinitePlayer.notifyGameOver(["a", c.EndGameReason.WON]);
+      let value = infinitePlayer.notifyGameOver(["a", constants.EndGameReason.WON]);
       assert.isTrue(value instanceof Promise);
     });
   });
@@ -57,7 +57,7 @@ describe('InfinitePlayer', function () {
       return promiseDoesNotResolve(promise);
     });
     it('notifyGameOver', function () {
-      let promise = infinitePlayer.notifyGameOver(["a", c.EndGameReason.WON]);
+      let promise = infinitePlayer.notifyGameOver(["a", constants.EndGameReason.WON]);
       return promiseDoesNotResolve(promise);
     });
   });

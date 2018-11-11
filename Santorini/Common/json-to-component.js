@@ -2,7 +2,7 @@ const Board = require('./board');
 const Worker = require('./worker');
 const nearley = require("nearley");
 const grammar = require("../Lib/jsongrammar.js");
-const c = require('./constants');
+const constants = require('./constants');
 let parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
 var exports = module.exports = {};
 
@@ -56,17 +56,17 @@ exports.parseBoard = function (boardSpec) {
   let workerList = [];
   let initBoard = [];
 
-  if (boardSpec.length < c.BOARD_HEIGHT) {
+  if (boardSpec.length < constants.BOARD_HEIGHT) {
     let initHeight = boardSpec.length;
-    for (let i = 0; i < c.BOARD_HEIGHT - initHeight; i++) {
+    for (let i = 0; i < constants.BOARD_HEIGHT - initHeight; i++) {
       boardSpec.push([0,0,0,0,0,0]);
     }
   }
 
   boardSpec.forEach((r) => {
-    if (r.length < c.BOARD_WIDTH) {
+    if (r.length < constants.BOARD_WIDTH) {
       let initWidth = r.length;
-      for (let i = 0; i < c.BOARD_WIDTH - initWidth; i++) {
+      for (let i = 0; i < constants.BOARD_WIDTH - initWidth; i++) {
         r.push(0);
       }
     }

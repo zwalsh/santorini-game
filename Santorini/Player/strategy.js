@@ -1,4 +1,4 @@
-const c = require('../Common/constants');
+const constants = require('../Common/constants');
 const dirs = require('../Common/direction');
 const Rulechecker = require('../Common/rulechecker');
 
@@ -43,7 +43,7 @@ class Strategy {
   // determined by placement on a board diagonal.
   // [InitWorker, ...] -> PlaceRequest
   getNextWorkerPlaceDiagonal(workerList) {
-    for (let i = 0; i < c.BOARD_HEIGHT; i++) {
+    for (let i = 0; i < constants.BOARD_HEIGHT; i++) {
       let p = {x:i, y:i};
       if (!this.tileIsOccupied(workerList, p)) {
         return ["place", p.x, p.y];
@@ -64,8 +64,8 @@ class Strategy {
     let posnToDistanceTable = new Map();
 
     //get array of possible unoccupied posns
-    for (let i = 0; i < c.BOARD_WIDTH; i++) {
-      for(let j = 0; j < c.BOARD_HEIGHT; j++) {
+    for (let i = 0; i < constants.BOARD_WIDTH; i++) {
+      for(let j = 0; j < constants.BOARD_HEIGHT; j++) {
         let posn = {x:i, y:j};
         if (!this.tileIsOccupied(workerList, posn)) unoccupiedTiles.push(posn);
       }
@@ -215,7 +215,7 @@ class Strategy {
         for (let moveCoord in dirs.directions) {
           let moveDir = dirs.coordToDirection(dirs.directions[moveCoord]);
           if (board.workerHasNeighbor(wRequest, moveDir) &&
-            board.workerNeighborHeight(wRequest, moveDir) === c.WINNING_HEIGHT) {
+            board.workerNeighborHeight(wRequest, moveDir) === constants.WINNING_HEIGHT) {
             decisions.push([["move", wRequest, moveDir]]);
             continue;
           }

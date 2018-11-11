@@ -1,6 +1,6 @@
 const Worker = require('./worker');
 const directionToCoordinate = require('./direction').directionToCoordinate;
-const c = require('./constants');
+const constants = require('./constants');
 
 /**
  * Data Definitions:
@@ -26,7 +26,7 @@ class Board {
   constructor(initWorkerList, initBoard = null, workersList = null) {
     // Generate a new board of heights 0 with dimensions based on the constants for this game.
     // If the constructor was given an initBoard (for testing purposes), set it to that.
-    this.board = initBoard || Board.createBoard(c.BOARD_WIDTH, c.BOARD_HEIGHT);
+    this.board = initBoard || Board.createBoard(constants.BOARD_WIDTH, constants.BOARD_HEIGHT);
 
     // Create a list of new Workers based on the InitWorker list
     this.workers = workersList || Board.createWorkerList(initWorkerList);
@@ -113,8 +113,8 @@ class Board {
   // WorkerRequest Direction -> Boolean
   workerHasNeighbor(workerRequest, direction) {
     let target = this.getNeighborTile(workerRequest, direction);
-    return (target.x >= 0 && target.x < c.BOARD_WIDTH)
-         && (target.y >= 0 && target.y < c.BOARD_HEIGHT);
+    return (target.x >= 0 && target.x < constants.BOARD_WIDTH)
+         && (target.y >= 0 && target.y < constants.BOARD_HEIGHT);
   }
 
   // Determines if the Target Tile is occupied by another worker.

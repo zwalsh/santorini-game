@@ -1,7 +1,7 @@
 const assert = require('chai').assert;
 const sinon = require('sinon');
 const Board = require('../Common/board');
-const c = require('../Common/constants');
+const constants = require('../Common/constants');
 const Observer = require('../Observer/observer');
 const Worker = require('../Common/worker');
 const GameResult = require('../Common/game-result');
@@ -52,11 +52,11 @@ describe('Observer tests', function () {
         observer.startGame(p1Name, p2Name);
       });
       it('outputs the winner\'s name if they won the game cleanly', function () {
-        let gameResult = new GameResult(p1Name, p2Name, c.EndGameReason.WON);
+        let gameResult = new GameResult(p1Name, p2Name, constants.EndGameReason.WON);
         assert.deepEqual(observer.gameResultToJson(gameResult), "Player wayne won the game!");
       });
       it('outputs the winner\'s name and the opponent\'s name if the opponent broke a rule', function () {
-        let gameResult = new GameResult(p2Name, p1Name, c.EndGameReason.BROKEN_RULE);
+        let gameResult = new GameResult(p2Name, p1Name, constants.EndGameReason.BROKEN_RULE);
         assert.deepEqual(observer.gameResultToJson(gameResult), "Player garth won because Player wayne broke the rules.");
       });
     });

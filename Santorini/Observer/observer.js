@@ -19,7 +19,7 @@
         represent a move, and the second two represent a build following the move.
 */
 
-const c = require('../Common/constants');
+const constants = require('../Common/constants');
 
 class Observer {
   constructor() {
@@ -134,10 +134,10 @@ class Observer {
   gameResultToJson(gameResult) {
     let message = "Player " + gameResult.winner + " ";
     switch(gameResult.reason) {
-      case c.EndGameReason.WON:
+      case constants.EndGameReason.WON:
         message += "won the game!";
         break;
-      case c.EndGameReason.BROKEN_RULE:
+      case constants.EndGameReason.BROKEN_RULE:
         message += "won because Player " + gameResult.loser + " broke the rules.";
         break;
       default:
