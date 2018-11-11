@@ -29,6 +29,13 @@
    The data definitions for Turn and PlaceRequest are in rulechecker.js
 
    The data definition for a Board is in board.js
+
+   A Match is one of:
+    - [GameResult, ..., GameResult] - a non-empty list of GameResults indicating a match
+                                      between two players that has completed, where no
+                                      more than one player cheated.
+    - []                            - an empty list, indicating a Match struck from the
+                                    record, as both players cheated.
 */
 
 class Observer {
@@ -70,12 +77,11 @@ class Observer {
 
   }
 
-  /* [GameResult,  ...] -> Promise<Void>
-    When a series reaches its conclusion, the list of GameResults
-    that occurred in the series are passed into the Observer via
-    this method.
+  /* Match -> Promise<Void>
+    When a series reaches its conclusion, the match result
+    is passed into the Observer via this method.
    */
-  seriesOver(gameResults) {
+  seriesOver(match) {
 
   }
 }

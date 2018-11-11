@@ -61,6 +61,8 @@ const IN_PROGRESS = constants.GameState.IN_PROGRESS;
  * - GameResult
  * and represents a game being in-progress or over.
  *
+ * Match is defined in match-table.js
+ *
  */
 
 const RC = new Rulechecker();
@@ -311,23 +313,21 @@ class Referee {
 
   // ========== Play Series ==========
 
-  /* PositiveInteger -> Promise<[GameResult, ...]>
+  /* PositiveInteger -> Promise<Match>
     Manages a given number of games of Santorini between the two given players.
-    Returns a list of GameResults representing the winner of the game, and the reason they won.
-    If a player breaks the rules in a game, that game is terminated and no further games are played.
-    If both players break in a game, then the series is invalid and an empty array of results is returned.
+    When a player (or players) break a rule, the series is terminated.
     The number of games in the series must be odd, or the behavior of this method is undefined.
    */
   playNGames(numGames) {
     this.notifyAllObservers(o => { return o.startSeries(this.player1.getId(), this.player2.getId(), numGames); });
 
-    return this.completePlayNGames(numGames, []).then((gameResults) => {
-      this.notifyAllObservers(o => { return o.seriesOver(gameResults.map(gr => gr.copy())); });
-      return gameResults;
+    return this.completePlayNGames(numGames, []).then((match) => {
+      this.notifyAllObservers(o => { return o.seriesOver(match.map(gr => gr.copy())); });
+      return match;
     });
   }
 
-  /* PositiveInteger [GameResult, ...] -> Promise<[GameResult, ...]>
+  /* PositiveInteger [GameResult, ...] -> Promise<Match>
     Complete a series of numGames games between the players, given
     the set of game results from any prior games in the series.
    */

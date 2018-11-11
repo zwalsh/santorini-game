@@ -18,6 +18,7 @@
   GP stands for GuardedPlayer, the data definition for which can be found in Player/guarded-player.js
   Referee data definition is in Admin/referee.js
   GameResult data definition is in Admin/referee.js
+  Match data definition is in
 
  */
 const constants = require('../Common/constants');
@@ -67,7 +68,7 @@ class TournamentManager {
     });
   }
 
-  /* GP GP -> Promise<[GameResult, ...]>
+  /* GP GP -> Promise<Match>
     Start a series between the given Players. Construct a Referee to manage the game,
     and set the callback to handle the series result.
 
@@ -87,15 +88,15 @@ class TournamentManager {
     return new Referee(player1, player2, TIMEOUT);
   }
 
-  /* GP GP [GameResult, ...] -> Void
+  /* GP GP Match -> Void
      Handles the result of a match between two players. This involves the following:
      - adding the match to the match table
      - checking if a player cheated during the match
      - matching the free players as necessary
      - check if the tournament is over and if so, end it
    */
-  handleMatchResult(player1, player2, gameResults) {
-    this.matchTable.setMatch(player1.getId(), player2.getId(), gameResults);
+  handleMatchResult(player1, player2, match) {
+    this.matchTable.setMatch(player1.getId(), player2.getId(), match);
     let badPlayersInMatch = this.disqualifyBadPlayers(player1, player2);
     this.badPlayers = this.badPlayers.concat(badPlayersInMatch);
     this.addWaitingPlayersToDoneList();

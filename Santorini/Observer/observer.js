@@ -91,10 +91,10 @@ class Observer {
     return Promise.resolve();
   }
 
-  /* [GameResult, ...] -> Promise<Void>
+  /* Match -> Promise<Void>
     No-op
    */
-  seriesOver(gameResults) {
+  seriesOver(match) {
     return Promise.resolve();
   }
 
