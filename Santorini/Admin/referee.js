@@ -72,7 +72,7 @@ class Referee {
   /* GuardedPlayer GuardedPlayer -> Referee
     Construct a Referee to run game(s) between the given players.
    */
-  constructor(player1, player2, timeout) {
+  constructor(player1, player2, observerTimeout) {
     // Board holds the state of a game between the 2 players
     this.board = null;
     // The 2 players that will play game(s) against each other
@@ -82,7 +82,7 @@ class Referee {
     // Observers are trusted components that are given
     // references to essential game data (as opposed to copies).
     this.observers = [];
-    this.timeout = timeout;
+    this.observerTimeout = observerTimeout;
   }
 
   /* Void -> Promise<[Maybe GameResult]>
@@ -411,7 +411,7 @@ class Referee {
     Return a protected call to notify the observer using the given notifier function.
   */
   promiseNotifyObserver(o, notifier) {
-    return protectedPromise(o, notifier, this.timeout);
+    return protectedPromise(o, notifier, this.observerTimeout);
   }
 
   /* Observer -> Void

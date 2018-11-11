@@ -25,7 +25,7 @@ const constants = require('../Common/constants');
 const MatchTable = require('./match-table');
 const TournamentResult = require('./tournament-result');
 const Referee = require('./referee');
-const TIMEOUT = 2000;
+const TIMEOUT = 30000;
 
 class TournamentManager {
 
@@ -33,10 +33,11 @@ class TournamentManager {
     Given a minimum length 2 list of (uniquely named) GuardedPlayers, and a positive odd number
     of games to play between each of them, create a TournamentManager.
    */
-  constructor(players, seriesLength) {
+  constructor(players, seriesLength, observerTimeout = TIMEOUT) {
     // Canonical ordering of players in this Tournament. This list should not be mutated.
     this.players = players;
     this.seriesLength = seriesLength;
+    this.observerTimeout = observerTimeout;
 
     // Players waiting to be put into a match - any two players on the waitlist
     // at any time must have already played each other, or they would be in a
@@ -85,7 +86,7 @@ class TournamentManager {
     Create a referee to run a match between the two players.
   */
   createReferee(player1, player2) {
-    return new Referee(player1, player2, TIMEOUT);
+    return new Referee(player1, player2, this.observerTimeout);
   }
 
   /* GP GP Match -> Void
