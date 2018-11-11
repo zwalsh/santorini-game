@@ -35,13 +35,8 @@
 const jsonParser = require('../Common/json-to-component').jsonParser;
 const ensureUniqueNames = require('./player-name-checker').ensureUniqueNames;
 
-const Player = require('../Player/player');
-const BrokenPlayer = require('../Player/player-all-breaker');
-const InfinitePlayer = require('../Player/player-infinite');
 const GuardedPlayer = require('./guarded-player');
-
 const TournamentManager = require('./tournament-manager');
-const TournamentResult = require('./tournament-result');
 
 const SERIES_LENGTH = 3;
 const TIMEOUT = 2000;
