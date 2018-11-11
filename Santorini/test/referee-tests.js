@@ -342,6 +342,35 @@ describe('Referee', function () {
         });
       });
     });
+    describe('when both Players break a rule in the first game in the series', function () {
+      let resultList;
+      beforeEach(function () {
+        referee.playGame = sinon.stub().resolves(false);
+        resultList = referee.playNGames(3);
+      });
+      it('returns an empty array of GameResults', function () {
+        return expect(resultList).to.eventually.deep.equal([]);
+      });
+      it('only plays one game', function () {
+        return resultList.then((_) => {
+          return assert.isTrue(referee.playGame.calledOnce);
+        });
+      });
+    });
+    describe('when both Players break a rule in a later game', function () {
+      let resultList, result1, result2;
+      beforeEach(function () {
+        result1 = new GameResult(p1Id, p2Id, c.EndGameReason.WON);
+        result2 = false;
+        referee.playGame = sinon.stub()
+          .onFirstCall().resolves(result1)
+          .onSecondCall().resolves(result2);
+        resultList = referee.playNGames(3);
+      });
+      it('returns an empty array of GameResults', function () {
+        return expect(resultList).to.eventually.deep.equal([]);
+      });
+    });
   });
 
   describe('isSeriesOver', function () {

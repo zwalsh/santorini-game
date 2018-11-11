@@ -315,6 +315,7 @@ class Referee {
     Manages a given number of games of Santorini between the two given players.
     Returns a list of GameResults representing the winner of the game, and the reason they won.
     If a player breaks the rules in a game, that game is terminated and no further games are played.
+    If both players break in a game, then the series is invalid and an empty array of results is returned.
     The number of games in the series must be odd, or the behavior of this method is undefined.
    */
   playNGames(numGames) {
@@ -332,6 +333,9 @@ class Referee {
    */
   completePlayNGames(numGames, gameResults) {
     return this.playGame().then((result) => {
+      if (result === false) {
+        return [];
+      }
       gameResults.push(result);
       if (result.reason === BROKEN_RULE) {
         return gameResults;
