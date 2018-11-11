@@ -44,7 +44,7 @@ class MatchTable {
     }
   }
 
-  /* String String -> Maybe<Match>
+  /* String String -> [Maybe Match]
     Returns the Match between the two players, or false if it has not occurred.
   */
   getMatch(player1, player2) {
