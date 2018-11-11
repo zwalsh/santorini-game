@@ -1,0 +1,20 @@
+{
+  "players": [
+    [
+      "infinite",
+      "a",
+      "../../Santorini/Player/player-infinite.js"
+    ],
+    [
+      "infinite",
+      "b",
+      "../../Santorini/Player/player-infinite.js"
+    ],
+    [
+      "breaker",
+      "c",
+      "../../Santorini/Player/player-all-breaker.js"
+    ]
+  ],
+  "observers": []
+}

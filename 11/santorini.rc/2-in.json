@@ -1,0 +1,15 @@
+{
+  "players": [
+    [
+      "good",
+      "a",
+      "../../Santorini/Player/player"
+    ],
+    [
+      "breaker",
+      "b",
+      "../../Santorini/Player/player-turn-breaker"
+    ]
+  ],
+  "observers": []
+}

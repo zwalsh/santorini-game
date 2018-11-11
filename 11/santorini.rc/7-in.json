@@ -1,0 +1,40 @@
+{
+  "players": [
+    [
+      "infinite",
+      "a",
+      "../../Santorini/Player/player-infinite.js"
+    ],
+    [
+      "breaker",
+      "b",
+      "../../Santorini/Player/player-turn-breaker.js"
+    ],
+    [
+      "breaker",
+      "c",
+      "../../Santorini/Player/player-all-breaker.js"
+    ],
+    [
+      "breaker",
+      "d",
+      "../../Santorini/Player/player-all-breaker.js"
+    ],
+    [
+      "breaker",
+      "e",
+      "../../Santorini/Player/player-all-breaker.js"
+    ],
+    [
+      "good",
+      "f",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "breaker",
+      "g",
+      "../../Santorini/Player/player-all-breaker.js"
+    ]
+  ],
+  "observers": []
+}

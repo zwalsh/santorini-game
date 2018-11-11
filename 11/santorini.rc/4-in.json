@@ -1,0 +1,25 @@
+{
+  "players": [
+    [
+      "good",
+      "a",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "breaker",
+      "b",
+      "../../Santorini/Player/player-all-breaker.js"
+    ],
+    [
+      "breaker",
+      "c",
+      "../../Santorini/Player/player-all-breaker.js"
+    ],
+    [
+      "infinite",
+      "d",
+      "../../Santorini/Player/player-infinite.js"
+    ]
+  ],
+  "observers": []
+}
