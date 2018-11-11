@@ -1,20 +1,4 @@
-/* Represents an interface for an observer of a game of Santorini.
-   When plugged into a Referee or other game-managing component,
-   the Referee will dutifully inform it of all events of interest.
-
-   These events include:
-   (- the start of a new game (including who is playing))
-   (- the start of a new series of n games)
-   - each valid Turn and the resulting Board state
-   - the end of a game (including the winner and reason)
-   (- the end of a series (including the list of game results in the series))
-   * Items in parens indicate non-mandatory, potential features
-
-   startGame() must be called before any Turns are reported, and gameOver()
-   must be called before a new game can begin. Similarly, startSeries() must
-   be called before seriesOver() and seriesOver() must be called before a
-   new series can begin. A series cannot be started during the progress
-   of a game.
+/* Implements a Santorini observer that prints game information to stdout.
 
    ------------- Implementation-Specific Data Definitions -------------
 
