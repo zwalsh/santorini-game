@@ -2,7 +2,7 @@ const chai = require('chai');
 const assert = chai.assert;
 const RFC = require('../Common/request-format-checker');
 const Board = require('../Common/board');
-const BrokenPlayer = require('../Player/player-breaker');
+const BrokenPlayer = require('../Player/player-all-breaker');
 
 describe('Broken Player', function () {
   let player, initWorkers;

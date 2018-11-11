@@ -1,6 +1,6 @@
 /* Represents a Player in a game of Santorini, which is carried through the various phases of the game.
 
-  This implementation returns only malformed PlaceRequests and Turns.
+  This implementation breaks on all inputs/communications.
 
   It can be used to test Referees, tournament managers, and other components that
   are supposed to be able to gracefully handle misbehavior from Players like this one.
@@ -14,16 +14,13 @@
 
 class BrokenPlayer {
   constructor (id) {
-    this.id = id;
   }
 
   /* String -> Promise<Void>
-    Set this player's ID to the given identifier.
-    Return a Promise that resolves to indicate receipt of the name.
+
   */
   setId(id) {
-    this.id = id;
-    return Promise.resolve();
+    return Promise.reject();
   }
 
   /* [InitWorker, ...] -> Promise<PlaceRequest>
@@ -48,7 +45,7 @@ class BrokenPlayer {
     against an opponent with the given ID.
   */
   newGame(opponentId) {
-    return Promise.resolve();
+    return Promise.reject();
   }
 
   /* GameResult -> Promise<Void>
@@ -57,7 +54,7 @@ class BrokenPlayer {
   */
   notifyGameOver(gameResult) {
     // Nothing to do here for now.
-    return Promise.resolve();
+    return Promise.reject();
   }
 }
 

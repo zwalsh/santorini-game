@@ -15,7 +15,7 @@
 
   The definition of GuardedPlayer is in guarded-player.js
   The definition of Player is in Player/player.js
-  The definition of BrokenPlayer is in Player/player-breaker.js
+  The definition of BrokenPlayer is in Player/player-all-breaker.js
   The definition of InfinitePlayer is in Player/player-infinite.js
   The definition of TournamentManager is in tournament-manager.js
 
@@ -36,7 +36,7 @@ const jsonParser = require('../Common/json-to-component').jsonParser;
 const ensureUniqueNames = require('./player-name-checker').ensureUniqueNames;
 
 const Player = require('../Player/player');
-const BrokenPlayer = require('../Player/player-breaker');
+const BrokenPlayer = require('../Player/player-all-breaker');
 const InfinitePlayer = require('../Player/player-infinite');
 const GuardedPlayer = require('./guarded-player');
 
