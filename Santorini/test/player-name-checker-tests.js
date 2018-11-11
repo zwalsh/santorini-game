@@ -10,17 +10,21 @@ const testLib = require('./test-lib');
 describe('PlayerNameChecker', function () {
   let playerList, getId = 'getId', setId = 'setId';
   let gp1, gp2, gp3;
+  let p1Id, p2Id, p3Id;
   beforeEach(function () {
     gp1 = testLib.createMockObject(getId, setId);
-    gp1.getId = sinon.stub().returns('p1');
+    p1Id = 'pone';
+    gp1.getId = sinon.stub().returns(p1Id);
     gp1.setId = sinon.stub().resolves();
 
     gp2 = testLib.createMockObject(getId, setId);
-    gp2.getId = sinon.stub().returns('p2');
+    p2Id = 'ptwo';
+    gp2.getId = sinon.stub().returns(p2Id);
     gp2.setId = sinon.stub().resolves();
 
     gp3 = testLib.createMockObject(getId, setId);
-    gp3.getId = sinon.stub().returns('p3');
+    p3Id = 'pthree';
+    gp3.getId = sinon.stub().returns(p3Id);
     gp3.setId = sinon.stub().resolves();
 
     playerList = [gp1, gp2, gp3];
@@ -34,11 +38,11 @@ describe('PlayerNameChecker', function () {
     let repeatedNamePlayer, repeatedNameBadPlayer;
     beforeEach(function () {
       repeatedNamePlayer = testLib.createMockObject(getId, setId);
-      repeatedNamePlayer.getId.returns('p1');
+      repeatedNamePlayer.getId.returns(p1Id);
       repeatedNamePlayer.setId.resolves();
 
       repeatedNameBadPlayer = testLib.createMockObject(getId, setId);
-      repeatedNameBadPlayer.getId.returns('p1');
+      repeatedNameBadPlayer.getId.returns(p1Id);
       repeatedNameBadPlayer.setId.rejects();
 
       playerList.push(repeatedNamePlayer, repeatedNameBadPlayer);
@@ -47,7 +51,7 @@ describe('PlayerNameChecker', function () {
       return ensureUniqueNames(playerList).then((uniqueNamedPlayers) => {
         expect(uniqueNamedPlayers.slice(0, 3)).to.deep.eql([gp1, gp2, gp3]);
         expect(uniqueNamedPlayers[3].setId.calledOnce).to.be.true;
-        return expect(uniqueNamedPlayers[3].setId.neverCalledWith('p1', 'p2', 'p3')).to.be.true;
+        return expect(uniqueNamedPlayers[3].setId.neverCalledWith(p1Id, p2Id, p3Id)).to.be.true;
       })
     });
     it('removes players that do not accept the name change', function () {

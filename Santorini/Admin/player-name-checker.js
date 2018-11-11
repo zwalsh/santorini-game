@@ -12,13 +12,14 @@
 
 const uuid = require('uuid/v4');
 
-const PLAYER_NAME_REGEXP = new RegExp(/^[a-z0-9]*$/);
+const PLAYER_NAME_REGEXP = new RegExp(/^[a-z]*$/);
 
 /* [GuardedPlayer, ...] -> Promise<[GuardedPlayer, ...]>
   Given a list of players, it ensures that all of their names are unique.
   Any players in the list with a non-unique name are given a new name,
   and any players that do not respond correctly when given the new name
   are removed from the tournament.
+  Players with invalid names are also not included in the tournament.
 */
 function ensureUniqueNames(players) {
   let namesInTournament = new Set();
@@ -47,7 +48,17 @@ function ensureUniqueNames(players) {
   Returns a unique, uuid-like name that is valid in Santorini (i.e., it has no dashes).
 */
 function generateUniqueName() {
-  return uuid().replace(/-/g, '');
+  return uuid().replace(/-/g, '')
+    .replace(/1/g, 'one')
+    .replace(/2/g, 'two')
+    .replace(/3/g, 'three')
+    .replace(/4/g, 'four')
+    .replace(/5/g, 'five')
+    .replace(/6/g, 'six')
+    .replace(/7/g, 'seven')
+    .replace(/8/g, 'eight')
+    .replace(/9/g, 'nine')
+    .replace(/0/g, 'zero');
 }
 
 /* GuardedPlayer -> Promise<[Maybe GuardedPlayer]>
