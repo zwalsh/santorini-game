@@ -128,19 +128,10 @@ class TournamentManager {
     between the two of them. If so, returns them in a list.
   */
   disqualifyBadPlayers(player1, player2) {
-    let match = this.matchTable.getMatch(player1.getId(), player2.getId());
-    if (match) {
-      if (match.length === 0) {
-        return [player1, player2]
-      }
-      let lastGameResult = match[match.length - 1];
-      if (lastGameResult.reason === constants.EndGameReason.BROKEN_RULE) {
-        let brokenPlayerName = lastGameResult.loser;
-        let brokenPlayer = brokenPlayerName === player1.getId() ? player1 : player2;
-        return [brokenPlayer];
-      }
-    }
-    return [];
+    let ruleBreakerNames = this.matchTable.ruleBreakersInMatch(player1.getId(), player2.getId());
+    return ruleBreakerNames.map((id) => {
+      return id === player1.getId() ? player1 : player2;
+    });
   }
 
   /* GP -> Void

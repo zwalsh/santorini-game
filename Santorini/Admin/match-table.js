@@ -70,7 +70,7 @@ class MatchTable {
   setMatch(player1, player2, match) {
     this.setMatchInternal(player1, player2, match);
 
-    this.ruleBreakersInMatch(player1, player2, match).forEach((name) => {
+    this.ruleBreakersInMatch(player1, player2).forEach((name) => {
       this.awardMatchesToOpponent(name);
     });
   }
@@ -126,19 +126,23 @@ class MatchTable {
     }
   }
 
-  /* String String Match -> [String, ...]
-  Return the names of any players who broke a rule in the given match.
+  /* String String -> [String, ...]
+  Return the names of any players who broke a rule in the match between them.
   */
-  ruleBreakersInMatch(player1, player2, match) {
-    if (match.length === 0) {
-      return [player1, player2];
+  ruleBreakersInMatch(player1, player2) {
+    let match = this.getMatch(player1, player2);
+    if (match) {
+      if (match.length === 0) {
+        return [player1, player2];
+      }
+      let lastGame = match[match.length - 1];
+      if (lastGame.reason === constants.EndGameReason.BROKEN_RULE) {
+        return [lastGame.loser];
+      } else {
+        return [];
+      }
     }
-    let lastGame = match[match.length - 1];
-    if (lastGame.reason === constants.EndGameReason.BROKEN_RULE) {
-      return [lastGame.loser];
-    } else {
-      return [];
-    }
+    return [];
   }
 
   /* String -> Void
