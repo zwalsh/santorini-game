@@ -12,5 +12,6 @@ module.exports = Object.freeze({
   },
   GameState: {
     IN_PROGRESS: "IN_PROGRESS"
-  }
+  },
+  DEFAULT_TIMEOUT: 30000,
 });

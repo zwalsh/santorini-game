@@ -1,4 +1,5 @@
-const timeoutDefault = 30000;
+const constants = require('../Common/constants');
+const DEFAULT_TIMEOUT = constants.DEFAULT_TIMEOUT;
 
 /* X [X -> Promise<Y>] Natural -> Promise<Y>
   Calls the given function on the given subject to produce a Promise.
@@ -7,7 +8,7 @@ const timeoutDefault = 30000;
   the timeout, else rejects, including in the case where the function fails
   to provide a Promise.
 */
-function protectedPromise(subject, promiseFunction, timeoutLength = timeoutDefault) {
+function protectedPromise(subject, promiseFunction, timeoutLength = DEFAULT_TIMEOUT) {
   let timeout;
   let timeoutPromise = new Promise((resolve, reject) => {
     timeout = setTimeout(() => {

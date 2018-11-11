@@ -25,7 +25,7 @@ const constants = require('../Common/constants');
 const MatchTable = require('./match-table');
 const TournamentResult = require('./tournament-result');
 const Referee = require('./referee');
-const TIMEOUT = 30000;
+const DEFAULT_TIMEOUT = constants.DEFAULT_TIMEOUT;
 
 class TournamentManager {
 
@@ -33,7 +33,7 @@ class TournamentManager {
     Given a minimum length 2 list of (uniquely named) GuardedPlayers, and a positive odd number
     of games to play between each of them, create a TournamentManager.
    */
-  constructor(players, seriesLength, observerTimeout = TIMEOUT) {
+  constructor(players, seriesLength, observerTimeout = DEFAULT_TIMEOUT) {
     // Canonical ordering of players in this Tournament. This list should not be mutated.
     this.players = players;
     this.seriesLength = seriesLength;
