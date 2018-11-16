@@ -42,4 +42,16 @@ describe('GuardedPlayer tests', function () {
       return assert.isRejected(guardedPlayer.setId(''));
     });
   });
+  describe('notifyTournamentOver', function () {
+    beforeEach(function () {
+      player = testLib.createMockObject('notifyTournamentOver');
+      player.notifyTournamentOver.resolves();
+      guardedPlayer = new GuardedPlayer(player, 1000);
+    });
+    it('notifies its player of the tournament result', function () {
+      return guardedPlayer.notifyTournamentOver([]).then(() => {
+        return assert.isTrue(player.notifyTournamentOver.calledWith([]));
+      });
+    });
+  });
 });

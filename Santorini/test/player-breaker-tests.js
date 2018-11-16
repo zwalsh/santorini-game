@@ -1,4 +1,7 @@
 const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised);
+
 const assert = chai.assert;
 const RFC = require('../Common/request-format-checker');
 const Board = require('../Common/board');
@@ -26,6 +29,12 @@ describe('Broken Player', function () {
       return player.takeTurn(new Board(initWorkers)).then((turn) => {
         return assert.isFalse(RFC.isWellFormedTurn(turn));
       });
+    });
+  });
+
+  describe('when told that a Tournament is over', function () {
+    it('returns a promise that rejects', function () {
+      return assert.isRejected(player.notifyTournamentOver([]));
     });
   });
 });

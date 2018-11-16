@@ -60,5 +60,9 @@ describe('InfinitePlayer', function () {
       let promise = infinitePlayer.notifyGameOver(["a", constants.EndGameReason.WON]);
       return promiseDoesNotResolve(promise);
     });
+    it('notifyTournamentOver', function () {
+      let promise = infinitePlayer.notifyTournamentOver([["a", constants.EndGameReason.WON]]);
+      return promiseDoesNotResolve(promise);
+    });
   });
 });
