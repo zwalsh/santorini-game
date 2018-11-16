@@ -47,12 +47,11 @@ class Player {
   takeTurn(board) {
   }
 
-  /* UUID UUID -> Promise<Void>
-    Notify this Player that they have been put into a new game.
-    The first UUID is this Player's ID for the game, and the second UUID
-    is the opponent's.
+  /* String -> Promise<Void>
+    Notify this Player that they have been put into a new game,
+    against an opponent with the given ID.
   */
-  newGame(myId, opponentId) {
+  newGame(opponentId) {
   }
 
   /* GameResult -> Promise<Void>
