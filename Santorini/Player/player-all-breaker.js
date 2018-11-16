@@ -52,6 +52,15 @@ class BrokenPlayer {
     // Nothing to do here for now.
     return Promise.reject();
   }
+
+  /* [GameResult, ...] -> Promise<Void>
+  Notify this Player of the results of a tournament,
+  in the form of a list of the results every game played.
+*/
+  notifyTournamentOver(gameResults) {
+    // Nothing to do here for now.
+    return Promise.reject();
+  }
 }
 
 module.exports = BrokenPlayer;

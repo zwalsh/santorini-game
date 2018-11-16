@@ -81,6 +81,16 @@ class GuardedPlayer {
       return p.notifyGameOver(gameResult)
     }, this.timeout);
   }
+
+  /* [GameResult, ...] -> Promise<Void>
+    Notify this Player of the results of a tournament,
+    in the form of a list of the results every game played.
+  */
+  notifyTournamentOver(gameResults) {
+    return protectedPromise(this.player, (p) => {
+      return p.notifyTournamentOver(gameResults)
+    }, this.timeout);
+  }
 }
 
 module.exports = GuardedPlayer;

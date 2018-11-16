@@ -61,6 +61,13 @@ class Player {
   */
   notifyGameOver(gameResult) {
   }
+
+  /* [GameResult, ...] -> Promise<Void>
+    Notify this Player of the results of a tournament,
+    in the form of a list of the results every game played.
+  */
+  notifyTournamentOver(gameResults) {
+  }
 }
 
 module.exports = Player;
