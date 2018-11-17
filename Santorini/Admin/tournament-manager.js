@@ -191,12 +191,25 @@ class TournamentManager {
   }
 
   /* Void -> Void
+    Notify players of tournament result.
     Calls the stored resolution function from the start of the tournament
     with the tournament's current results.
   */
   endTournament() {
+    this.notifyPlayersOfResult();
     let tournamentResult = new TournamentResult(this.players, this.badPlayers, this.matchTable);
     this.resolveTournament(tournamentResult);
+  }
+
+  /* Void -> Void
+    Send all non-broken players (a copy of) the list of tournament game results.
+   */
+  notifyPlayersOfResult() {
+    let gameResults = this.matchTable.getAllGames();
+    this.donePlayers.forEach(player => {
+      let gameResultsCopy = gameResults.map(gr => gr.copy());
+      player.notifyTournamentOver(gameResultsCopy);
+    });
   }
 }
 
