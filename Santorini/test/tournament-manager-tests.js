@@ -9,6 +9,7 @@ const GuardedPlayer = require('../Admin/guarded-player');
 const Player = require('../Player/player');
 const TournamentManager = require('../Admin/tournament-manager');
 const constants = require('../Common/constants');
+const assertDeepCopy = require('./test-lib').assertDeepCopy;
 
 const BROKEN_RULE = constants.EndGameReason.BROKEN_RULE;
 const WON = constants.EndGameReason.WON;
@@ -281,20 +282,23 @@ describe('TournamentManager', function () {
   });
 
   describe('endTournament', function () {
+    let tournamentResult, p1p2Match, p1p3Match, p2p3Match;
+    beforeEach(function () {
+      tm = new TournamentManager([p1, p2, p3], 3);
+      p1p2Match = [new GameResult(p1Id, p2Id, WON)];
+      p1p3Match = [new GameResult(p1Id, p3Id, BROKEN_RULE)];
+      p2p3Match = [new GameResult(p2Id, p3Id, BROKEN_RULE)];
+      tm.matchTable.setMatch(p1Id, p2Id, p1p2Match);
+      tm.matchTable.setMatch(p1Id, p3Id, p1p3Match);
+      tm.matchTable.setMatch(p2Id, p3Id, p2p3Match);
+      tm.badPlayers = [p3];
+      tm.donePlayers = [p1, p2];
+      tm.resolveTournament = sinon.stub();
+      tm.notifyPlayersOfResult = sinon.stub();
+      tm.endTournament();
+    });
     describe('calls the resolution function', function () {
-      let tournamentResult, p1p2Match, p1p3Match, p2p3Match;
       beforeEach(function () {
-        tm = new TournamentManager([p1, p2, p3], 3);
-        p1p2Match = [new GameResult(p1Id, p2Id, WON)];
-        p1p3Match = [new GameResult(p1Id, p3Id, BROKEN_RULE)];
-        p2p3Match = [new GameResult(p2Id, p3Id, BROKEN_RULE)];
-        tm.matchTable.setMatch(p1Id, p2Id, p1p2Match);
-        tm.matchTable.setMatch(p1Id, p3Id, p1p3Match);
-        tm.matchTable.setMatch(p2Id, p3Id, p2p3Match);
-        tm.badPlayers = [p3];
-        tm.donePlayers = [p1, p2];
-        tm.resolveTournament = sinon.stub();
-        tm.endTournament();
         tournamentResult = tm.resolveTournament.getCall(0).args[0];
       });
       it('with a TournamentResult with the correct MatchTable', function () {
@@ -310,6 +314,52 @@ describe('TournamentManager', function () {
         let players = tournamentResult.players;
         assert.deepEqual(players, [p1, p2, p3]);
       });
+    });
+    describe('notifies players of tournament result', function () {
+      it('calls the notification function', function () {
+        assert.isTrue(tm.notifyPlayersOfResult.called);
+      });
+    });
+  });
+
+  describe('notifyPlayersOfResult', function () {
+    let p1p2Match, p1p3Match, p2p3Match, expectedGameResults,
+      p1GameResults, p2GameResults;
+    beforeEach(function () {
+      tm = new TournamentManager([p1, p2, p3], 3);
+      p1p2Match = [new GameResult(p1Id, p2Id, WON)];
+      p1p3Match = [new GameResult(p1Id, p3Id, BROKEN_RULE)];
+      p2p3Match = [new GameResult(p2Id, p3Id, BROKEN_RULE)];
+      expectedGameResults = p1p2Match.concat(p1p3Match).concat(p2p3Match);
+      tm.matchTable.setMatch(p1Id, p2Id, p1p2Match);
+      tm.matchTable.setMatch(p1Id, p3Id, p1p3Match);
+      tm.matchTable.setMatch(p2Id, p3Id, p2p3Match);
+      tm.badPlayers = [p3];
+      tm.donePlayers = [p1, p2];
+
+      p1.notifyTournamentOver = sinon.stub().resolves();
+      p2.notifyTournamentOver = sinon.stub().resolves();
+      p3.notifyTournamentOver = sinon.stub().resolves();
+
+      tm.notifyPlayersOfResult();
+
+      p1GameResults = p1.notifyTournamentOver.getCall(0).args[0];
+      p2GameResults = p2.notifyTournamentOver.getCall(0).args[0];
+    });
+
+    it('notifies all good players of the tournament results', function () {
+      assert.isTrue(p1.notifyTournamentOver.called);
+      assert.isTrue(p2.notifyTournamentOver.called);
+    });
+    it('does not notify any bad players',  function () {
+      assert.isFalse(p3.notifyTournamentOver.called);
+    });
+    it('copies the game results before sending them to players', function () {
+      assertDeepCopy(p1GameResults, expectedGameResults);
+      assertDeepCopy(p2GameResults, expectedGameResults);
+    });
+    it('sends a new copy of the game results to each player', function () {
+      assertDeepCopy(p1GameResults, p2GameResults);
     });
   });
 });
