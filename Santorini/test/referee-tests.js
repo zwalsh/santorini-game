@@ -599,8 +599,8 @@ describe('Referee', function () {
             let observerTurn = call0Args[0];
             let observerBoard = call0Args[1];
 
-            assert.deepEqual(observerTurn, turn);
-            assert.deepEqual(observerBoard, referee.board);
+            testLib.assertDeepCopy(observerTurn, turn);
+            testLib.assertDeepCopy(observerBoard, referee.board);
             return;
           });
         });
