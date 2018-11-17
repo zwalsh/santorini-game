@@ -7,27 +7,28 @@
 
   It immediately sends JSON values over the connection.
 */
-const JsonSocket = require('json-socket');
+const parseJson = require('./json-parser').jsonParser;
 
 class PromiseJsonSocket {
   /* Socket -> PromiseJsonSocket
     Constructs a PromiseJsonSocket that wraps the given Socket.
   */
   constructor(socket) {
-    // for testing purposes, don't create a JsonSocket if a Socket is not given
-    if (socket) {
-      this.socket = new JsonSocket(socket);
-      socket.on('message', this.receiveJsonMessage);
-    }
     this.receivedMessageQueue = [];
     this.readJsonCallback = null;
+    this.bufferedInput = "";
+    // for testing purposes, don't create a JsonSocket if a Socket is not given
+    if (socket) {
+      this.socket = socket;
+      socket.on('data', (data) => { this.receiveData(data) });
+    }
   }
 
   /* JSON -> Void
     Sends the given JSON message on the socket.
   */
   sendJson(json) {
-    this.socket.sendMessage(json);
+    this.socket.write(JSON.stringify(json));
   }
 
   /* Void -> Promise<JSON>
@@ -56,6 +57,23 @@ class PromiseJsonSocket {
       this.readJsonCallback = null;
     } else {
       this.receivedMessageQueue.push(json);
+    }
+  }
+
+  /* String -> Void
+    Receives JSON over the wire, buffers it, and parses it into complete JSON
+    if possible. Hands complete values off to the handler for JSON messages.
+  */
+  receiveData(data) {
+    if (data) {
+      this.bufferedInput = this.bufferedInput + data;
+      let parsed = parseJson(this.bufferedInput);
+      if (parsed.length > 0) {
+        for (let json of parsed) {
+          this.receiveJsonMessage(json);
+        }
+        this.bufferedInput = "";
+      }
     }
   }
 }

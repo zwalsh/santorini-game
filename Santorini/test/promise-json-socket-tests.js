@@ -12,14 +12,14 @@ describe('PromiseJsonSocket', function () {
   beforeEach(function () {
     pjs = new PromiseJsonSocket();
     mockJsonSocket = testLib.createMockObject();
-    mockJsonSocket.sendMessage = sinon.stub();
+    mockJsonSocket.write = sinon.stub();
     pjs.socket = mockJsonSocket;
   });
   describe('sendJson', function () {
     it('sends the value on the socket', function () {
       let sendValue = "this-string";
       pjs.sendJson(sendValue);
-      assert.isTrue(mockJsonSocket.sendMessage.calledWith(sendValue));
+      assert.isTrue(mockJsonSocket.write.calledWith(JSON.stringify(sendValue)));
     });
   });
   describe('readJson', function () {
