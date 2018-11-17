@@ -32,7 +32,7 @@
   PathString is a String that specifies a Linux path to a component
  */
 
-const jsonParser = require('../Common/json-to-component').jsonParser;
+const jsonParser = require('../Lib/json-parser').jsonParser;
 const ensureUniqueNames = require('./player-name-checker').ensureUniqueNames;
 
 const GuardedPlayer = require('./guarded-player');

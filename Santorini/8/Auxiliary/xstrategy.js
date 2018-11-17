@@ -1,4 +1,5 @@
 const utility = require("../../Common/json-to-component");
+const jsonParser = require('../../Lib/json-parser').jsonParser;
 const Strategy = require("../../Common/strategy");
 
 const process = require('process');
@@ -10,7 +11,7 @@ process.stdin.on('readable', () => {
   const chunk = process.stdin.read();
   if (chunk !== null) {
 
-    utility.jsonParser(chunk).forEach((c) => {
+    jsonParser(chunk).forEach((c) => {
       parseCommand(c);
     });
   }

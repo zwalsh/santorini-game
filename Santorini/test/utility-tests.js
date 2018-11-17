@@ -9,19 +9,6 @@ describe('utility tests', function() {
     [3, 4, 2, 3, 1, 2],
     [1, 0, 0, 0, "0alfred1", "1sampson1"]];
 
-
-  describe('jsonParser', function() {
-    it('should return valid list of JSON', function() {
-      let arrJSON = Utility.jsonParser("[\"Hello\"][\"World\"]");
-      let arrJSON2 = Utility.jsonParser("[\"Hello\"]\n[\"World\"]");
-      assert.isTrue(Utility.jsonParser("[2]")[0][0] === 2);
-      assert.isTrue(arrJSON[0][0] === "Hello");
-      assert.isTrue(arrJSON[1][0] === "World");
-      assert.isTrue(arrJSON2[0][0] === "Hello");
-      assert.isTrue(arrJSON2[1][0] === "World");
-    });
-  });
-
   describe('parseWorker', function() {
     it('should return valid WorkerRequest', function() {
       let workerRequest = Utility.parseWorker("alfred1");

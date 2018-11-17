@@ -1,9 +1,6 @@
 const Board = require('./board');
 const Worker = require('./worker');
-const nearley = require("nearley");
-const grammar = require("../Lib/jsongrammar.js");
 const constants = require('./constants');
-let parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
 var exports = module.exports = {};
 
 /**
@@ -26,17 +23,6 @@ var exports = module.exports = {};
  *
  */
 
-// Robust string-to-JSON parser, supporting multiple JSON inputs in nearly any format.
-// If multiple JSON objects or arrays are submitted in one input, they are in order in the output list.
-// String -> ListOfJSON
-exports.jsonParser = function (input) {
-  parser.feed(input.trim());
-  if (parser.results.length !== 0) {
-    let res = parser.results;
-    parser = new nearley.Parser(nearley.Grammar.fromCompiled(grammar));
-    return res[0];
-  }
-};
 
 // Returns a WorkerRequest given a StringWorker representation.
 // StringWorker -> WorkerRequest
