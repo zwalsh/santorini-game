@@ -17,9 +17,9 @@ class PromiseJsonSocket {
     this.receivedMessageQueue = [];
     this.readJsonCallback = null;
     this.bufferedInput = "";
-    // for testing purposes, don't create a JsonSocket if a Socket is not given
+    this.socket = socket;
+    // for testing purposes, don't set the callback if a Socket is not given
     if (socket) {
-      this.socket = socket;
       socket.on('data', (data) => { this.receiveData(data) });
     }
   }
