@@ -8,11 +8,13 @@
 */
 
 class RemoteProxyPlayer {
-  /* Socket -> RPP
-    Instantiates a RPP that communicates with the Player on the
-    client side of the socket.
+  /* PromiseJsonSocket String -> RPP
+    Instantiates a RPP that uses a PromiseJsonSocket to communicate
+    with the Player with the given name on the other side of the network.
   */
-  constructor(socket) {
+  constructor(playerDataSource, name) {
+    this.playerDataSource = playerDataSource;
+    this.name = name;
   }
 
   /* String -> Promise<Void>
