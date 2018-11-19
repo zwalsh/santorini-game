@@ -121,3 +121,12 @@ function parseWorker(worker) {
 
   return {player: player, id: id};
 }
+
+
+module.exports = {
+  'boardToJson': boardToJson,
+  'workerToJson': workerToJson,
+  'turnToJson': turnToJson,
+  'jsonToBoard': jsonToBoard,
+  'parseWorker': parseWorker,
+}
