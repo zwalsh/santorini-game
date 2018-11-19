@@ -71,22 +71,68 @@ describe('PromiseJsonSocket', function () {
     });
   });
   describe('receiveData', function() {
+    let bufferedData, inputData;
+    beforeEach(function () {
+      pjs.receiveJsonMessage = sinon.stub();
+    });
     describe('when no data has been buffered', function () {
-
       describe('when given incomplete JSON data', function () {
-        // no call to rJM, check buffer
+        beforeEach(function () {
+          inputData = '[1,';
+          pjs.receiveData(inputData);
+        });
+        it('adds the input to the buffer', function () {
+          assert.equal(pjs.bufferedInput, inputData);
+        });
+        it('does not process any JSON message', function () {
+          assert.isFalse(pjs.receiveJsonMessage.called);
+        });
       });
-      describe('when given complete JSON data', function () {
-        // calls recJsonMsg for each json value in the parsed data
-        // clears buffer
+      describe('when given (multiple) complete JSON data', function () {
+        beforeEach(function () {
+          inputData = '[1] [3] [5]';
+          pjs.receiveData(inputData);
+        });
+        it('processes all of the JSON messages separately', function () {
+          assert.equal(pjs.receiveJsonMessage.callCount, 3);
+          assert.deepEqual(pjs.receiveJsonMessage.getCall(0).args[0], [1]);
+          assert.deepEqual(pjs.receiveJsonMessage.getCall(1).args[0], [3]);
+          assert.deepEqual(pjs.receiveJsonMessage.getCall(2).args[0], [5]);
+        });
+        it('clears out the buffer', function () {
+          assert.equal(pjs.bufferedInput, '');
+        });
       });
     });
     describe('when some data is buffered', function () {
+      beforeEach(function () {
+        bufferedData = '[1, ';
+        pjs.bufferedInput = bufferedData;
+      });
       describe('when given data that completes the JSON value in the buffer', function () {
-        // same as #2 above
+        beforeEach(function () {
+          inputData = '2]';
+          pjs.receiveData(inputData);
+        });
+        it('processes the JSON message', function () {
+          assert.isTrue(pjs.receiveJsonMessage.calledOnce);
+          assert.deepEqual(pjs.receiveJsonMessage.getCall(0).args[0], [1, 2]);
+        });
+        it('clears out the buffer', function () {
+          assert.equal(pjs.bufferedInput, '');
+        });
       });
       describe('when given data that does not complete the JSON value', function () {
-        //
+        beforeEach(function () {
+          inputData = '2,';
+          pjs.receiveData(inputData);
+        });
+        it('adds the input to the buffer', function () {
+          assert.equal(pjs.bufferedInput, bufferedData + inputData);
+        });
+        it('does not process any JSON message', function () {
+          assert.isFalse(pjs.receiveJsonMessage.called);
+        });
       });
     });
   });
