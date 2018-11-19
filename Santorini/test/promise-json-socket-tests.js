@@ -70,4 +70,24 @@ describe('PromiseJsonSocket', function () {
       });
     });
   });
+  describe('receiveData', function() {
+    describe('when no data has been buffered', function () {
+
+      describe('when given incomplete JSON data', function () {
+        // no call to rJM, check buffer
+      });
+      describe('when given complete JSON data', function () {
+        // calls recJsonMsg for each json value in the parsed data
+        // clears buffer
+      });
+    });
+    describe('when some data is buffered', function () {
+      describe('when given data that completes the JSON value in the buffer', function () {
+        // same as #2 above
+      });
+      describe('when given data that does not complete the JSON value', function () {
+        //
+      });
+    });
+  });
 });
