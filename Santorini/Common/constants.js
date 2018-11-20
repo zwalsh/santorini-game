@@ -14,5 +14,8 @@ module.exports = Object.freeze({
     IN_PROGRESS: "IN_PROGRESS"
   },
   DEFAULT_TIMEOUT: 30000,
-  ENCOUNTER_OUTCOME_IRREGULAR: 'irregular',
+  Message: {
+    ENCOUNTER_OUTCOME_IRREGULAR: 'irregular',
+    PLAYING_AS: 'playing-as',
+  },
 });
