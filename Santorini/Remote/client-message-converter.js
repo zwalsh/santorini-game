@@ -1,6 +1,7 @@
 /*
   This module provides functions for converting JSON network messages
-  to internal data representations and objects, and vice versa.
+  sent and received by the client side to internal data representations
+  and objects, and vice versa.
 
   ========== Data Definitions ==========
 

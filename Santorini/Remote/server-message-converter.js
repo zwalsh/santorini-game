@@ -1,5 +1,27 @@
 /*
+  This module provides functions for converting JSON network messages
+  sent and received by the server side to internal data representations
+  and objects, and vice versa.
 
+  ========== Data Definitions ==========
+
+  Internal:
+  - Board
+  - Worker
+  - Turn
+  - InitWorker
+  - WorkerRequest
+  - GameResult
+
+
+  JSON:
+  - JsonWorker is (Worker) ...
+  - Cell is ...
+  - Placement
+  - WorkerPlace is ...
+  - Coordinate is ...
+  - Action is ...
+  - EncounterOutcome is ...
 */
 
 
