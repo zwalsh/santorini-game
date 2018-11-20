@@ -13,21 +13,21 @@ const WON = constants.EndGameReason.WON;
 const BROKEN_RULE = constants.EndGameReason.BROKEN_RULE;
 
 describe('ServerMessageConverter tests', function () {
-  let p1 = 'crosby', p2 = 'stills', p3 = 'nash';
+  let p1Name = 'crosby', p2Name = 'stills', p3Name = 'nash';
   describe('initWorkerListToJson', function () {
-    let initWorkerList = [{ player: p1, x: 1, y: 1 },
-      { player: p2, x: 2, y: 2 },
-      { player: p1, x: 3, y: 3 }];
+    let initWorkerList = [{ player: p1Name, x: 1, y: 1 },
+      { player: p2Name, x: 2, y: 2 },
+      { player: p1Name, x: 3, y: 3 }];
     it('translates each InitWorker in the list into a WorkerPlace', function () {
-      let expectedPlacement = [[p1 + 1, 1, 1], [p2 + 1, 2, 2], [p1 + 2, 3, 3]];
+      let expectedPlacement = [[p1Name + 1, 1, 1], [p2Name + 1, 2, 2], [p1Name + 2, 3, 3]];
       assert.deepEqual(MC.initWorkerListToJson(initWorkerList), expectedPlacement);
     });
   });
   describe('boardToJson', function () {
-    let board, initBoard, jsonBoard, playerName1, playerName2, workerLocations;
+    let board, initBoard, jsonBoard, workerLocations;
     beforeEach(function () {
-      playerName1 = "wayne";
-      playerName2 = "garth";
+      p1Name = "wayne";
+      p2Name = "garth";
       initBoard = [[2, 0, 3, 4, 0, 0],
         [0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
@@ -36,16 +36,16 @@ describe('ServerMessageConverter tests', function () {
         [0, 2, 0, 0, 0, 0]];
       board = new Board(null,
         initBoard,
-        [new Worker(0, 0, 1, playerName1),
-          new Worker(1, 0, 1, playerName2),
-          new Worker(2, 3, 2, playerName1)]);
+        [new Worker(0, 0, 1, p1Name),
+          new Worker(1, 0, 1, p2Name),
+          new Worker(2, 3, 2, p1Name)]);
       workerLocations = [[0, 0], [1, 0], [2, 3]];
       jsonBoard = MC.boardToJson(board);
     });
     it('includes all workers (with heights) in the output', function () {
-      assert.deepEqual(jsonBoard[0][0], 2 + playerName1 + 1);
-      assert.deepEqual(jsonBoard[0][1], 0 + playerName2 + 1);
-      assert.deepEqual(jsonBoard[3][2], 1 + playerName1 + 2);
+      assert.deepEqual(jsonBoard[0][0], 2 + p1Name + 1);
+      assert.deepEqual(jsonBoard[0][1], 0 + p2Name + 1);
+      assert.deepEqual(jsonBoard[3][2], 1 + p1Name + 2);
     });
     it('outputs normal heights at all locations not occupied by workers', function () {
       let numWorkers = 0;
@@ -71,13 +71,13 @@ describe('ServerMessageConverter tests', function () {
   describe('gameResultsToJson', function () {
     let gameResults;
     beforeEach(function () {
-      gameResults = [new GameResult(p1, p2, WON),
-        new GameResult(p2, p1, WON),
-        new GameResult(p1, p2, WON),
-        new GameResult(p1, p3, BROKEN_RULE)];
+      gameResults = [new GameResult(p1Name, p2Name, WON),
+        new GameResult(p2Name, p1Name, WON),
+        new GameResult(p1Name, p2Name, WON),
+        new GameResult(p1Name, p3Name, BROKEN_RULE)];
     });
     it('translates each GameResult in the list into an EncounterOutcome', function () {
-      let expectedEncounterOutcomes = [[p1, p2], [p2, p1], [p1, p2], [p1, p3, "irregular"]];
+      let expectedEncounterOutcomes = [[p1Name, p2Name], [p2Name, p1Name], [p1Name, p2Name], [p1Name, p3Name, "irregular"]];
       assert.deepEqual(MC.gameResultsToJson(gameResults), expectedEncounterOutcomes);
     });
   });
@@ -87,21 +87,21 @@ describe('ServerMessageConverter tests', function () {
       place = [4, 5];
     });
     it('converts the Place to a PlaceRequest with the correct name', function () {
-      let expectedPlaceRequest = { player: p1, x: 4, y: 5 };
-      assert.deepEqual(MC.jsonToPlaceRequest(place, p1), expectedPlaceRequest);
+      let expectedPlaceRequest = ["place", 4, 5];
+      assert.deepEqual(MC.jsonToPlaceRequest(place, p1Name), expectedPlaceRequest);
     });
   });
   describe('jsonToTurn', function () {
     it('converts a move action into a Turn with only a move', function () {
-      let moveAction = [p1 + 1, Direction.EAST, Direction.SOUTH];
-      let workerRequest = { player: p1, id: 1 }
-      let expectedTurn = [["move", workerRequest, Direction.directions.EASTSOUTH]];
+      let moveAction = [p1Name + 1, Direction.EAST, Direction.SOUTH];
+      let workerRequest = { player: p1Name, id: 1 }
+      let expectedTurn = [["move", workerRequest, [Direction.EAST, Direction.SOUTH]]];
       assert.deepEqual(MC.jsonToTurn(moveAction), expectedTurn);
     });
     it('converts a move-build action into a move-build Turn', function () {
-      let moveBuildAction = [p1 + 2, Direction.WEST, Direction.PUT, Direction.WEST, Direction.NORTH];
-      let workerRequest = { player: p1, id: 2 };
-      let expectedTurn = [["move", workerRequest, Direction.directions.WESTPUT], ["build", Direction.directions.WESTNORTH]]
+      let moveBuildAction = [p1Name + 2, Direction.WEST, Direction.PUT, Direction.WEST, Direction.NORTH];
+      let workerRequest = { player: p1Name, id: 2 };
+      let expectedTurn = [["move", workerRequest, [Direction.WEST, Direction.PUT]], ["build", [Direction.WEST, Direction.NORTH]]]
       assert.deepEqual(MC.jsonToTurn(moveBuildAction), expectedTurn);
     });
   });
