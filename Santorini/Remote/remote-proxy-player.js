@@ -7,6 +7,8 @@
   Data Definitions: See Common/player-interface.js
 */
 
+const MessageConverter = require('./server-message-converter');
+
 class RemoteProxyPlayer {
   /* PromiseJsonSocket String -> RPP
     Instantiates a RPP that uses a PromiseJsonSocket to communicate
@@ -22,6 +24,9 @@ class RemoteProxyPlayer {
     Return a Promise that resolves to indicate receipt of the name.
   */
   setId(id) {
+    this.name = id;
+    this.playerDataSource.sendJson(MessageConverter.nameToJson(id));
+    return Promise.resolve();
   }
 
   /* [InitWorker, ...] -> Promise<PlaceRequest>
@@ -30,6 +35,8 @@ class RemoteProxyPlayer {
     their next Worker.
   */
   placeInitialWorker(existingWorkers) {
+    return this.clientRequest(existingWorkers, MessageConverter.initWorkerListToJson,
+      MessageConverter.jsonToPlaceRequest);
   }
 
   /* Board -> Promise<Turn>
@@ -37,6 +44,8 @@ class RemoteProxyPlayer {
     this Player wishes to take.
   */
   takeTurn(board) {
+    return this.clientRequest(board, MessageConverter.boardToJson,
+      MessageConverter.jsonToTurn);
   }
 
   /* String -> Promise<Void>
@@ -44,6 +53,8 @@ class RemoteProxyPlayer {
     against an opponent with the given ID.
   */
   newGame(opponentId) {
+    this.playerDataSource.sendJson(opponentId);
+    return Promise.resolve();
   }
 
   /* GameResult -> Promise<Void>
@@ -51,8 +62,10 @@ class RemoteProxyPlayer {
     so that internal information can be reset/updated as necessary
   */
   notifyGameOver(gameResult) {
-    // Do nothing, because there is no message specified to send
+    // Send nothing, because there is no message specified to send
     // to the client when a single game ends.
+    // Resolve so that callers know the notification did not fail.
+    return Promise.resolve();
   }
 
   /* [GameResult, ...] -> Promise<Void>
@@ -60,6 +73,20 @@ class RemoteProxyPlayer {
     in the form of a list of the results every game played.
   */
   notifyTournamentOver(gameResults) {
+    let encounterOutcomes = MessageConverter.gameResultsToJson(gameResults);
+    this.playerDataSource.sendJson(encounterOutcomes);
+    return Promise.resolve();
+  }
+
+  /* X [X -> JSON] [JSON -> Y] -> Promise<Y>
+    Convert the given data to JSON, send it to the client, and return
+    the decoded response.
+  */
+  clientRequest(requestValue, encodeRequestFn, decodeResponseFn) {
+    let json = encodeRequestFn(requestValue);
+    this.playerDataSource.sendJson(json);
+    return this.playerDataSource.readJson()
+      .then(decodeResponseFn);
   }
 }
 
