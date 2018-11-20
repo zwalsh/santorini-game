@@ -25,6 +25,11 @@
 
  */
 
+const Worker = require('../Common/worker');
+const Board = require('../Common/board');
+const constants = require('../Common/constants');
+
+
 // ================= X to JSON ==================
 
 /* PlaceRequest -> Place
@@ -104,7 +109,7 @@ function jsonToBoard(boardSpec) {
 /* [EncounterOutcome, ...] -> [GameResult, ...]
 
 */
-function jsonToGameResults(gameResults) {
+function jsonToGameResults(encounterOutcomes) {
 
 }
 
