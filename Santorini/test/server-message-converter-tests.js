@@ -4,32 +4,9 @@ const assert = chai.assert;
 const Board = require('../Common/board');
 const Worker = require('../Common/worker');
 
-const MessageConverter = require('../Common/message-converter');
+const MC = require('../Remote/server-message-converter');
 
-describe('MessageConverter tests', function () {
-  describe('Turn to JSON', function () {
-    let move, build, pName, workerId;
-    beforeEach(function () {
-      pName = 'garth';
-      workerId = 1;
-      move = ["move", {player: pName, id: workerId}, ["EAST", "NORTH"]];
-      build = ["build", ["WEST", "SOUTH"]];
-    });
-
-    it('converts the Worker correctly', function () {
-      let turn = [move, build];
-      assert.deepEqual(MessageConverter.turnToJson(turn)[0], 'garth1');
-    });
-    it('converts a Move-only turn correctly', function () {
-      let turn = [move];
-      assert.deepEqual(MessageConverter.turnToJson(turn), ['garth1', "EAST", "NORTH"]);
-    });
-    it('converts a Move-Build turn correctly', function () {
-      let turn = [move, build];
-      assert.deepEqual(MessageConverter.turnToJson(turn), ['garth1', "EAST", "NORTH", "WEST", "SOUTH"]);
-    });
-  });
-
+describe('ServerMessageConverter tests', function () {
   describe('Board to JSON', function () {
     let board, initBoard, jsonBoard, playerName1, playerName2, workerLocations;
     beforeEach(function () {
@@ -47,7 +24,7 @@ describe('MessageConverter tests', function () {
           new Worker(1, 0, 1, playerName2),
           new Worker(2, 3, 2, playerName1)]);
       workerLocations = [[0, 0], [1, 0], [2, 3]];
-      jsonBoard = MessageConverter.boardToJson(board);
+      jsonBoard = MC.boardToJson(board);
     });
     it('includes all workers (with heights) in the output', function () {
       assert.deepEqual(jsonBoard[0][0], 2 + playerName1 + 1);

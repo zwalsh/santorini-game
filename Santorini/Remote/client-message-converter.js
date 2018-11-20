@@ -4,50 +4,34 @@
 
   ========== Data Definitions ==========
 
+  Internal:
+  - Board
+  - Worker
+  - Turn
+  - InitWorker
+  - WorkerRequest
+  - GameResult
 
 
   JSON:
-  - Worker is ...
+  - JsonWorker is (Worker) ...
   - Cell is ...
-
-
-
+  - Placement
+  - WorkerPlace is ...
+  - Coordinate is ...
+  - Action is ...
+  - EncounterOutcome is ...
 
  */
 
-
 // ================= X to JSON ==================
 
-/* Board -> [[Cell, ...], ...]
-  Convert a Board object to its JSON representation.
-*/
-function boardToJson(board) {
-  let jsonBoard = [];
-  let boardHeights = board.getBoard();
-  let workers = board.getWorkers();
-  for (let y = 0; y < boardHeights.length; y++) {
-    let row = [];
-    for (let x = 0; x < boardHeights.length; x++) {
-      let workerAtSquare = workers.find((w) => { return w.posn.x === x && w.posn.y === y });
-      if (workerAtSquare) {
-        row.push(workerToJson(workerAtSquare, boardHeights[y][x]));
-      } else {
-        row.push(boardHeights[y][x]);
-      }
-    }
-    jsonBoard.push(row);
-  }
-  return jsonBoard;
-}
+/* PlaceRequest -> Place
 
-/* Worker Integer -> JSON
-  Produces the JSON representation of a Worker as will be included in the JsonBoard,
-  including the height of the cell that the Worker is on.
-*/
-function workerToJson(worker, height) {
-  return height + worker.player + worker.id;
-}
+ */
+function placeRequestToJson(placeRequest) {
 
+}
 
 /* Turn -> Action
   Convert the Turn data to an Action.
@@ -63,9 +47,25 @@ function turnToJson(turn) {
   return jsonTurn;
 }
 
-
 // ================= JSON to X ==================
 
+/* Placement -> [InitWorker, ...]
+
+*/
+function jsonToInitWorkerList(initWorkerList) {
+
+}
+
+/* Worker -> WorkerRequest
+  Convert the string worker representation to a WorkerRequest
+ */
+function jsonToWorkerRequest(worker) {
+  let parsedWorker = worker.split(/[0-9]/);
+  let player = parsedWorker[0];
+  let id = parseInt(worker.substring(worker.length - 1));
+
+  return {player: player, id: id};
+}
 
 /* [[Cell, ...] ...] -> Board
   Create a Board object from the given JSON representation.
@@ -111,22 +111,19 @@ function jsonToBoard(boardSpec) {
   return new Board(null, initBoard, workerList);
 }
 
-/* Worker -> WorkerRequest
-  Convert the string worker representation to a WorkerRequest
- */
-function parseWorker(worker) {
-  let parsedWorker = worker.split(/[0-9]/);
-  let player = parsedWorker[0];
-  let id = parseInt(worker.substring(worker.length - 1));
+/* [EncounterOutcome, ...] -> [GameResult, ...]
 
-  return {player: player, id: id};
+*/
+function jsonToGameResults(gameResults) {
+
 }
 
 
 module.exports = {
-  'boardToJson': boardToJson,
-  'workerToJson': workerToJson,
+  'placeRequestToJson': placeRequestToJson,
   'turnToJson': turnToJson,
   'jsonToBoard': jsonToBoard,
-  'parseWorker': parseWorker,
+  'jsonToWorkerRequest': jsonToWorkerRequest,
+  'jsonToInitWorkerList': jsonToInitWorkerList,
+  'jsonToGameResults': jsonToGameResults,
 }
