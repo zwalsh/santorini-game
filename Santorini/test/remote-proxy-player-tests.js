@@ -6,6 +6,8 @@ const testLib = require('./test-lib');
 
 const Direction = require('../Common/direction');
 const GameResult = require('../Common/game-result');
+const Board = require('../Common/board');
+const constants = require('../Common/constants');
 const RemoteProxyPlayer = require('../Remote/remote-proxy-player');
 
 describe('RemoteProxyPlayer tests', function () {
@@ -21,7 +23,7 @@ describe('RemoteProxyPlayer tests', function () {
     beforeEach(function () {
       mockPJSocket.sendJson.resolves();
       newName = 'ttub';
-      setIdResult = mockPJSocket.setId(newName);
+      setIdResult = rpp.setId(newName);
     });
     it('changes the name on the RPP', function () {
       return setIdResult.then(() => {
@@ -30,7 +32,8 @@ describe('RemoteProxyPlayer tests', function () {
     });
     it('sends the new name to the client', function () {
       return setIdResult.then(() => {
-        return assert.isTrue(mockPJSocket.sendJson.calledOnce);
+        let nameFromCall = mockPJSocket.sendJson.getCall(0).args[0];
+        return assert.deepEqual(nameFromCall, ['playing-as', newName]);
       });
     });
     it('resolves to indicate that the name was sent', function () {
