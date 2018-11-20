@@ -51,6 +51,8 @@ class RemoteProxyPlayer {
     so that internal information can be reset/updated as necessary
   */
   notifyGameOver(gameResult) {
+    // Do nothing, because there is no message specified to send
+    // to the client when a single game ends.
   }
 
   /* [GameResult, ...] -> Promise<Void>
