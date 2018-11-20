@@ -34,12 +34,13 @@
         alternative but signals that the losing player misbehaved.
 */
 
+const constants = require('../Common/constants');
 
 // ================= X to JSON ==================
 
 
 /* [InitWorker, ...] -> Placement
-
+  Convert the list of InitWorkers to a corresponding list of WorkerPlace
 */
 function initWorkerListToJson(initWorkerList) {
   let placement = [];
@@ -95,26 +96,43 @@ function workerToJson(worker, height) {
 }
 
 /* [GameResult, ...] -> [EncounterOutcome, ...]
-
+  Produce the JSON representation of the list of GameResults.
 */
 function gameResultsToJson(gameResults) {
-
+  let encounterOutcomes = [];
+  for (let gameResult of gameResults) {
+    let eo = [gameResult.winner, gameResult.loser];
+    if (gameResult.reason === constants.EndGameReason.BROKEN_RULE) {
+      eo.push(constants.ENCOUNTER_OUTCOME_IRREGULAR);
+    }
+    encounterOutcomes.push(eo);
+  }
+  return encounterOutcomes;
 }
 
 // ================= JSON to X ==================
 
-/* Place String-> PlaceRequest
+/* Place -> PlaceRequest
   String is player's name
  */
-function jsonToPlaceRequest(place, name) {
-
+function jsonToPlaceRequest(place) {
+  return ["place", place[0], place[1]];
 }
 
 /* Action -> Turn
   (does not need to support string Actions for now)
  */
-function jsonToTurn() {
-
+function jsonToTurn(action) {
+  let workerRequest = jsonToWorkerRequest(action[0]);
+  let moveDir = [action[1], action[2]];
+  let moveRequest = ['move', workerRequest, moveDir];
+  let turn = [moveRequest];
+  if (action.length === 5) {
+    let buildDir = [action[3], action[4]];
+    let buildRequest = ['build', buildDir];
+    turn.push(buildRequest);
+  }
+  return turn;
 }
 
 /* Worker -> WorkerRequest
