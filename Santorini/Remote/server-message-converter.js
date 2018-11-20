@@ -42,7 +42,26 @@
 
 */
 function initWorkerListToJson(initWorkerList) {
+  let placement = [];
+  let playerToWorkerId = new Map();
+  for (let initWorker of initWorkerList) {
+    let player = initWorker.player;
+    let currentWorkerId = playerToWorkerId.get(player);
+    if (!currentWorkerId) {
+      currentWorkerId = 1;
+    }
+    let workerPlace = initWorkerToWorkerPlace(initWorker, currentWorkerId);
+    playerToWorkerId.set(player, currentWorkerId + 1);
+    placement.push(workerPlace);
+  }
+  return placement;
+}
 
+/* InitWorker -> WorkerPlace
+  Convert the given InitWorker to a WorkerPlace with the same Worker and Coordinates
+*/
+function initWorkerToWorkerPlace(initWorker, workerId) {
+  return [initWorker.player + workerId, initWorker.x, initWorker.y];
 }
 
 /* Board -> [[Cell, ...], ...]
