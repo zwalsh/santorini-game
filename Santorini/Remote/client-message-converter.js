@@ -39,7 +39,6 @@ const Board = require('../Common/board');
 const GameResult = require('../Common/game-result');
 const constants = require('../Common/constants');
 
-
 // ================= X to JSON ==================
 
 /* PlaceRequest -> Place
@@ -80,7 +79,6 @@ function jsonToInitWorker(workerPlace) {
   let workerRequest = jsonToWorkerRequest(workerPlace[0]);
   return { player: workerRequest.player, x: workerPlace[1], y: workerPlace[2] };
 }
-
 
 /* [[Cell, ...] ...] -> Board
   Create a Board object from the given JSON representation.
@@ -141,7 +139,6 @@ function jsonToGameResult(encounterOutcome) {
   return new GameResult(encounterOutcome[0], encounterOutcome[1], endGameReason);
 }
 
-
 /* Worker -> WorkerRequest
   Convert the string worker representation to a WorkerRequest
  */
@@ -152,7 +149,6 @@ function jsonToWorkerRequest(worker) {
 
   return {player: player, id: id};
 }
-
 
 module.exports = {
   'placeRequestToJson': placeRequestToJson,
