@@ -6,22 +6,32 @@
   ========== Data Definitions ==========
 
   Internal:
-  - Board
-  - Worker
-  - Turn
-  - InitWorker
-  - WorkerRequest
-  - GameResult
-
+  - Board is defined in Common/board.js
+  - Worker is defined in Common/worker.js
+  - Turn is defined in Common/player-interface.js
+  - InitWorker is defined in Common/board.js
+  - GameResult is defined in Common/game-result.js
 
   JSON:
-  - JsonWorker is (Worker) ...
-  - Cell is ...
-  - Placement
-  - WorkerPlace is ...
-  - Coordinate is ...
-  - Action is ...
-  - EncounterOutcome is ...
+  - A Cell is defined in RuleCheckerHarness.js
+  - A Placement is an array: [WorkerPlace, ...] of up to length 3, representing
+    a list of already-placed Workers.
+  - A WorkerPlace is a JSON array: [JsonWorker,Coordinate,Coordinate].
+  - A JsonWorker is a String of the player's name followed by either
+    a 1 or a 2, denoting which of the player's Workers it is.
+  - A Coordinate is a natural number between 0 and 5 (inclusive).
+  - An Action is either:
+      - String, which represents the name of a player that is giving up;
+      - [Worker,EastWest,NorthSouth], which represents a winning move; or
+      - [Worker,EastWest,NorthSouth,EastWest,NorthSouth], which represents
+         a request to move the specified worker and build in the specified
+         directions. The first pair of directions specify the move, the
+         second one the building step.
+  - An EncounterOutcome is one of the following:
+      - [String, String], which is the name of the winner followed by
+        the loser;
+      - [String, String, "irregular"], which is like the first
+        alternative but signals that the losing player misbehaved.
 */
 
 
@@ -88,10 +98,22 @@ function jsonToTurn() {
 
 }
 
+/* Worker -> WorkerRequest
+  Convert the string worker representation to a WorkerRequest
+ */
+function jsonToWorkerRequest(worker) {
+  let parsedWorker = worker.split(/[0-9]/);
+  let player = parsedWorker[0];
+  let id = parseInt(worker.substring(worker.length - 1));
+
+  return {player: player, id: id};
+}
+
 module.exports = {
   'boardToJson': boardToJson,
   'initWorkerListToJson':  initWorkerListToJson,
   'gameResultsToJson': gameResultsToJson,
   'jsonToTurn': jsonToTurn,
   'jsonToPlaceRequest': jsonToPlaceRequest,
+  'jsonToWorkerRequest': jsonToWorkerRequest,
 };

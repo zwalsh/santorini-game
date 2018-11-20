@@ -57,17 +57,6 @@ function jsonToInitWorkerList(initWorkerList) {
 
 }
 
-/* Worker -> WorkerRequest
-  Convert the string worker representation to a WorkerRequest
- */
-function jsonToWorkerRequest(worker) {
-  let parsedWorker = worker.split(/[0-9]/);
-  let player = parsedWorker[0];
-  let id = parseInt(worker.substring(worker.length - 1));
-
-  return {player: player, id: id};
-}
-
 /* [[Cell, ...] ...] -> Board
   Create a Board object from the given JSON representation.
 */
@@ -124,7 +113,6 @@ module.exports = {
   'placeRequestToJson': placeRequestToJson,
   'turnToJson': turnToJson,
   'jsonToBoard': jsonToBoard,
-  'jsonToWorkerRequest': jsonToWorkerRequest,
   'jsonToInitWorkerList': jsonToInitWorkerList,
   'jsonToGameResults': jsonToGameResults,
 }
