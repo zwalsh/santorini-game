@@ -13,6 +13,7 @@
   - GameResult is defined in Common/game-result.js
 
   JSON:
+  - A PlayingAs is a ["playing-as", Name], where Name is a lowercase alphabetic string
   - A Cell is defined in RuleCheckerHarness.js
   - A Placement is an array: [WorkerPlace, ...] of up to length 3, representing
     a list of already-placed Workers.
@@ -38,6 +39,12 @@ const constants = require('../Common/constants');
 
 // ================= X to JSON ==================
 
+/* String -> PlayingAs
+  Wrap the name in a PlayingAs
+ */
+function nameToJson(name) {
+  return [constants.Message.PLAYING_AS, name];
+}
 
 /* [InitWorker, ...] -> Placement
   Convert the list of InitWorkers to a corresponding list of WorkerPlace
@@ -103,7 +110,7 @@ function gameResultsToJson(gameResults) {
   for (let gameResult of gameResults) {
     let eo = [gameResult.winner, gameResult.loser];
     if (gameResult.reason === constants.EndGameReason.BROKEN_RULE) {
-      eo.push(constants.ENCOUNTER_OUTCOME_IRREGULAR);
+      eo.push(constants.Message.ENCOUNTER_OUTCOME_IRREGULAR);
     }
     encounterOutcomes.push(eo);
   }
@@ -147,6 +154,7 @@ function jsonToWorkerRequest(worker) {
 }
 
 module.exports = {
+  'nameToJson': nameToJson,
   'boardToJson': boardToJson,
   'initWorkerListToJson':  initWorkerListToJson,
   'gameResultsToJson': gameResultsToJson,
