@@ -13,25 +13,48 @@
   - GameResult is defined in Common/game-result.js
 
   JSON:
-  - A Cell is defined in RuleCheckerHarness.js
-  - A Placement is an array: [WorkerPlace, ...] of up to length 3, representing
-    a list of already-placed Workers.
-  - A WorkerPlace is a JSON array: [JsonWorker,Coordinate,Coordinate].
-  - A JsonWorker is a String of the player's name followed by either
-    a 1 or a 2, denoting which of the player's Workers it is.
-  - A Coordinate is a natural number between 0 and 5 (inclusive).
-  - An Action is either:
-      - String, which represents the name of a player that is giving up;
-      - [Worker,EastWest,NorthSouth], which represents a winning move; or
-      - [Worker,EastWest,NorthSouth,EastWest,NorthSouth], which represents
-         a request to move the specified worker and build in the specified
-         directions. The first pair of directions specify the move, the
-         second one the building step.
-  - An EncounterOutcome is one of the following:
-      - [String, String], which is the name of the winner followed by
-        the loser;
-      - [String, String, "irregular"], which is like the first
-        alternative but signals that the losing player misbehaved.
+
+  PlayingAs    is a JSON array: ["playing-as", Name]
+
+  Name         is an all-lowercase alphabetic string.
+
+  Place        is a JSON array: [Coordinate, Coordinate]
+
+  Coordinate   is a natural number between 0 and 5 (inclusive).
+
+  Board        is a JSON array: [[Cell, ...], ...]
+
+  Cell         is a Height or a BuildingWorker.
+
+  Height       is one of: 0, 1, 2, 3, 4. It indicates (the height of) a building.
+
+  BuildingWorker is a String that starts with a single digit
+               followed by a JsonWorker. The first digit represents the
+               Height of the building.
+
+  Placement    is a JSON array: [WorkerPlace, ...] of up to length 3,
+               representing a list of already-placed JsonWorker.
+
+  WorkerPlace  is a JSON array: [JsonWorker,Coordinate,Coordinate].
+
+  JsonWorker   is a String of the player's name followed by either
+               a 1 or a 2, denoting which of the player's JsonWorkers it is.
+
+  Action       is one of:
+               - String, which represents the name of a player that is giving up;
+               - [JsonWorker,EastWest,NorthSouth], which represents a winning move; or
+               - [JsonWorker,EastWest,NorthSouth,EastWest,NorthSouth], which represents
+                  a request to move the specified worker and build in the specified
+                  directions. The first pair of directions specify the move, the
+                  second one the building step.
+
+  Results      is a list of EncounterOutcome.
+
+  EncounterOutcome is one of:
+               - [String, String], which is the names of the winner, then the loser
+               - [String, String, "irregular"], which is like the first
+                 alternative but signals that the losing player misbehaved.
+
 */
 
 const Worker = require('../Common/worker');
@@ -63,6 +86,13 @@ function turnToJson(turn) {
 }
 
 // ================= JSON to X ==================
+
+/* PlayingAs -> Name
+  Get the name from the PlayingAs message.
+ */
+function jsonToName(playingAs) {
+  return playingAs[1];
+}
 
 /* Placement -> [InitWorker, ...]
   Convert the received Placement into an InitWorkerList, with each
@@ -151,6 +181,7 @@ function jsonToWorkerRequest(worker) {
 }
 
 module.exports = {
+  'jsonToName': jsonToName,
   'placeRequestToJson': placeRequestToJson,
   'turnToJson': turnToJson,
   'jsonToBoard': jsonToBoard,
