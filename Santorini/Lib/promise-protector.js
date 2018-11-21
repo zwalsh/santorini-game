@@ -24,6 +24,9 @@ function protectedPromise(subject, promiseFunction, timeoutLength = DEFAULT_TIME
     return Promise.race([timeoutPromise, promise]).then((result) => {
       clearTimeout(timeout);
       return result;
+    }).catch((err) => {
+      clearTimeout(timeout);
+      return Promise.reject(err);
     });
   } catch (err) {
     // this catches the case where promiseFunction itself throws an error

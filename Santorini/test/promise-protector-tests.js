@@ -21,6 +21,7 @@ describe('promiseProtector', function () {
       let promiseFn = (p) => {
         return new Promise((resolve => {
           setTimeout(resolve, timeout / 2, "succeeded");
+          return;
         }));
       };
       let protectedPromise = promiseProtector({}, promiseFn, timeout);
@@ -32,6 +33,7 @@ describe('promiseProtector', function () {
       let promiseFn = (p) => {
         return new Promise((resolve => {
           setTimeout(resolve, timeout * 420, "succeeded");
+          return;
         }));
       };
       let protectedPromise = promiseProtector({}, promiseFn, timeout);
