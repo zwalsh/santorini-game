@@ -2,7 +2,7 @@
   It produces Turns and places Workers (as appropriate) when it is requested to do so,
   and when it is given an update on the current state of the game.
 
-  This implementation delegates to a Player on the other side of a Socket.
+  This implementation delegates to a Player on the other side of a network connection.
 
   Data Definitions: See Common/player-interface.js
 */
@@ -14,8 +14,8 @@ class RemoteProxyPlayer {
     Instantiates a RPP that uses a PromiseJsonSocket to communicate
     with the Player with the given name on the other side of the network.
   */
-  constructor(playerDataSource, name) {
-    this.playerDataSource = playerDataSource;
+  constructor(client, name) {
+    this.client = client;
     this.name = name;
   }
 
@@ -25,7 +25,7 @@ class RemoteProxyPlayer {
   */
   setId(id) {
     this.name = id;
-    this.playerDataSource.sendJson(MessageConverter.nameToJson(id));
+    this.client.sendJson(MessageConverter.nameToJson(id));
     return Promise.resolve();
   }
 
@@ -53,7 +53,7 @@ class RemoteProxyPlayer {
     against an opponent with the given ID.
   */
   newGame(opponentId) {
-    this.playerDataSource.sendJson(opponentId);
+    this.client.sendJson(opponentId);
     return Promise.resolve();
   }
 
@@ -74,7 +74,7 @@ class RemoteProxyPlayer {
   */
   notifyTournamentOver(gameResults) {
     let encounterOutcomes = MessageConverter.gameResultsToJson(gameResults);
-    this.playerDataSource.sendJson(encounterOutcomes);
+    this.client.sendJson(encounterOutcomes);
     return Promise.resolve();
   }
 
@@ -84,8 +84,8 @@ class RemoteProxyPlayer {
   */
   clientRequest(requestValue, encodeRequestFn, decodeResponseFn) {
     let json = encodeRequestFn(requestValue);
-    this.playerDataSource.sendJson(json);
-    return this.playerDataSource.readJson()
+    this.client.sendJson(json);
+    return this.client.readJson()
       .then(decodeResponseFn);
   }
 }
