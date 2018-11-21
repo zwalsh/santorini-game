@@ -23,6 +23,7 @@ describe('PromiseJsonSocket', function () {
     });
   });
   describe('readJson', function () {
+    let promisedJsonValue;
     describe('when a message has not been received before the call', function () {
       it('sets its resolve function as the callback', function () {
         expect(pjs.readJsonCallback).to.be.null;
@@ -31,7 +32,7 @@ describe('PromiseJsonSocket', function () {
       });
     });
     describe('when messages are received before the call', function () {
-      let promisedJsonValue, firstJsonValue, secondJsonValue;
+      let firstJsonValue, secondJsonValue;
       beforeEach(function () {
         firstJsonValue = 'first';
         secondJsonValue = 'second';
@@ -45,6 +46,33 @@ describe('PromiseJsonSocket', function () {
       });
       it('removes the first message from the queue', function () {
         return expect(pjs.receivedMessageQueue).to.deep.eql([secondJsonValue]);
+      });
+    });
+    describe('when the socket has been closed', function () {
+      beforeEach(function () {
+        pjs.socketOpen = false;
+      });
+      describe('when there are values in the queue', function () {
+        let firstJsonValue;
+        beforeEach(function () {
+          firstJsonValue = 'first';
+          pjs.receivedMessageQueue.push(firstJsonValue);
+          promisedJsonValue = pjs.readJson();
+        });
+        it('returns the first message received', function () {
+          return expect(promisedJsonValue).to.eventually.eql(firstJsonValue);
+        });
+        it('removes the first message from the queue', function () {
+          return expect(pjs.receivedMessageQueue).to.deep.eql([]);
+        });
+      });
+      describe('when there are no values in the queue', function () {
+        beforeEach(function () {
+          promisedJsonValue = pjs.readJson();
+        });
+        it('returns a Promise that rejects', function () {
+          return assert.isRejected(promisedJsonValue);
+        });
       });
     });
   });
@@ -133,6 +161,35 @@ describe('PromiseJsonSocket', function () {
         it('does not process any JSON message', function () {
           assert.isFalse(pjs.receiveJsonMessage.called);
         });
+      });
+    });
+    describe('when given non-JSON input', function () {
+      beforeEach(function () {
+        pjs.bufferedInput = '["some data",';
+        pjs.receiveData('not json');
+      });
+      it('sets the socketOpen flag to false', function () {
+        assert.isFalse(pjs.socketOpen);
+      });
+      it('does not call receiveJsonMessage', function () {
+        assert.isFalse(pjs.receiveJsonMessage.called);
+      });
+      it('clears out the buffer', function () {
+        assert.equal(pjs.bufferedInput, "");
+      });
+    });
+    describe('when the socketOpen flag is false', function () {
+      let inputData;
+      beforeEach(function () {
+        inputData = '[1, 2]';
+        pjs.socketOpen = false;
+        pjs.receiveData(inputData);
+      });
+      it('does not call receiveJsonMessage', function () {
+        assert.isFalse(pjs.receiveJsonMessage.called);
+      });
+      it('does not add the received data to the buffer', function () {
+        assert.equal(pjs.bufferedInput, "");
       });
     });
   });

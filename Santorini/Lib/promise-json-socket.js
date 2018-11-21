@@ -2,10 +2,13 @@
   Wraps a socket such that JSON values may be sent and received over
   the socket using Promises.
 
+  When given JSON values to send, it immediately sends them over the connection.
+
   It buffers incoming JSON values, storing them internally until they
   are requested.
 
-  It immediately sends JSON values over the connection.
+  If non-JSON input is received, the socket is closed and
+
 */
 const parseJson = require('./json-parser').jsonParser;
 
@@ -18,9 +21,11 @@ class PromiseJsonSocket {
     this.readJsonCallback = null;
     this.bufferedInput = "";
     this.socket = socket;
+    this.socketOpen = true;
     // for testing purposes, don't set the callback if a Socket is not given
     if (socket) {
       socket.on('data', (data) => { this.receiveData(data) });
+      socket.on('close', () => { this.socketOpen = false });
     }
   }
 
@@ -39,10 +44,14 @@ class PromiseJsonSocket {
     if (this.receivedMessageQueue.length > 0) {
       return Promise.resolve(this.receivedMessageQueue.shift());
     } else {
-      return new Promise((res) => {
-        this.readJsonCallback = res;
-        return;
-      });
+      if (this.socketOpen) {
+        return new Promise((res) => {
+          this.readJsonCallback = res;
+          return;
+        });
+      } else {
+        return Promise.reject();
+      }
     }
   }
 
@@ -65,9 +74,18 @@ class PromiseJsonSocket {
     if possible. Hands complete values off to the handler for JSON messages.
   */
   receiveData(data) {
-    if (data) {
-      this.bufferedInput = this.bufferedInput + data;
-      let parsed = parseJson(this.bufferedInput);
+    if (data && this.socketOpen) {
+      this.bufferedInput += data;
+      let parsed;
+
+      try {
+        parsed = parseJson(this.bufferedInput);
+      } catch (err) {
+        this.socketOpen = false;
+        this.bufferedInput = "";
+        return;
+      }
+
       if (parsed.length > 0) {
         for (let json of parsed) {
           this.receiveJsonMessage(json);
