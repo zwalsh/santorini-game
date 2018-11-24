@@ -8,6 +8,16 @@ const testLib = require('./test-lib');
 
 const TournamentServer = require('../Remote/server');
 
+/* String -> Player
+  Create mock Player object with getId() and setId() mocked.
+  getId() returns name. No other methods mocked.
+*/
+function mockPlayer(name) {
+  let player = testLib.createMockObject('getId', 'setId');
+  player.getId.returns(name);
+  return player;
+}
+
 describe('TournamentServer', function () {
   let ts, minPlayers, port, waitingFor, repeat, host;
   beforeEach(function () {
@@ -101,20 +111,93 @@ describe('TournamentServer', function () {
     beforeEach(function () {
       ts = new TournamentServer(minPlayers, port, waitingFor, repeat);
     });
-    describe('when less than two players are correctly set up', function () {
+    describe('when not enough players can be registered (fail to provide name)', function () {
+      let promiseResult;
       beforeEach(function () {
+        ts.sockets = [{}, {}];
         ts.createPlayerWithSocket = sinon.stub.rejects();
-        ts.createAndRunTournament();
+        ts.createTournamentManager = sinon.stub();
+        ts.shutdown = sinon.stub();
+        promiseResult = ts.createAndRunTournament();
       });
-      it('does not start the tournament manager');
+      it('does not create the tournament manager', function () {
+        return promiseResult.then(() => {
+          return assert.isFalse(ts.createTournamentManager.called);
+        });
+      });
+      it('calls shutdown', function () {
+        return promiseResult.then(() => {
+          return assert.isTrue(ts.shutdown.called);
+        });
+      });
     });
-    describe('when a player cannot be set up from the socket', function () {
-      it('excludes that player from the tournament');
+    describe('when players fail to provide names', function () {
+      // 3 sockets, but only 2 calls to createPlayer succeed.
+      let p1, p2, mockTM, promiseResult;
+      beforeEach(function () {
+        ts.sockets = [{}, {}, {}];
+        p1 = mockPlayer("a");
+        p2 = mockPlayer("b");
+        ts.createPlayerWithSocket = sinon.stub
+          .onCall(0).resolves(p1)
+          .onCall(1).rejects()
+          .onCall(2).resolves(p2);
+
+        mockTM = testLib.createMockObject('startTournament');
+        mockTM.startTournament.resolves();
+        ts.createTournamentManager = sinon.stub().resolves(mockTM);
+        ts.shutdown = sinon.stub();
+
+        promiseResult = ts.createAndRunTournament();
+      });
+      it('excludes those players from the tournament', function () {
+        return promiseResult.then(() => {
+          return assert.isTrue(ts.createTournamentManager.calledWith([p1, p2]));
+        });
+      });
     });
-    it('makes the TournamentManager');
-    it('wraps all sockets in RemoteProxyPlayers and GuardedPlayers');
-    it('ensures all names are unique');
-    it('clears the waitingForTimeout');
+    describe('when enough players are properly set up', function () {
+      let p1, p2, p3, mockTM, promiseResult;
+      beforeEach(function () {
+        ts.sockets = [{}, {}, {}];
+        p1 = mockPlayer("a");
+        p2 = mockPlayer("b");
+        p3 = mockPlayer("c");
+        ts.createPlayerWithSocket = sinon.stub
+          .onCall(0).resolves(p1)
+          .onCall(1).resolves(p2)
+          .onCall(2).resolves(p3);
+
+        mockTM = testLib.createMockObject('startTournament');
+        mockTM.startTournament.resolves();
+        ts.createTournamentManager = sinon.stub().resolves(mockTM);
+        ts.shutdown = sinon.stub();
+
+        promiseResult = ts.createAndRunTournament();
+      });
+      it('makes the TournamentManager with all ready players', function () {
+        return promiseResult.then(() => {
+          assert.isTrue(ts.createTournamentManager.calledWith([p1, p2, p3]));
+          assert.isTrue(mockTM.startTournament.calledOnce);
+          return;
+        });
+      });
+      it('wraps all sockets in RemoteProxyPlayers and GuardedPlayers', function () {
+        return promiseResult.then(() => {
+          return assert.equal(ts.createPlayerWithSocket.callCount, 3);
+        });
+      });
+      it('clears the waitingForTimeout', function () {
+        return promiseResult.then(() => {
+          return assert.isNull(ts.waitingForTimeout);
+        });
+      });
+      it('calls shutdown when the tournament ends', function () {
+        return promiseResult.then(() => {
+          return assert.isTrue(ts.shutdown.called);
+        });
+      });
+    });
   });
   describe('createTournamentManager', function () {
     beforeEach(function () {
@@ -126,9 +209,9 @@ describe('TournamentServer', function () {
 
       });
     });
-    describe('when enough players have unique names', function () {
+    describe('when enough players have or accept unique names', function () {
       // getId should return same id
-      it('creates the TournamentManager with those players', function () {
+      it('creates the TournamentManager with the players that accepted names', function () {
 
       });
     });

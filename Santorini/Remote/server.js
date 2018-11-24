@@ -96,10 +96,12 @@ class TournamentServer {
 
   /* PromiseJsonSocket -> Promise<GuardedPlayer>
     Creates a GuardedPlayer out of a PromiseJsonSocket.
+    Reject if the player fails to provide a name.
   */
   createPlayerWithSocket(pjs) {
     // use promise protector here
     return this.getPlayerName(pjs).then((name) => {
+      //
       new GP(RPP(), null, timeout);
     });
   }
