@@ -14,6 +14,12 @@
 const net = require('net');
 const PromiseJsonSocket = require('../Lib/promise-json-socket');
 const TournamentManager = require('../Admin/tournament-manager');
+const GuardedPlayer = require('../Admin/guarded-player');
+const RemoteProxyPlayer = require('./remote-proxy-player');
+const renamePlayer = require('../Admin/player-name-checker').renamePlayer;
+const PLAYER_NAME_REGEXP = require('../Admin/player-name-checker').PLAYER_NAME_REGEXP;
+const protectedPromise = require('../Lib/promise-protector');
+const constants = require('../Common/constants');
 
 class TournamentServer {
 
@@ -46,15 +52,15 @@ class TournamentServer {
     amount of time.
   */
   start() {
-    // this.server.listen(host, port);
-    // this.waitingForTimeout = this.createWaitingForTimeout();
+    this.server.listen(this.port, this.host);
+    this.waitingForTimeout = this.createTimeout();
   }
 
   /* Void -> Timeout
     Creates the timeout that calls shutdown after waitingFor seconds.
   */
   createTimeout() {
-    this.waitingForTimeout = setTimeout(this.shutdown, this.waitingFor * 1000);
+    this.waitingForTimeout = setTimeout(this.shutdown, this.waitingFor);
   }
 
   /* Void -> Server
@@ -101,11 +107,13 @@ class TournamentServer {
     tournament is to be played.
   */
   shutdown() {
-    // close all connections
-    // clear everything out of the socket list
-    // clear the timeout
-    // if(!repeat)
-    // server.close()
+    for (let socket of this.sockets) {
+      socket.end();
+    }
+    this.sockets = [];
+    if (!this.repeat) {
+      this.server.close();
+    }
   }
 
   /* PromiseJsonSocket -> Promise<GuardedPlayer>
@@ -114,7 +122,7 @@ class TournamentServer {
   */
   registerPlayer(pjs) {
     return this.getPlayerName(pjs).then((name) => {
-      // new GP(RPP(), null, timeout);
+      return new GuardedPlayer(new RemoteProxyPlayer(pjs, name), name, constants.DEFAULT_TIMEOUT);
     });
   }
 
@@ -130,7 +138,16 @@ class TournamentServer {
     registered.
   */
   addAndEnsureUnique(player) {
-
+    return this.uniquelyNamedPlayer(player).then((uniquePlayer) => {
+      this.uniquePlayers.push(uniquePlayer);
+      if (this.uniquePlayers.length === this.minPlayers) {
+        clearTimeout(this.waitingForTimeout);
+      }
+      if (this.canStartTournament()) {
+        this.createAndRunTournament();
+      }
+      return;
+    });
   }
 
   /* GuardedPlayer -> Promise<GuardedPlayer>
@@ -141,7 +158,18 @@ class TournamentServer {
     rejects if the player does not accept the new name.
   */
   uniquelyNamedPlayer(player) {
-
+    let currentNames = this.uniquePlayers.map((p) => { return p.getId() });
+    if (currentNames.includes(player.getId())) {
+      return renamePlayer(player).then((maybePlayer) => {
+        if (maybePlayer) {
+          return Promise.resolve(maybePlayer);
+        } else {
+          return Promise.reject();
+        }
+      });
+    } else {
+      return Promise.resolve(player);
+    }
   }
 
   /* Void -> Boolean
@@ -151,7 +179,9 @@ class TournamentServer {
     - no more sockets are currently being registered as players
   */
   canStartTournament() {
-
+    let playerCount = this.uniquePlayers.length;
+    return playerCount >= this.minPlayers &&
+      playerCount === this.sockets.length;
   }
 
   /* Void -> Promise<TournamentManager>
@@ -174,13 +204,22 @@ class TournamentServer {
   */
   getPlayerName(socket) {
     // use promise protector here
+    return protectedPromise(socket, (pjs) => {
+      return pjs.readJson();
+    }).then((val) => {
+      if (this.checkPlayerName(val)) {
+        return val;
+      } else {
+        return Promise.reject();
+      }
+    });
   }
 
   /* JSON -> Boolean
     Returns true if the value is a proper player name
   */
   checkPlayerName(name) {
-
+    return typeof name === 'string' && PLAYER_NAME_REGEXP.test(name);
   }
 }
 

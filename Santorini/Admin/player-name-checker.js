@@ -70,3 +70,5 @@ function renamePlayer(player) {
 }
 
 module.exports.ensureUniqueNames = ensureUniqueNames;
+module.exports.renamePlayer = renamePlayer;
+module.exports.PLAYER_NAME_REGEXP = PLAYER_NAME_REGEXP;

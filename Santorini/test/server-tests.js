@@ -53,16 +53,18 @@ describe('TournamentServer', function () {
     });
   });
   describe('createTimeout', function () {
+    let waitingFor;
     beforeEach(function () {
-      let waitingFor = 10;
+      waitingFor = 10;
       ts = createTournamentServer(waitingFor, null);
       ts.shutdown = sinon.stub();
       ts.createTimeout();
     });
     it('creates a timeout that calls shutdown after waitingFor seconds', function () {
-      return new Promise(() => {
+      return new Promise((resolve) => {
         return setTimeout(() => {
-          return assert.isTrue(ts.shutdown.calledOnce);
+          assert.isTrue(ts.shutdown.calledOnce);
+          resolve();
         }, waitingFor + 1);
       });
     });
@@ -228,7 +230,7 @@ describe('TournamentServer', function () {
       });
       it('resolves to a GuardedPlayer that uses that name', function () {
         return registerPlayerPromise.then((gp) => {
-          return assert.isEqual(gp.getId(), name);
+          return assert.equal(gp.getId(), name);
         });
       });
     });
@@ -259,7 +261,7 @@ describe('TournamentServer', function () {
         playerToAddName = 'bob';
         playerToAdd = mockPlayer(playerToAddName);
         ts.canStartTournament = sinon.stub();
-        ts.uniquelyNamedPlayer = sinon.stub().resolves(addedPlayer);
+        ts.uniquelyNamedPlayer = sinon.stub().resolves(playerToAdd);
       });
       describe('when the tournament can be started', function () {
         beforeEach(function () {
@@ -273,7 +275,7 @@ describe('TournamentServer', function () {
         });
         it('adds the player to the list', function () {
           return addResult.then(() => {
-            return assert.isTrue(ts.players.includes(playerToAdd));
+            return assert.isTrue(ts.uniquePlayers.includes(playerToAdd));
           });
         });
       });
@@ -289,7 +291,7 @@ describe('TournamentServer', function () {
         });
         it('adds the player to the list', function () {
           return addResult.then(() => {
-            return assert.isTrue(ts.players.includes(playerToAdd));
+            return assert.isTrue(ts.uniquePlayers.includes(playerToAdd));
           });
         });
       });
@@ -343,7 +345,7 @@ describe('TournamentServer', function () {
           return uniqueResult.then((gp) => {
             assert.deepEqual(gp, playerToAdd);
             assert.isTrue(gp.setId.called);
-            return assert.notEqual(gp.getId(), playerToAddName);
+            return assert.isFalse(gp.setId.calledWith(playerToAddName));
           });
         });
       });
@@ -399,7 +401,7 @@ describe('TournamentServer', function () {
     describe('when the PJS provides a good name', function () {
       beforeEach(function () {
         name = 'wayne';
-        pjsMock.readJson.resolve(name);
+        pjsMock.readJson.resolves(name);
         ts.checkPlayerName = sinon.stub().returns(true);
         getPlayerNamePromise = ts.getPlayerName(pjsMock);
       });
@@ -410,7 +412,7 @@ describe('TournamentServer', function () {
     describe('when the PJS provides a bad name', function () {
       beforeEach(function () {
         name = 'A_3$';
-        pjsMock.readJson.resolve(name);
+        pjsMock.readJson.resolves(name);
         ts.checkPlayerName = sinon.stub().returns(false);
         getPlayerNamePromise = ts.getPlayerName(pjsMock);
       });
