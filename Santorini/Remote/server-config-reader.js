@@ -28,6 +28,10 @@
  */
 
 const parseJson = require('../Lib/json-parser').jsonParser;
+const TournamentServer = require('./server');
+
+const HOST = '127.0.0.1';
+const SERIES_LENGTH = 3;
 
 /* String -> [Maybe SantoriniServer]
   Creates a SantoriniServer from the configuration specified in the
@@ -38,10 +42,9 @@ function createServer(configStr) {
   if (maybeConfig) {
     let minPlayers = maybeConfig["min players"];
     let port = maybeConfig["port"];
-    let waitingFor = maybeConfig["waiting for"];
-    let repeat = maybeConfig["repeat"];
-    // todo use TournamentServer
-    // return new SantoriniServer(minPlayers, port, waitingFor, repeat);
+    let waitingFor = maybeConfig["waiting for"] * 1000;
+    let repeat = maybeConfig["repeat"] === 1;
+    return new TournamentServer(minPlayers, port, HOST, waitingFor, repeat, SERIES_LENGTH);
   }
   return false;
 }
