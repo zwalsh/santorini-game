@@ -8,6 +8,8 @@ const testLib = require('./test-lib');
 
 const TournamentServer = require('../Remote/server');
 
+const minPlayers = 2, port = 50000, waitingFor = 1000, repeat = false, host = '127.0.0.1', seriesLength = 3;
+
 /* String -> Player
   Create mock Player object with getId() and setId() mocked.
   getId() returns name. No other methods mocked.
@@ -18,20 +20,25 @@ function mockPlayer(name) {
   return player;
 }
 
+/* Natural Boolean -> TournamentServer
+  Create a TournamentServer with the default values for minPlayers,
+  port, host, and seriesLength, but with the given values for
+  waitingFor and repeat.
+*/
+function createTournamentServer(newWaitingFor, newRepeat) {
+  return new TournamentServer(minPlayers, port, host,
+    newWaitingFor ? newWaitingFor : waitingFor,
+    newRepeat ? newRepeat : repeat,
+    seriesLength);
+}
+
 describe('TournamentServer', function () {
-  let ts, minPlayers, port, waitingFor, repeat, host;
-  beforeEach(function () {
-    minPlayers = 2;
-    port = 50000;
-    waitingFor = 1000;
-    repeat = 0;
-    host = '127.0.0.1';
-  });
+  let ts;
   describe('start', function () {
     let timeoutObj;
     beforeEach(function () {
       timeoutObj = {};
-      ts = new TournamentServer(minPlayers, port, waitingFor, repeat);
+      ts = createTournamentServer();
       ts.server = testLib.createMockObject('listen');
       ts.createTimeout = sinon.stub();
       ts.createTimeout.returns(timeoutObj);
@@ -47,8 +54,8 @@ describe('TournamentServer', function () {
   });
   describe('createTimeout', function () {
     beforeEach(function () {
-      waitingFor = 10;
-      ts = new TournamentServer(minPlayers, port, waitingFor, repeat, host);
+      let waitingFor = 10;
+      ts = createTournamentServer(waitingFor, null);
       ts.shutdown = sinon.stub();
       ts.createTimeout();
     });
@@ -61,183 +68,385 @@ describe('TournamentServer', function () {
     });
   });
   describe('handleConnection', function () {
-    let socket;
+    let socket, handleConnectionPromise;
     beforeEach(function () {
-      ts = new TournamentServer(minPlayers, port, waitingFor, repeat);
-      ts.createAndRunTournament = sinon.stub();
+      ts = createTournamentServer();
       socket = testLib.createMockObject();
     });
-    describe('when more than one player is needed to start a tournament', function () {
+
+    describe('when there are enough registered players', function () {
       beforeEach(function () {
-        ts.handleConnection(socket);
+        ts.uniquePlayers = [{}, {}];
+        socket.destroy = sinon.stub();
+        handleConnectionPromise = ts.handleConnection(socket);
       });
-      it('adds the socket to the list', function () {
-        assert.deepEqual(ts.sockets, [socket]);
-      });
-      it('does not start the tournament', function () {
-        assert.isFalse(ts.createAndRunTournament.called);
+      it('destroys the socket', function () {
+        return handleConnectionPromise.then(() => {
+          assert.isTrue(socket.destroy.calledOnce);
+        });
       });
     });
-    describe('when one more player is needed to start a tournament', function () {
+    describe('when there are not enough registered players', function () {
+      let player;
       beforeEach(function () {
-        ts.sockets = [{}];
-        ts.handleConnection(socket);
+        player = testLib.createMockObject();
+        ts.wrapSocket = sinon.stub().resolves({});
+        ts.registerPlayer = sinon.stub().resolves(player);
+        ts.addAndEnsureUnique = sinon.stub().resolves();
       });
-      it('adds the socket to the list', function () {
-        assert.deepEqual(ts.sockets, [{}, socket]);
+      describe('when the player is registered and added properly', function () {
+        beforeEach(function () {
+          handleConnectionPromise = ts.handleConnection(socket);
+        });
+        it('adds the socket to the list', function () {
+          return handleConnectionPromise.then(() => {
+            assert.isTrue(ts.sockets.includes(socket));
+          });
+        });
+        it('registers the socket as a player', function () {
+          return handleConnectionPromise.then(() => {
+            assert.isTrue(ts.registerPlayer.calledOnce);
+          });
+        });
+        it('adds the player to the unique player list', function () {
+          return handleConnectionPromise.then(() => {
+            assert.isTrue(ts.addAndEnsureUnique.calledWith(player));
+          });
+        });
       });
-      it('starts the tournament', function () {
-        assert.isTrue(ts.createAndRunTournament.calledOnce);
+      describe('when the player fails to be registered', function () {
+        beforeEach(function () {
+          socket.destroy = sinon.stub();
+          ts.registerPlayer.rejects();
+          handleConnectionPromise = ts.handleConnection(socket);
+        });
+        it('catches the failure and destroys the socket', function () {
+          return handleConnectionPromise.then(() => {
+            assert.isTrue(socket.destroy.calledOnce);
+            assert.isFalse(ts.sockets.includes(socket));
+          });
+        });
+        it('does not attempt to add the player', function () {
+          return handleConnectionPromise.then(() => {
+            assert.isFalse(ts.addAndEnsureUnique.called);
+          });
+        });
       });
-    });
-    describe('when the server already has enough connections', function () {
-      beforeEach(function () {
-        ts.sockets = [{}, {}];
-        socket = testLib.createMockObject('destroy');
-        ts.handleConnection(socket);
-      });
-      it('destroys the incoming connection', function () {
-        assert.isTrue(socket.destroy.calledOnce);
-      });
-      it('does not add the connection to the list', function () {
-        assert.deepEqual(ts.sockets, [{}, {}]);
-      });
-      it('does not start the tournament', function () {
-        assert.isFalse(ts.createAndRunTournament.isCalled);
+      describe('when the player fails to be added uniquely', function () {
+        beforeEach(function () {
+          socket.destroy = sinon.stub();
+          ts.addAndEnsureUnique.rejects();
+          handleConnectionPromise = ts.handleConnection(socket);
+        });
+        it('catches the failure and destroys the socket', function () {
+          return handleConnectionPromise.then(() => {
+            assert.isTrue(socket.destroy.calledOnce);
+            assert.isFalse(ts.sockets.includes(socket));
+          });
+        });
       });
     });
   });
   describe('createAndRunTournament', function () {
+    let mockTM, createAndRunTournamentPromise;
     beforeEach(function () {
-      ts = new TournamentServer(minPlayers, port, waitingFor, repeat);
+      ts = createTournamentServer();
+      mockTM = testLib.createMockObject('startTournament');
+      mockTM.startTournament.resolves();
+      ts.createTournamentManager = sinon.stub().returns(mockTM);
+      ts.shutdown = sinon.stub();
+      createAndRunTournamentPromise = ts.createAndRunTournament();
     });
-    describe('when not enough players can be registered (fail to provide name)', function () {
-      let promiseResult;
-      beforeEach(function () {
-        ts.sockets = [{}, {}];
-        ts.createPlayerWithSocket = sinon.stub.rejects();
-        ts.createTournamentManager = sinon.stub();
-        ts.shutdown = sinon.stub();
-        promiseResult = ts.createAndRunTournament();
-      });
-      it('does not create the tournament manager', function () {
-        return promiseResult.then(() => {
-          return assert.isFalse(ts.createTournamentManager.called);
-        });
-      });
-      it('calls shutdown', function () {
-        return promiseResult.then(() => {
-          return assert.isTrue(ts.shutdown.called);
-        });
+    it('creates the tournament manager and starts the tournament', function () {
+      return createAndRunTournamentPromise.then(() => {
+        assert.isTrue(ts.createTournamentManager.calledOnce);
+        assert.isTrue(mockTM.startTournament.calledOnce);
       });
     });
-    describe('when players fail to provide names', function () {
-      // 3 sockets, but only 2 calls to createPlayer succeed.
-      let p1, p2, mockTM, promiseResult;
-      beforeEach(function () {
-        ts.sockets = [{}, {}, {}];
-        p1 = mockPlayer("a");
-        p2 = mockPlayer("b");
-        ts.createPlayerWithSocket = sinon.stub
-          .onCall(0).resolves(p1)
-          .onCall(1).rejects()
-          .onCall(2).resolves(p2);
-
-        mockTM = testLib.createMockObject('startTournament');
-        mockTM.startTournament.resolves();
-        ts.createTournamentManager = sinon.stub().resolves(mockTM);
-        ts.shutdown = sinon.stub();
-
-        promiseResult = ts.createAndRunTournament();
-      });
-      it('excludes those players from the tournament', function () {
-        return promiseResult.then(() => {
-          return assert.isTrue(ts.createTournamentManager.calledWith([p1, p2]));
-        });
-      });
-    });
-    describe('when enough players are properly set up', function () {
-      let p1, p2, p3, mockTM, promiseResult;
-      beforeEach(function () {
-        ts.sockets = [{}, {}, {}];
-        p1 = mockPlayer("a");
-        p2 = mockPlayer("b");
-        p3 = mockPlayer("c");
-        ts.createPlayerWithSocket = sinon.stub
-          .onCall(0).resolves(p1)
-          .onCall(1).resolves(p2)
-          .onCall(2).resolves(p3);
-
-        mockTM = testLib.createMockObject('startTournament');
-        mockTM.startTournament.resolves();
-        ts.createTournamentManager = sinon.stub().resolves(mockTM);
-        ts.shutdown = sinon.stub();
-
-        promiseResult = ts.createAndRunTournament();
-      });
-      it('makes the TournamentManager with all ready players', function () {
-        return promiseResult.then(() => {
-          assert.isTrue(ts.createTournamentManager.calledWith([p1, p2, p3]));
-          assert.isTrue(mockTM.startTournament.calledOnce);
-          return;
-        });
-      });
-      it('wraps all sockets in RemoteProxyPlayers and GuardedPlayers', function () {
-        return promiseResult.then(() => {
-          return assert.equal(ts.createPlayerWithSocket.callCount, 3);
-        });
-      });
-      it('clears the waitingForTimeout', function () {
-        return promiseResult.then(() => {
-          return assert.isNull(ts.waitingForTimeout);
-        });
-      });
-      it('calls shutdown when the tournament ends', function () {
-        return promiseResult.then(() => {
-          return assert.isTrue(ts.shutdown.called);
-        });
-      });
-    });
-  });
-  describe('createTournamentManager', function () {
-    beforeEach(function () {
-      // will need to mock player objects w getId, setId
-    });
-    describe('when not enough players accept unique names', function () {
-      // getId should return same id, setId should reject
-      it('does not create the TournamentManager', function () {
-
-      });
-    });
-    describe('when enough players have or accept unique names', function () {
-      // getId should return same id
-      it('creates the TournamentManager with the players that accepted names', function () {
-
+    it('calls shutdown when the tournament is over', function () {
+      return createAndRunTournamentPromise.then(() => {
+        assert.isTrue(ts.shutdown.calledOnce);
       });
     });
   });
   describe('shutdown', function () {
-    it('closes all sockets');
-    it('removes all sockets from the list');
+    let socket1, socket2;
+    beforeEach(function () {
+      socket1 = testLib.createMockObject('end');
+      socket2 = testLib.createMockObject('end');
+      ts = createTournamentServer();
+      ts.server = testLib.createMockObject('close');
+      ts.sockets = [socket1, socket2];
+    });
     describe('when the tournament is supposed to repeat', function () {
-      it('does not shut down the server');
+      beforeEach(function () {
+        let repeat = true;
+        ts.repeat = repeat;
+        ts.shutdown();
+      });
+      it('does not shut down the server', function () {
+        assert.isFalse(ts.server.close.called);
+      });
+      it('closes all sockets', function () {
+        assert.isTrue(socket1.end.calledOnce);
+        assert.isTrue(socket2.end.calledOnce);
+      });
+      it('removes all sockets from the list', function () {
+        assert.isTrue(ts.sockets.length === 0);
+      });
     });
     describe('when the tournament is not supposed to repeat', function () {
-      it('shuts down the server');
+      beforeEach(function () {
+        let repeat = false;
+        ts.repeat = repeat;
+        ts.shutdown();
+      });
+      it('does shut down the server', function () {
+        assert.isTrue(ts.server.close.called);
+      });
+      it('closes all sockets', function () {
+        assert.isTrue(socket1.end.calledOnce);
+        assert.isTrue(socket2.end.calledOnce);
+      });
+      it('removes all sockets from the list', function () {
+        assert.isTrue(ts.sockets.length === 0);
+      });
     });
   });
   describe('registerPlayer', function () {
-    it('gets the player\'s name', function () {
-
+    beforeEach(function () {
+      ts = createTournamentServer();
+      ts.getPlayerName = sinon.stub();
     });
-    it('returns a GuardedPlayer with a RemoteProxyPlayer');
+    describe('when the socket returns a good value', function () {
+      let name, pjs, registerPlayerPromise;
+      beforeEach(function () {
+        name = 'wayne';
+        pjs = {};
+        ts.getPlayerName.resolves(name);
+        registerPlayerPromise = ts.registerPlayer(pjs);
+      });
+      it('resolves to a GuardedPlayer that uses that name', function () {
+        return registerPlayerPromise.then((gp) => {
+          return assert.isEqual(gp.getId(), name);
+        });
+      });
+    });
+    describe('when the socket fails to return a good value', function () {
+      let pjs, registerPlayerPromise;
+      beforeEach(function () {
+        pjs = {};
+        ts.getPlayerName.rejects();
+        registerPlayerPromise = ts.registerPlayer(pjs);
+      });
+      it('rejects', function () {
+        return assert.isRejected(registerPlayerPromise);
+      });
+    });
+  });
+  describe('addAndEnsureUnique', function () {
+    let addedPlayer, addedPlayerName, playerToAdd, playerToAddName, addResult;
+    beforeEach(function () {
+      ts = createTournamentServer();
+      ts.createAndRunTournament = sinon.stub();
+      addedPlayerName = 'joe';
+      addedPlayer = mockPlayer(addedPlayerName);
+      ts.uniquePlayers = [addedPlayer];
+    });
+
+    describe('when the player is uniquely named', function () {
+      beforeEach(function () {
+        playerToAddName = 'bob';
+        playerToAdd = mockPlayer(playerToAddName);
+        ts.canStartTournament = sinon.stub();
+        ts.uniquelyNamedPlayer = sinon.stub().resolves(addedPlayer);
+      });
+      describe('when the tournament can be started', function () {
+        beforeEach(function () {
+          ts.canStartTournament.returns(true);
+          addResult = ts.addAndEnsureUnique(playerToAdd);
+        });
+        it('starts the tournament', function () {
+          return addResult.then(() => {
+            return assert.isTrue(ts.createAndRunTournament.calledOnce);
+          });
+        });
+        it('adds the player to the list', function () {
+          return addResult.then(() => {
+            return assert.isTrue(ts.players.includes(playerToAdd));
+          });
+        });
+      });
+      describe('when the tournament cannot be started', function () {
+        beforeEach(function () {
+          ts.canStartTournament.returns(false);
+          addResult = ts.addAndEnsureUnique(playerToAdd);
+        });
+        it('does not start the tournament', function () {
+          return addResult.then(() => {
+            return assert.isFalse(ts.createAndRunTournament.called);
+          });
+        });
+        it('adds the player to the list', function () {
+          return addResult.then(() => {
+            return assert.isTrue(ts.players.includes(playerToAdd));
+          });
+        });
+      });
+    });
+    describe('when the player fails to be uniquely named', function () {
+      beforeEach(function () {
+        playerToAddName = 'joe';
+        playerToAdd = mockPlayer(playerToAddName);
+        ts.uniquelyNamedPlayer = sinon.stub().rejects();
+        addResult = ts.addAndEnsureUnique(playerToAdd);
+      });
+      it('rejects', function () {
+        return assert.isRejected(addResult);
+      });
+    });
+  });
+  describe('uniquelyNamedPlayer', function () {
+    let addedPlayer, addedPlayerName, playerToAdd, playerToAddName, uniqueResult;
+    beforeEach(function () {
+      ts = createTournamentServer();
+      ts.createAndRunTournament = sinon.stub();
+      addedPlayerName = 'joe';
+      addedPlayer = mockPlayer(addedPlayerName);
+      ts.uniquePlayers = [addedPlayer];
+    });
+
+    describe('when the player is uniquely-named already', function () {
+      beforeEach(function () {
+        playerToAddName = 'bob';
+        playerToAdd = mockPlayer(playerToAddName);
+        uniqueResult = ts.uniquelyNamedPlayer(playerToAdd);
+      });
+      it('does not set a new name on the player', function () {
+        return uniqueResult.then((gp) => {
+          assert.deepEqual(gp, playerToAdd);
+          return assert.isFalse(gp.setId.called);
+        });
+      });
+    });
+    describe('when the player is not uniquely-named', function () {
+      beforeEach(function () {
+        playerToAddName = 'joe';
+        playerToAdd = mockPlayer(playerToAddName);
+      });
+      describe('when the player accepts a new name', function () {
+        beforeEach(function () {
+          playerToAdd.setId.resolves();
+          uniqueResult = ts.uniquelyNamedPlayer(playerToAdd);
+        });
+        it('renames the player and resolves', function () {
+          return uniqueResult.then((gp) => {
+            assert.deepEqual(gp, playerToAdd);
+            assert.isTrue(gp.setId.called);
+            return assert.notEqual(gp.getId(), playerToAddName);
+          });
+        });
+      });
+      describe('when the player does not accept a new name', function () {
+        beforeEach(function () {
+          playerToAdd.setId.rejects();
+          uniqueResult = ts.uniquelyNamedPlayer(playerToAdd);
+        });
+        it('rejects', function () {
+          return assert.isRejected(uniqueResult);
+        });
+      });
+    });
+  });
+  describe('canStartTournament', function () {
+    beforeEach(function () {
+      ts = createTournamentServer();
+    });
+    describe('when the tournament can be started', function () {
+      beforeEach(function () {
+        ts.sockets = [{}, {}];
+        ts.uniquePlayers = [{}, {}];
+      });
+      it('returns true', function () {
+        assert.isTrue(ts.canStartTournament());
+      });
+    });
+    describe('when not enough unique players have been registered', function () {
+      beforeEach(function () {
+        ts.sockets = [{}];
+        ts.uniquePlayers = [{}];
+      });
+      it('returns false', function () {
+        assert.isFalse(ts.canStartTournament());
+      });
+    });
+    describe('when the server is waiting on sockets to finish registration', function () {
+      beforeEach(function () {
+        ts.sockets = [{}, {}, {}];
+        ts.uniquePlayers = [{}, {}];
+      });
+      it('returns false', function () {
+        assert.isFalse(ts.canStartTournament());
+      });
+    });
   });
   describe('getPlayerName', function () {
-    describe('when the PJS provides a name', function () {
-      it('resolves with the name');
+    let pjsMock, name, getPlayerNamePromise;
+    beforeEach(function () {
+      pjsMock = testLib.createMockObject('readJson');
+      ts = createTournamentServer();
+    });
+    describe('when the PJS provides a good name', function () {
+      beforeEach(function () {
+        name = 'wayne';
+        pjsMock.readJson.resolve(name);
+        ts.checkPlayerName = sinon.stub().returns(true);
+        getPlayerNamePromise = ts.getPlayerName(pjsMock);
+      });
+      it('resolves with the name', function () {
+        return assert.isFulfilled(getPlayerNamePromise, name);
+      });
+    });
+    describe('when the PJS provides a bad name', function () {
+      beforeEach(function () {
+        name = 'A_3$';
+        pjsMock.readJson.resolve(name);
+        ts.checkPlayerName = sinon.stub().returns(false);
+        getPlayerNamePromise = ts.getPlayerName(pjsMock);
+      });
+      it('rejects', function () {
+        return assert.isRejected(getPlayerNamePromise);
+      });
     });
     describe('when the PJS does not provide a name', function () {
-      it('rejects');
+      beforeEach(function () {
+        pjsMock.readJson.rejects();
+        ts.checkPlayerName = sinon.stub().returns(false);
+        getPlayerNamePromise = ts.getPlayerName(pjsMock);
+      });
+      it('rejects', function () {
+        return assert.isRejected(getPlayerNamePromise);
+      });
+    });
+  });
+  describe('checkPlayerName', function () {
+    beforeEach(function () {
+      ts = createTournamentServer();
+    });
+    it('returns false for non-string values', function () {
+      assert.isFalse(ts.checkPlayerName([]));
+    });
+    it('returns false for names with uppercase letters', function () {
+      assert.isFalse(ts.checkPlayerName("A"));
+    });
+    it('returns false for names with special characters', function () {
+      assert.isFalse(ts.checkPlayerName("%"));
+    });
+    it('returns false for names with numerals', function () {
+      assert.isFalse(ts.checkPlayerName("abc1"));
+    });
+    it('returns true for lowercase, alphabetic names', function () {
+      assert.isTrue(ts.checkPlayerName("wayne"));
     });
   });
 });

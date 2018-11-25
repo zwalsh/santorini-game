@@ -64,7 +64,7 @@ class TournamentServer {
     return new net.Server(this.handleConnection);
   }
 
-  /* Socket -> Void
+  /* Socket -> Promise<Void>
     Add the incoming socket connection to the list.
     Attempt to register the player, which will trigger starting
     the tournament.
@@ -74,21 +74,26 @@ class TournamentServer {
   handleConnection(socket) {
     if (this.uniquePlayers.length >= this.minPlayers)  {
       socket.destroy();
+      return Promise.resolve();
     } else {
       this.sockets.push(socket);
-      this.registerPlayer(new PromiseJsonSocket(socket))
-        .then((p) => { this.addAndEnsureUnique(p) })
-        .catch(() => { /* remove the socket and destroy */ });
+      return this.registerPlayer(this.wrapSocket(socket))
+        .then((p) => { return this.addAndEnsureUnique(p); })
+        .catch(() => {
+          this.sockets.splice(this.sockets.indexOf(socket), 1);
+          socket.destroy();
+        });
     }
   }
 
-  /* Void -> Void
+  /* Void -> Promise<Void>
     Create a TournamentManager with the registered players.
     Run the tournament. Shutdown or reset the server state when the
     tournament is over.
   */
   createAndRunTournament() {
-
+    let tm = this.createTournamentManager();
+    return tm.startTournament().then(() => { return this.shutdown() });
   }
 
   /* Void -> Void
@@ -108,7 +113,6 @@ class TournamentServer {
     Reject if the player fails to provide a name.
   */
   registerPlayer(pjs) {
-    // use promise protector here
     return this.getPlayerName(pjs).then((name) => {
       // new GP(RPP(), null, timeout);
     });
@@ -126,7 +130,18 @@ class TournamentServer {
     registered.
   */
   addAndEnsureUnique(player) {
-    
+
+  }
+
+  /* GuardedPlayer -> Promise<GuardedPlayer>
+    Returns the given player, with a name that is guaranteed to be
+    unique.
+
+    If the player is not uniquely named, it renames the player, and
+    rejects if the player does not accept the new name.
+  */
+  uniquelyNamedPlayer(player) {
+
   }
 
   /* Void -> Boolean
@@ -147,11 +162,25 @@ class TournamentServer {
     return new TournamentManager(this.uniquePlayers, this.seriesLength);
   }
 
+  /* Socket -> PromiseJsonSocket
+    Wraps the socket in a PromiseJsonSocket
+  */
+  wrapSocket(socket) {
+    return new PromiseJsonSocket(socket);
+  }
+
   /* PromiseJsonSocket -> Promise<String>
     Gets the player's name out of the PromiseJsonSocket.
   */
   getPlayerName(socket) {
     // use promise protector here
+  }
+
+  /* JSON -> Boolean
+    Returns true if the value is a proper player name
+  */
+  checkPlayerName(name) {
+
   }
 }
 
