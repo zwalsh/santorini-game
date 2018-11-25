@@ -40,7 +40,8 @@ function createServer(configStr) {
     let port = maybeConfig["port"];
     let waitingFor = maybeConfig["waiting for"];
     let repeat = maybeConfig["repeat"];
-    return new SantoriniServer(minPlayers, port, waitingFor, repeat);
+    // todo use TournamentServer
+    // return new SantoriniServer(minPlayers, port, waitingFor, repeat);
   }
   return false;
 }

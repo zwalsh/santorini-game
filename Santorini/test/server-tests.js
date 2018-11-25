@@ -226,7 +226,7 @@ describe('TournamentServer', function () {
       it('shuts down the server');
     });
   });
-  describe('createPlayerWithSocket', function () {
+  describe('registerPlayer', function () {
     it('gets the player\'s name', function () {
 
     });

@@ -12,18 +12,22 @@
 */
 
 const net = require('net');
+const PromiseJsonSocket = require('../Lib/promise-json-socket');
+const TournamentManager = require('../Admin/tournament-manager');
 
 class TournamentServer {
 
-  /* Natural Natural Natural Boolean -> TournamentServer
+  /* Natural Natural String Natural Boolean Natural -> TournamentServer
 
     Create a TournamentServer with the given configuration options.
       minPlayers : The minimum number of players to wait for
       port       : The port to listen on, in the range [50000, 60000]
+      host       : The host address to listen on
       waitingFor : The maximum number of milliseconds to wait for
       repeat     : whether the server should repeat
+      seriesLength: the length (in games) of a series in the tournament
   */
-  constructor(minPlayers, port, waitingFor, repeat, host) {
+  constructor(minPlayers, port, host, waitingFor, repeat, seriesLength) {
     this.minPlayers = minPlayers;
     this.port = port;
     this.host = host;
@@ -31,6 +35,8 @@ class TournamentServer {
     this.waitingForTimeout;
     this.repeat = repeat;
     this.sockets = [];
+    this.uniquePlayers = [];
+    this.seriesLength = seriesLength;
     this.server = this.createServer();
   }
 
@@ -48,7 +54,7 @@ class TournamentServer {
     Creates the timeout that calls shutdown after waitingFor seconds.
   */
   createTimeout() {
-
+    this.waitingForTimeout = setTimeout(this.shutdown, this.waitingFor * 1000);
   }
 
   /* Void -> Server
@@ -60,26 +66,29 @@ class TournamentServer {
 
   /* Socket -> Void
     Add the incoming socket connection to the list.
-    If enough sockets have been received, start the tournament,
-    and destroy any more that are received.
+    Attempt to register the player, which will trigger starting
+    the tournament.
+    If enough players have registered, destroy any more sockets
+    that are received.
   */
   handleConnection(socket) {
-    // can receive more socket calls???
-    if (this.sockets.length >= this.minPlayers) {
+    if (this.uniquePlayers.length >= this.minPlayers)  {
       socket.destroy();
-      return;
+    } else {
+      this.sockets.push(socket);
+      this.registerPlayer(new PromiseJsonSocket(socket))
+        .then((p) => { this.addAndEnsureUnique(p) })
+        .catch(() => { /* remove the socket and destroy */ });
     }
   }
 
   /* Void -> Void
-    Create a TournamentManager with the players behind the network
-    connections. Run the tournament. Shutdown or reset the
-    server state when the tournament is over.
+    Create a TournamentManager with the registered players.
+    Run the tournament. Shutdown or reset the server state when the
+    tournament is over.
   */
   createAndRunTournament() {
-    // wrap sockets: GP(RPP(PJS(socket)))
-    // clear the timeout
-    // tm.run().then(shutdown);
+
   }
 
   /* Void -> Void
@@ -98,22 +107,44 @@ class TournamentServer {
     Creates a GuardedPlayer out of a PromiseJsonSocket.
     Reject if the player fails to provide a name.
   */
-  createPlayerWithSocket(pjs) {
+  registerPlayer(pjs) {
     // use promise protector here
     return this.getPlayerName(pjs).then((name) => {
-      //
-      new GP(RPP(), null, timeout);
+      // new GP(RPP(), null, timeout);
     });
   }
 
-  /* [GuardedPlayer, ...] -> Promise<TournamentManager>
-    Creates a TournamentManager that manages a tournament
-    between the given list of GuardedPlayers. Ensures
-    that all of their names are unique, and only
-    creates the TM if at least two players are properly set up.
-  */
-  createTournamentManager(players) {
+  /* GuardedPlayer -> Promise<Void>
+    Adds the player to the list of uniquely-named players,
+    assigning a unique name if necessary. Rejects if the player
+    does not accept a unique name.
 
+    Starts the tournament if this is the last player we are
+    waiting for.
+
+    Clears the timeout if enough players have been received and
+    registered.
+  */
+  addAndEnsureUnique(player) {
+    
+  }
+
+  /* Void -> Boolean
+    Determines if the server is ready to start the tournament.
+    This is when:
+    - enough unique players have registered
+    - no more sockets are currently being registered as players
+  */
+  canStartTournament() {
+
+  }
+
+  /* Void -> Promise<TournamentManager>
+    Creates a TournamentManager that manages a tournament
+    between the unique players.
+  */
+  createTournamentManager() {
+    return new TournamentManager(this.uniquePlayers, this.seriesLength);
   }
 
   /* PromiseJsonSocket -> Promise<String>
