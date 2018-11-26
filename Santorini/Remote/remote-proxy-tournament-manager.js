@@ -76,7 +76,9 @@ class RemoteProxyTournamentManager {
   /* [EncounterOutcome, ...] -> Promise<Void>
     Notify the player that the tournament has ended with the given results.
    */
-  notifyPlayerOfEnd() {
+  notifyPlayerOfEnd(encounterOutcomes) {
 
   }
 }
+
+module.exports = RemoteProxyTournamentManager;
