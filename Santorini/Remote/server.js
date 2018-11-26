@@ -9,6 +9,11 @@
   or to continue running new tournaments indefinitely.
 
   =================== Data Definitions ===================
+
+  GuardedPlayer is defined in Admin/guarded-player.js.
+  PromiseJsonSocket is defined in Lib/promise-json-socket.js.
+  TournamentManager is defined in Admin/tournament-manager.js.
+
 */
 
 const net = require('net');

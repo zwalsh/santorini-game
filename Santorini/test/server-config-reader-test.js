@@ -1,6 +1,5 @@
 const chai = require('chai');
 const assert = chai.assert;
-const expect = chai.expect;
 const TournamentServer = require('../Remote/server');
 
 let createServer = require('../Remote/server-config-reader').createServer;
