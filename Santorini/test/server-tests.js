@@ -5,20 +5,11 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 const assert = chai.assert;
 const testLib = require('./test-lib');
+const mockPlayer = testLib.mockPlayer;
 
 const TournamentServer = require('../Remote/server');
 
 const minPlayers = 2, port = 50000, waitingFor = 1000, repeat = false, host = '127.0.0.1', seriesLength = 3;
-
-/* String -> Player
-  Create mock Player object with getId() and setId() mocked.
-  getId() returns name. No other methods mocked.
-*/
-function mockPlayer(name) {
-  let player = testLib.createMockObject('getId', 'setId');
-  player.getId.returns(name);
-  return player;
-}
 
 /* Natural Boolean -> TournamentServer
   Create a TournamentServer with the default values for minPlayers,
