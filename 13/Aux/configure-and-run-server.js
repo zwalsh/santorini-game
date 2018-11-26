@@ -6,7 +6,7 @@
   reader to construct and start the specified server.
 */
 
-const serverMessageConverter = require('../../Santorini/Remote/server-message-converter');
+const ServerMessageConverter = require('../../Santorini/Remote/server-message-converter');
 const createServer = require('../../Santorini/Remote/server-config-reader').createServer;
 
 process.stdin.setEncoding('utf8');
