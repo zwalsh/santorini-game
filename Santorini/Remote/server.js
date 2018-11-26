@@ -6,13 +6,16 @@
   minimum amount of time before beginning a tournament.
 
   It can be configured to run a single tournament before shutting down,
-  or to continue running new tournaments indefinitely.
+  or to continue running new tournaments indefinitely. When it is
+  configured to run a single tournament, it can optionally be started
+  with a function that will return the single tournament's result.
 
   =================== Data Definitions ===================
 
   GuardedPlayer is defined in Admin/guarded-player.js.
   PromiseJsonSocket is defined in Lib/promise-json-socket.js.
   TournamentManager is defined in Admin/tournament-manager.js.
+  TournamentResult is defined in Admin/tournament-result.js.
 
 */
 
@@ -48,6 +51,7 @@ class TournamentServer {
     this.sockets = [];
     this.uniquePlayers = [];
     this.seriesLength = seriesLength;
+    this.resolveWithTournamentResult = null;
     this.server = this.createServer();
   }
 
@@ -59,6 +63,19 @@ class TournamentServer {
   start() {
     this.server.listen(this.port, this.host);
     this.waitingForTimeout = this.createTimeout();
+  }
+
+  /* Void -> Promise<TournamentResult>
+    Start the server, and also return the results of the last tournament run.
+    When the TournamentServer is set to continuously run tournaments,
+    this method behaves the same as start() because it never returns.
+   */
+  startAndReturnResults() {
+    this.start();
+    return new Promise((resolve, reject) => {
+      this.resolveWithTournamentResult = resolve;
+      return;
+    });
   }
 
   /* Void -> Timeout
@@ -104,12 +121,17 @@ class TournamentServer {
   */
   createAndRunTournament() {
     let tm = this.createTournamentManager();
-    return tm.startTournament().then(() => { return this.shutdown() });
+    return tm.startTournament().then((tournamentResult) => {
+      if (!this.repeat) {
+        this.resolveWithTournamentResult(tournamentResult);
+      }
+      return this.shutdown();
+    });
   }
 
   /* Void -> Void
-    Closes all socket connections and closes the server if only one
-    tournament is to be played.
+    Closes all socket connections and clears the socket list.
+    If only one tournament is to be played, closes the server.
   */
   shutdown() {
     for (let socket of this.sockets) {

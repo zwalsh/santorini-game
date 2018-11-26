@@ -7,6 +7,7 @@ const assert = chai.assert;
 const testLib = require('./test-lib');
 const mockPlayer = testLib.mockPlayer;
 
+const TournamentResult = require('../Admin/tournament-result');
 const TournamentServer = require('../Remote/server');
 
 const minPlayers = 2, port = 50000, waitingFor = 1000, repeat = false, host = '127.0.0.1', seriesLength = 3;
@@ -41,6 +42,30 @@ describe('TournamentServer', function () {
     it('creates the waitingFor timeout and sets it on the object', function () {
       assert.isTrue(ts.createTimeout.called);
       assert.equal(ts.waitingForTimeout, timeoutObj);
+    });
+  });
+  describe('startAndReturnResults', function () {
+    let startPromise;
+    beforeEach(function () {
+      ts = createTournamentServer(1000, false);
+      ts.start = sinon.stub();
+      startPromise = ts.startAndReturnResults();
+    });
+    it('calls start() to start the server', function () {
+      assert.isTrue(ts.start.calledOnce);
+    });
+    it('sets the resolution function', function () {
+      assert.isNotNull(ts.resolveWithTournamentResult);
+    });
+    describe('when the resolution function is called with tournament result', function () {
+      let tournamentResult;
+      beforeEach(function () {
+        tournamentResult = new TournamentResult([], [], {});
+        ts.resolveWithTournamentResult(tournamentResult);
+      });
+      it('the original call resolves to those results', function () {
+        return assert.becomes(startPromise, tournamentResult);
+      });
     });
   });
   describe('createTimeout', function () {
@@ -141,24 +166,58 @@ describe('TournamentServer', function () {
     });
   });
   describe('createAndRunTournament', function () {
-    let mockTM, createAndRunTournamentPromise;
+    let mockTM, createAndRunTournamentPromise, tournamentResult;
     beforeEach(function () {
       ts = createTournamentServer();
       mockTM = testLib.createMockObject('startTournament');
-      mockTM.startTournament.resolves();
+      tournamentResult = new TournamentResult([], [], {});
+      mockTM.startTournament.resolves(tournamentResult);
       ts.createTournamentManager = sinon.stub().returns(mockTM);
       ts.shutdown = sinon.stub();
-      createAndRunTournamentPromise = ts.createAndRunTournament();
+      ts.resolveWithTournamentResult = sinon.stub();
     });
-    it('creates the tournament manager and starts the tournament', function () {
-      return createAndRunTournamentPromise.then(() => {
-        assert.isTrue(ts.createTournamentManager.calledOnce);
-        assert.isTrue(mockTM.startTournament.calledOnce);
+    describe('when the server is set to repeat tournaments', function () {
+      beforeEach(function () {
+        ts.repeat = true;
+        createAndRunTournamentPromise = ts.createAndRunTournament();
+      });
+      it('creates the tournament manager and starts the tournament', function () {
+        return createAndRunTournamentPromise.then(() => {
+          assert.isTrue(ts.createTournamentManager.calledOnce);
+          assert.isTrue(mockTM.startTournament.calledOnce);
+        });
+      });
+      it('calls shutdown when the tournament is over', function () {
+        return createAndRunTournamentPromise.then(() => {
+          assert.isTrue(ts.shutdown.calledOnce);
+        });
+      });
+      it('does not call the resolution function', function () {
+        return createAndRunTournamentPromise.then(() => {
+          return assert.isFalse(ts.resolveWithTournamentResult.called);
+        });
       });
     });
-    it('calls shutdown when the tournament is over', function () {
-      return createAndRunTournamentPromise.then(() => {
-        assert.isTrue(ts.shutdown.calledOnce);
+    describe('when the server is set to play only one tournament', function () {
+      beforeEach(function () {
+        ts.repeat = false;
+        createAndRunTournamentPromise = ts.createAndRunTournament();
+      });
+      it('creates the tournament manager and starts the tournament', function () {
+        return createAndRunTournamentPromise.then(() => {
+          assert.isTrue(ts.createTournamentManager.calledOnce);
+          assert.isTrue(mockTM.startTournament.calledOnce);
+        });
+      });
+      it('calls shutdown when the tournament is over', function () {
+        return createAndRunTournamentPromise.then(() => {
+          assert.isTrue(ts.shutdown.calledOnce);
+        });
+      });
+      it('calls the resolution function with the results', function () {
+        return createAndRunTournamentPromise.then(() => {
+          return assert.isTrue(ts.resolveWithTournamentResult.calledWith(tournamentResult));
+        });
       });
     });
   });

@@ -6,6 +6,7 @@
   reader to construct and start the specified server.
 */
 
+const serverMessageConverter = require('../../Santorini/Remote/server-message-converter');
 const createServer = require('../../Santorini/Remote/server-config-reader').createServer;
 
 process.stdin.setEncoding('utf8');
@@ -23,9 +24,21 @@ process.stdin.on('readable', () => {
 function configureAndRunServer(configStr) {
   let server = createServer(configStr);
   if (server) {
-    return server.start();
+    return server.startAndReturnResults().then((tournamentResult) => {
+      printResults(tournamentResult);
+    });
   } else {
     process.stdout.write('Invalid configuration, cannot start server.\n');
     return process.exit(1);
   }
+}
+
+/* TournamentResult -> Void
+  Get the game results from the TournamentResult and print them as a list
+  of EncounterOutcomes
+*/
+function printResults(tournamentResult) {
+  let gameResults = tournamentResult.matchTable.getAllGames();
+  let encounterOutcomes = ServerMessageConverter.gameResultsToJson(gameResults);
+  process.stdout.write(JSON.stringify(encounterOutcomes) + '\n');
 }
