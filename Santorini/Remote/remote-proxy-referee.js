@@ -7,6 +7,14 @@
   GuardedPlayer is defined in Admin/guarded-player.js
   PromiseJsonSocket is defined in Lib/promise-json-socket.js
 
+  Server messages:
+
+  Placement
+  WorkerPlace
+  JsonWorker
+  Coordinate
+  Board
+
 */
 
 class RemoteProxyReferee {
@@ -30,8 +38,8 @@ class RemoteProxyReferee {
   }
 
   /* JSON -> Promise<JSON>
-    Request the next action from the player according to the game-level
-    message received, send it to server, and continue gameplay.
+    Delegate to the appropriate message-handling method, if a game-level
+    message is received.
     Resolve with the next unrecognized (non-game-level) message
     received from the server.
   */
@@ -39,15 +47,21 @@ class RemoteProxyReferee {
 
   }
 
-  /*
+  /* Placement -> Promise<JSON>
+    Convert the Placement to a placeInitialWorker() method call
+    on the player. Send the player's response back to the server.
 
+    Resolve with the next message received from the server.
   */
   handlePlacement() {
 
   }
 
-  /*
+  /* Board -> Promise<JSON>
+    Convert the Placement to a takeTurn() method call
+    on the player. Send the player's response back to the server.
 
+    Resolve with the next message received from the server.
   */
   handleTakeTurn() {
 
