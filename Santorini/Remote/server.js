@@ -110,6 +110,7 @@ class TournamentServer {
         .catch(() => {
           this.sockets.splice(this.sockets.indexOf(socket), 1);
           socket.destroy();
+          return;
         });
     }
   }
@@ -117,13 +118,14 @@ class TournamentServer {
   /* Void -> Promise<Void>
     Create a TournamentManager with the registered players.
     Run the tournament. Shutdown or reset the server state when the
-    tournament is over.
+    tournament is over. Print the results if a resolution function is waiting.
   */
   createAndRunTournament() {
     let tm = this.createTournamentManager();
     return tm.startTournament().then((tournamentResult) => {
-      if (!this.repeat) {
+      if (this.resolveWithTournamentResult) {
         this.resolveWithTournamentResult(tournamentResult);
+        this.resolveWithTournamentResult = null;
       }
       return this.shutdown();
     });

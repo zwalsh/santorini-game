@@ -174,11 +174,9 @@ describe('TournamentServer', function () {
       mockTM.startTournament.resolves(tournamentResult);
       ts.createTournamentManager = sinon.stub().returns(mockTM);
       ts.shutdown = sinon.stub();
-      ts.resolveWithTournamentResult = sinon.stub();
     });
-    describe('when the server is set to repeat tournaments', function () {
+    describe('when no resolution function is awaiting the results', function () {
       beforeEach(function () {
-        ts.repeat = true;
         createAndRunTournamentPromise = ts.createAndRunTournament();
       });
       it('creates the tournament manager and starts the tournament', function () {
@@ -192,15 +190,12 @@ describe('TournamentServer', function () {
           assert.isTrue(ts.shutdown.calledOnce);
         });
       });
-      it('does not call the resolution function', function () {
-        return createAndRunTournamentPromise.then(() => {
-          return assert.isFalse(ts.resolveWithTournamentResult.called);
-        });
-      });
     });
-    describe('when the server is set to play only one tournament', function () {
+    describe('when there is a resolution function awaiting the results', function () {
+      let resolutionFnMock;
       beforeEach(function () {
-        ts.repeat = false;
+        resolutionFnMock = sinon.stub();
+        ts.resolveWithTournamentResult = resolutionFnMock;
         createAndRunTournamentPromise = ts.createAndRunTournament();
       });
       it('creates the tournament manager and starts the tournament', function () {
@@ -216,7 +211,12 @@ describe('TournamentServer', function () {
       });
       it('calls the resolution function with the results', function () {
         return createAndRunTournamentPromise.then(() => {
-          return assert.isTrue(ts.resolveWithTournamentResult.calledWith(tournamentResult));
+          return assert.isTrue(resolutionFnMock.calledWith(tournamentResult));
+        });
+      });
+      it('removes the reference to the resolution function', function () {
+        return createAndRunTournamentPromise.then(() => {
+          return assert.isNull(ts.resolveWithTournamentResult);
         });
       });
     });
