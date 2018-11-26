@@ -82,14 +82,14 @@ class TournamentServer {
     Creates the timeout that calls shutdown after waitingFor seconds.
   */
   createTimeout() {
-    this.waitingForTimeout = setTimeout(this.shutdown, this.waitingFor);
+    this.waitingForTimeout = setTimeout(() => { return this.shutdown(); }, this.waitingFor);
   }
 
   /* Void -> Server
     Create the networked server that can accept client connections.
    */
   createServer() {
-    return new net.Server(this.handleConnection);
+    return new net.Server((socket) => { return this.handleConnection(socket); } );
   }
 
   /* Socket -> Promise<Void>
