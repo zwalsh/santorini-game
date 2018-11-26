@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Script to load a Santorini tournament server configuration
+# and configure and start the server accordingly
+
+# Usage: ./xserver {config-file}.json
+# where config-file is the name of a JSON file containing a
+# configuration object.
+
+# Output: Prints the Results (list of EncounterOutcomes, defined
+in server.js) from the tournament that was run.
+
+node Aux/configure-and-run-server.js
