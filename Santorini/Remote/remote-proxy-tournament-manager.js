@@ -9,7 +9,9 @@
 
   GuardedPlayer is defined in Admin/guarded-player.js
   PromiseJsonSocket is defined in Lib/promise-json-socket.js
+  RemoteProxyReferee is defined in remote-proxy-referee.js
 
+  EncounterOutcome is defined in client-message-converter.js
 */
 
 class RemoteProxyTournamentManager {
