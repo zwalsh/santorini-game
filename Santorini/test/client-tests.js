@@ -13,23 +13,49 @@ describe('SantoriniClient tests', function () {
     client = new SantoriniClient(player, socket);
   });
   describe('start', function () {
-    let startPromise;
-    beforeEach(function () {
-      let mockTM = testLib.createMockObject('startTournament');
-      mockTM.startTournament.resolves();
-      client.createTournament = sinon.stub().returns(mockTM);
-      client.shutdown = sinon.stub();
-      startPromise = client.start();
-    });
-    it('creates the tournament', function () {
-      return startPromise.then(() => {
-        return assert.isTrue(client.createTournament.called);
+    describe('when the tournament execution succeeds', function () {
+      let startPromise;
+      beforeEach(function () {
+        let mockTM = testLib.createMockObject('startTournament');
+        mockTM.startTournament.resolves();
+        client.createTournament = sinon.stub().returns(mockTM);
+        client.shutdown = sinon.stub();
+        startPromise = client.start();
+      });
+
+      it('creates the tournament', function () {
+        return startPromise.then(() => {
+          return assert.isTrue(client.createTournament.called);
+        });
+      });
+      it('after the tournament is over, calls shutdown()', function () {
+        return startPromise.then(() => {
+          return assert.isTrue(client.shutdown.called);
+        });
       });
     });
-    it('after the tournament is over, calls shutdown()', function () {
-      return startPromise.then(() => {
-        return assert.isTrue(client.shutdown.called);
+
+    describe('when the tournament execution fails', function () {
+      let startPromise;
+      beforeEach(function () {
+        let mockTM = testLib.createMockObject('startTournament');
+        mockTM.startTournament.rejects();
+        client.createTournament = sinon.stub().returns(mockTM);
+        client.shutdown = sinon.stub();
+        startPromise = client.start();
       });
+
+      it('creates the tournament', function () {
+        return startPromise.then(() => {
+          return assert.isTrue(client.createTournament.called);
+        });
+      });
+      it('after the tournament is over, calls shutdown()', function () {
+        return startPromise.then(() => {
+          return assert.isTrue(client.shutdown.called);
+        });
+      });
+    });
     });
   });
 
