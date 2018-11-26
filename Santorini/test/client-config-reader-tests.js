@@ -17,7 +17,7 @@ describe('createClients tests', function () {
 
     describe('where a player specification is invalid', function () {
       it('returns false', function () {
-        let players = [["broken", 500, "./something/else"]];
+        let players = [["borken", "itme", "./something/else"]];
         let observers = [];
         let configStr = JSON.stringify(makeConfigObj(players, observers, ip, port))
         assert.isFalse(createClients(configStr));

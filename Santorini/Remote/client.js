@@ -16,6 +16,9 @@
 
 */
 
+const PromiseJsonSocket = require('../Lib/promise-json-socket');
+const RemoteProxyTournamentManager = require('../Remote/remote-proxy-tournament-manager');
+
 class SantoriniClient {
 
   /* GuardedPlayer Socket -> SantoriniClient
@@ -34,7 +37,10 @@ class SantoriniClient {
     or if the player breaks.
   */
   start() {
-    // use .finally() to call shutdown
+    return this.createTournament()
+      .start()
+      .then(() => { return this.shutdown() })
+      .catch(() => { return this.shutdown() });
   }
 
   /* Void -> RemoteProxyTournamentManager
@@ -44,14 +50,15 @@ class SantoriniClient {
     This function is separated out for testing purposes.
   */
   createTournament() {
-
+    let pjSocket = new PromiseJsonSocket(this.socket);
+    return new RemoteProxyTournamentManager(this.player, pjSocket);
   }
 
   /* Void -> Void
     Close the socket.
   */
   shutdown() {
-
+    this.socket.destroy();
   }
 }
 

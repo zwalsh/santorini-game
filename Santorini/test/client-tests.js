@@ -16,8 +16,8 @@ describe('SantoriniClient tests', function () {
     describe('when the tournament execution succeeds', function () {
       let startPromise;
       beforeEach(function () {
-        let mockTM = testLib.createMockObject('startTournament');
-        mockTM.startTournament.resolves();
+        let mockTM = testLib.createMockObject('start');
+        mockTM.start.resolves();
         client.createTournament = sinon.stub().returns(mockTM);
         client.shutdown = sinon.stub();
         startPromise = client.start();
@@ -38,8 +38,8 @@ describe('SantoriniClient tests', function () {
     describe('when the tournament execution fails', function () {
       let startPromise;
       beforeEach(function () {
-        let mockTM = testLib.createMockObject('startTournament');
-        mockTM.startTournament.rejects();
+        let mockTM = testLib.createMockObject('start');
+        mockTM.start.rejects();
         client.createTournament = sinon.stub().returns(mockTM);
         client.shutdown = sinon.stub();
         startPromise = client.start();
@@ -63,6 +63,7 @@ describe('SantoriniClient tests', function () {
     beforeEach(function () {
       mockSock = testLib.createMockObject('destroy');
       client.socket = mockSock;
+      client.shutdown();
     });
     it('closes the socket', function () {
       assert.isTrue(mockSock.destroy.called);
