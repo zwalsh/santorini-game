@@ -56,7 +56,6 @@ describe('SantoriniClient tests', function () {
         });
       });
     });
-    });
   });
 
   describe('shutdown', function () {
