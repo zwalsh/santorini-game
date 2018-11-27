@@ -36,6 +36,9 @@
 
 */
 
+const constants = require('../Common/constants');
+const PLAYER_NAME_REGEXP = require('../Admin/player-name-checker').PLAYER_NAME_REGEXP;
+
 /* Any -> Boolean
 
 */
@@ -44,45 +47,89 @@ function checkPlayingAs(playingAs) {
 }
 
 /* Any -> Boolean
-
+  Checks if the given value is a properly-formed Placement.
 */
 function checkPlacement(placement) {
-  return true;
+  return Array.isArray(placement) && placement.every(checkWorkerPlace);
 }
 
 /* Any -> Boolean
-
+  Checks if the given value is a valid WorkerPlace.
 */
 function checkWorkerPlace(workerPlace) {
-  return true;
+  return Array.isArray(workerPlace) &&
+    workerPlace.length === 3 &&
+    checkWorker(workerPlace[0]) &&
+    checkCoordinate(workerPlace[1]) &&
+    checkCoordinate(workerPlace[2]);
 }
 
 /* Any -> Boolean
-
+  Checks if the given value is a valid Worker.
 */
 function checkWorker(worker) {
-  return true;
+  if (typeof worker !== 'string') {
+    return false;
+  }
+  if (worker.length < 2) {
+    return false;
+  }
+  let workerNumber = Number(worker.substr(worker.length - 1, 1));
+  let validNumber = (Number.isInteger(workerNumber) && [1, 2].includes(workerNumber));
+  let playerName = worker.substr(0, worker.length - 1);
+  return PLAYER_NAME_REGEXP.test(playerName) && validNumber;
 }
 
 /* Any -> Boolean
-
+  Checks if the given value is a valid Coordinate.
 */
 function checkCoordinate(coord) {
-  return true;
+  return Number.isInteger(coord) &&
+    0 <= coord <= constants.BOARD_WIDTH;
 }
 
 /* Any -> Boolean
-
+  Checks if the given value is a valid JSON Board.
 */
 function checkBoard(board) {
-  return true;
+  return Array.isArray(board) && board.every(checkRow);
 }
 
 /* Any -> Boolean
+  Checks if the given value is a valid row in a JSON Board.
+*/
+function checkRow(row) {
+  return Array.isArray(row) && row.every(checkCell);
+}
 
+/* Any -> Boolean
+  Checks if the given value is a valid Cell.
 */
 function checkCell(cell) {
-  return true;
+  if (Number.isInteger(cell)) {
+    return 0 <= cell <= constants.MAX_HEIGHT;
+  } else if (typeof cell === 'string') {
+    return checkBuildingWorker(cell);
+  } else {
+    return false;
+  }
+}
+
+/* Any -> Boolean
+  Return true if the given value is a well-formed BuildingWorker.
+*/
+function checkBuildingWorker(bw) {
+  if (typeof bw !== 'string') {
+    return false;
+  }
+  if (bw.length < 3) {
+    return false;
+  }
+  let height = Number(bw.substr(0, 1));
+  if (!Number.isInteger(height) || height < 0 || height > constants.MAX_HEIGHT) {
+    return false;
+  }
+  return checkWorker(bw.substr(1));
 }
 
 /* Any -> Boolean
