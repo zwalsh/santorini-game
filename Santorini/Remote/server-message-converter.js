@@ -147,9 +147,13 @@ function jsonToPlaceRequest(place) {
 }
 
 /* Action -> Turn
-  (does not need to support string Actions for now)
+  Convert the Action to a Turn if it represents one,
+  or return the player name otherwise.
  */
 function jsonToTurn(action) {
+  if (typeof action === 'string') {
+    return action;
+  }
   let workerRequest = jsonToWorkerRequest(action[0]);
   let moveDir = [action[1], action[2]];
   let moveRequest = ['move', workerRequest, moveDir];

@@ -209,7 +209,8 @@ class Referee {
 
   /* Player -> Promise<GameState>
     Get a Promise from the given Player, containing their next Turn.
-    Apply the Turn to this Referee's Board if it:
+    If the turn is their name, return a GameResult where the other player won legitimately.
+    Else, apply the Turn to this Referee's Board if it:
       - is well-formed
       - refers to themself and not the other player
       - and is valid according to the Rulechecker
@@ -221,7 +222,9 @@ class Referee {
    */
   getAndApplyTurn(activePlayer) {
     return activePlayer.takeTurn(this.board.copy()).then((turn) => {
-      if (this.checkTurn(turn, activePlayer)) {
+      if (turn === activePlayer.getId()) {
+        return new GameResult(this.flip(activePlayer).getId(), activePlayer.getId(), WON);
+      } else if (this.checkTurn(turn, activePlayer)) {
         this.board.applyTurn(turn);
         let curBoardCopy = this.board.copy();
 
