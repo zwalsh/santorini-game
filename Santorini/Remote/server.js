@@ -101,7 +101,7 @@ class TournamentServer {
   */
   handleConnection(socket) {
     if (this.uniquePlayers.length >= this.minPlayers)  {
-      socket.destroy();
+      socket.end();
       return Promise.resolve();
     } else {
       this.sockets.push(socket);
@@ -109,7 +109,7 @@ class TournamentServer {
         .then((p) => { return this.addAndEnsureUnique(p); })
         .catch(() => {
           this.sockets.splice(this.sockets.indexOf(socket), 1);
-          socket.destroy();
+          socket.end();
           return;
         });
     }
@@ -242,7 +242,7 @@ class TournamentServer {
       if (this.checkPlayerName(val)) {
         return val;
       } else {
-        return Promise.reject();
+        return Promise.reject(new Error('Player failed to provide a name.'));
       }
     });
   }
