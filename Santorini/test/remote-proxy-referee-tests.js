@@ -4,7 +4,6 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const sinon = require('sinon');
 const testLib = require('./test-lib');
-const constants = require('../Common/constants');
 
 const Board = require('../Common/board');
 const Direction = require('../Common/direction');
@@ -106,13 +105,13 @@ describe('RemoteProxyReferee tests', function () {
 
   describe('handlePlacement', function () {
     let player, socket, placementMsg, expectedInitWorkers, placeRequest,
-      expectedWorkerPlace, nextServerMsg, handlePlacementPromise;
+      expectedPlace, nextServerMsg, handlePlacementPromise;
     beforeEach(function () {
       let playerName = 'mango';
       placementMsg = [['grape1', 0, 0]];
       expectedInitWorkers = [{player: 'grape', x: 0, y: 0}];
       placeRequest = ['place', 1, 1];
-      expectedWorkerPlace = ['mango1', 1, 1];
+      expectedPlace = [1, 1];
       nextServerMsg = [['grape1', 0, 0], ['mango1', 1, 1], ['grape2', 2, 2]];
 
       player = testLib.mockPlayer(playerName);
@@ -131,7 +130,8 @@ describe('RemoteProxyReferee tests', function () {
     });
     it('sends the translated player response back to the server', function () {
       return handlePlacementPromise.then(() => {
-        return assert.isTrue(socket.sendJson.calledWith(expectedWorkerPlace));
+        let actualWorkerPlace = socket.sendJson.getCall(0).args[0];
+        return assert.deepEqual(actualWorkerPlace, expectedPlace);
       });
     });
     it('resolve to the next value received from the server', function () {

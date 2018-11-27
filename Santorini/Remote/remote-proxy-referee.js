@@ -17,6 +17,9 @@
 
 */
 
+const ClientMessageConverter = require('./client-message-converter');
+const ClientMessageFormChecker = require('./client-message-form-checker');
+
 class RemoteProxyReferee {
 
   /* GuardedPlayer PromiseJsonSocket -> RPR
@@ -34,7 +37,19 @@ class RemoteProxyReferee {
     received from the server.
   */
   startGame(name) {
+    let nextMessageFromServer = this.player.newGame(name).then(this.server.readJson);
 
+    let gameMessage = nextMessageFromServer.then((msg) => {
+      if (typeof msg === 'string') { // do checkName
+        return this.player.setId(msg).then(this.server.readJson);
+      } else {
+        return msg;
+      }
+    });
+
+    return gameMessage.then((val) => {
+      return this.handleGameMessage(val);
+    });
   }
 
   /* JSON -> Promise<JSON>
@@ -44,7 +59,17 @@ class RemoteProxyReferee {
     received from the server.
   */
   handleGameMessage(msg) {
-
+    if (ClientMessageFormChecker.checkBoard(msg)) {
+      return this.handleTakeTurn(msg).then((nextMessage) => {
+        return this.handleGameMessage(nextMessage);
+      });
+    } else if (ClientMessageFormChecker.checkPlacement(msg)) {
+      return this.handlePlacement(msg).then((nextMessage) => {
+        return this.handleGameMessage(nextMessage);
+      });
+    } else {
+      return Promise.resolve(msg);
+    }
   }
 
   /* Placement -> Promise<JSON>
@@ -53,8 +78,16 @@ class RemoteProxyReferee {
 
     Resolve with the next message received from the server.
   */
-  handlePlacement() {
+  handlePlacement(placement) {
+    let initWorkerList = ClientMessageConverter.jsonToInitWorkerList(placement);
 
+    let workerPlacement = this.player.placeInitialWorker(initWorkerList)
+      .then(ClientMessageConverter.placeRequestToJson);
+
+    return workerPlacement.then((placement) => {
+      this.server.sendJson(placement);
+      return this.server.readJson();
+    });
   }
 
   /* Board -> Promise<JSON>
@@ -63,8 +96,16 @@ class RemoteProxyReferee {
 
     Resolve with the next message received from the server.
   */
-  handleTakeTurn() {
+  handleTakeTurn(jsonBoard) {
+    let board = ClientMessageConverter.jsonToBoard(jsonBoard);
 
+    let turn = this.player.takeTurn(board)
+      .then(ClientMessageConverter.turnToJson);
+
+    return turn.then((t) => {
+      this.server.sendJson(t);
+      return this.server.readJson();
+    });
   }
 
 }
