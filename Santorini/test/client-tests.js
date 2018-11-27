@@ -61,12 +61,12 @@ describe('SantoriniClient tests', function () {
   describe('shutdown', function () {
     let mockSock;
     beforeEach(function () {
-      mockSock = testLib.createMockObject('destroy');
+      mockSock = testLib.createMockObject('end');
       client.socket = mockSock;
       client.shutdown();
     });
     it('closes the socket', function () {
-      assert.isTrue(mockSock.destroy.called);
+      assert.isTrue(mockSock.end.called);
     });
   });
 });

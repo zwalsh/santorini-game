@@ -29,7 +29,7 @@ describe('createClients tests', function () {
         let players = [];
         let observers = [];
         let configStr = JSON.stringify(makeConfigObj(players, observers, ip, port))
-        assert.isFalse(createClients(configStr));
+        assert.deepEqual(createClients(configStr), []);
       });
     });
 

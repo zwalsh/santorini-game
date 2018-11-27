@@ -95,12 +95,12 @@ describe('TournamentServer', function () {
     describe('when there are enough registered players', function () {
       beforeEach(function () {
         ts.uniquePlayers = [{}, {}];
-        socket.destroy = sinon.stub();
+        socket.end = sinon.stub();
         handleConnectionPromise = ts.handleConnection(socket);
       });
-      it('destroys the socket', function () {
+      it('ends the socket', function () {
         return handleConnectionPromise.then(() => {
-          assert.isTrue(socket.destroy.calledOnce);
+          assert.isTrue(socket.end.calledOnce);
         });
       });
     });
@@ -134,13 +134,13 @@ describe('TournamentServer', function () {
       });
       describe('when the player fails to be registered', function () {
         beforeEach(function () {
-          socket.destroy = sinon.stub();
+          socket.end = sinon.stub();
           ts.registerPlayer.rejects();
           handleConnectionPromise = ts.handleConnection(socket);
         });
-        it('catches the failure and destroys the socket', function () {
+        it('catches the failure and ends the socket', function () {
           return handleConnectionPromise.then(() => {
-            assert.isTrue(socket.destroy.calledOnce);
+            assert.isTrue(socket.end.calledOnce);
             assert.isFalse(ts.sockets.includes(socket));
           });
         });
@@ -152,13 +152,13 @@ describe('TournamentServer', function () {
       });
       describe('when the player fails to be added uniquely', function () {
         beforeEach(function () {
-          socket.destroy = sinon.stub();
+          socket.end = sinon.stub();
           ts.addAndEnsureUnique.rejects();
           handleConnectionPromise = ts.handleConnection(socket);
         });
-        it('catches the failure and destroys the socket', function () {
+        it('catches the failure and ends the socket', function () {
           return handleConnectionPromise.then(() => {
-            assert.isTrue(socket.destroy.calledOnce);
+            assert.isTrue(socket.end.calledOnce);
             assert.isFalse(ts.sockets.includes(socket));
           });
         });

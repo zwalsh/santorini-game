@@ -126,6 +126,7 @@ describe('RemoteProxyTournamentManager tests', function () {
 
     describe('when given an unexpected value', function () {
       beforeEach(function () {
+        rptm.player.getId = sinon.stub().returns('dontcare');
         handleTMPromise = rptm.handleTournamentMessage('unexpected value');
       });
       it('rejects', function () {
