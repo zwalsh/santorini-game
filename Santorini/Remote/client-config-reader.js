@@ -20,6 +20,7 @@ const net = require('net');
 
 const createPlayers = require('../Admin/configure-tournament').createPlayers;
 const SantoriniClient = require('./client');
+const parseJson = require('../Lib/json-parser').jsonParser
 
 /* String -> [Maybe [SantoriniClient, ...]]
   Create a list of SantoriniClients from the given configuration string,

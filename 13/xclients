@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Script that accepts a client configuration over STDIN.
+# Creates the clients, connects them to a running server,
+# and starts them.
+
+node Aux/configure-and-run-client.js
