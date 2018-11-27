@@ -36,9 +36,11 @@ class RemoteProxyTournamentManager {
   start() {
     return this.register()
       .then((message) => {
+        console.log(this.player.getId() + 'done registering with msg: ' + message);
         return this.handleTournamentMessage(message);
       })
       .then((encounterOutcomes) => {
+        console.log(this.player.getId() + ' encounter outcomes ' + encounterOutcomes);
         return this.notifyPlayerOfEnd(encounterOutcomes);
       });
   }
@@ -55,7 +57,7 @@ class RemoteProxyTournamentManager {
     return renameOrNextMessage.then((msg) => {
       if (ClientMessageFormChecker.checkPlayingAs(msg)) {
         let newName = ClientMessageConverter.jsonToName(msg);
-        return this.player.setId(newName).then(this.server.readJson);
+        return this.player.setId(newName).then(() => { return this.server.readJson() });
       } else {
         return msg;
       }
@@ -69,13 +71,18 @@ class RemoteProxyTournamentManager {
     tournament is over.
   */
   handleTournamentMessage(message) {
+    console.log(this.player.getId() + ' handling msg ' + JSON.stringify(message));
     if (ClientMessageFormChecker.checkName(message)) {
+      console.log(this.player.getId() + " starting game against " + message);
       return this.playNextGame(message).then((nextMessage) => {
+        console.log(this.player.getId() + ' game played ' + JSON.stringify(nextMessage));
         return this.handleTournamentMessage(nextMessage);
       });
     } else if (ClientMessageFormChecker.checkResults(message)) {
+      console.log(this.player.getId() + ' tournament over');
       return Promise.resolve(message);
     } else {
+      console.log(this.player.getId() + ' unexpected value ' + JSON.stringify(message));
       return Promise.reject();
     }
   }
@@ -87,7 +94,7 @@ class RemoteProxyTournamentManager {
   */
   playNextGame(name) {
     let ref = this.createReferee();
-    return ref.startGame(name).then(this.server.readJson);
+    return ref.startGame(name);
   }
 
   /* Void -> RemoteProxyReferee

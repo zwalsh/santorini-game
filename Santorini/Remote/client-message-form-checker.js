@@ -102,7 +102,7 @@ function checkCoordinate(coord) {
   Checks if the given value is a valid JSON Board.
 */
 function checkBoard(board) {
-  return Array.isArray(board) && board.every(checkRow);
+  return Array.isArray(board) && board.length === 6 && board.every(checkRow);
 }
 
 /* Any -> Boolean

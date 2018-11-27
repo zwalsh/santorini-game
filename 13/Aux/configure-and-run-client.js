@@ -29,6 +29,7 @@ function configureAndRunClients(chunk) {
     maybeClients.forEach((c) => {
       timeout += timeoutIncrement;
       setTimeout(() => {
+        console.log('starting client');
         c.start();
       }, timeout);
     });

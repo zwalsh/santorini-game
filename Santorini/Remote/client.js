@@ -40,7 +40,10 @@ class SantoriniClient {
     return this.createTournament()
       .start()
       .then(() => { return this.shutdown() })
-      .catch(() => { return this.shutdown() });
+      .catch((err) => {
+        console.log(this.player.getId() + ' catching ' + err.stack);
+        return this.shutdown();
+      });
   }
 
   /* Void -> RemoteProxyTournamentManager
@@ -58,6 +61,7 @@ class SantoriniClient {
     Close the socket.
   */
   shutdown() {
+    console.log('Player ' + this.player.getId() + ' shut down');
     this.socket.destroy();
   }
 }
