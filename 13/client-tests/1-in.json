@@ -6,9 +6,9 @@
       "../../Santorini/Player/player.js"
     ],
     [
-      "good",
+      "infinite",
       "zach",
-      "../../Santorini/Player/player.js"
+      "../../Santorini/Player/player-infinite.js"
     ],
     [
       "infinite",
@@ -16,16 +16,7 @@
       "../../Santorini/Player/player-infinite.js"
     ]
   ],
-  "observers": [
-    [
-      "watchmewhip",
-      "../../Santorini/Observer/observer.js"
-    ],
-    [
-      "watchmenaynay",
-      "../../Santorini/Observer/observer.js"
-    ]
-  ],
+  "observers": [],
   "ip": "127.0.0.1",
   "port": 50000
 }
