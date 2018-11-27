@@ -64,7 +64,6 @@ function parseCommand(json) {
         potentialMove.push(["build", json[1]])
         break
       default:
-        console.log(json);
         throw "Error: Invalid command";
     }
   }

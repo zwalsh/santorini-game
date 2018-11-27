@@ -78,7 +78,6 @@ class TournamentManager {
   */
   startMatch(player1, player2) {
     let ref = this.createReferee(player1, player2);
-    console.log('Match starting between ' + player1.getId() + ', ' + player2.getId());
     return ref.playNGames(this.seriesLength).then((gameResults) => {
       return this.handleMatchResult(player1, player2, gameResults);
     });
@@ -99,7 +98,6 @@ class TournamentManager {
      - check if the tournament is over and if so, end it
    */
   handleMatchResult(player1, player2, match) {
-    console.log('Match over between ' + player1.getId() + ', ' + player2.getId() + ', ' + JSON.stringify(match));
     this.matchTable.setMatch(player1.getId(), player2.getId(), match);
     let badPlayersInMatch = this.disqualifyBadPlayers(player1, player2);
     this.badPlayers = this.badPlayers.concat(badPlayersInMatch);

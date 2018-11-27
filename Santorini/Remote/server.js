@@ -121,10 +121,8 @@ class TournamentServer {
     tournament is over. Print the results if a resolution function is waiting.
   */
   createAndRunTournament() {
-    console.log('Starting tournament');
     let tm = this.createTournamentManager();
     return tm.startTournament().then((tournamentResult) => {
-      console.log('Tournament over');
       if (this.resolveWithTournamentResult) {
         this.resolveWithTournamentResult(tournamentResult);
         this.resolveWithTournamentResult = null;
@@ -170,7 +168,6 @@ class TournamentServer {
   */
   addAndEnsureUnique(player) {
     return this.uniquelyNamedPlayer(player).then((uniquePlayer) => {
-      console.log('added player: ' + uniquePlayer.getId());
       this.uniquePlayers.push(uniquePlayer);
       if (this.uniquePlayers.length === this.minPlayers) {
         clearTimeout(this.waitingForTimeout);

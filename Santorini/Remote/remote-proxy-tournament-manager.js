@@ -39,7 +39,6 @@ class RemoteProxyTournamentManager {
         return this.handleTournamentMessage(message);
       })
       .then((encounterOutcomes) => {
-        console.log(this.player.getId() + ' encounter outcomes ' + encounterOutcomes);
         return this.notifyPlayerOfEnd(encounterOutcomes);
       });
   }
@@ -70,18 +69,13 @@ class RemoteProxyTournamentManager {
     tournament is over.
   */
   handleTournamentMessage(message) {
-    console.log(this.player.getId() + ' handling msg ' + JSON.stringify(message));
     if (ClientMessageFormChecker.checkName(message)) {
-      console.log(this.player.getId() + " starting game against " + message);
       return this.playNextGame(message).then((nextMessage) => {
-        console.log(this.player.getId() + ' game played ' + JSON.stringify(nextMessage));
         return this.handleTournamentMessage(nextMessage);
       });
     } else if (ClientMessageFormChecker.checkResults(message)) {
-      console.log(this.player.getId() + ' tournament over');
       return Promise.resolve(message);
     } else {
-      console.log(this.player.getId() + ' unexpected value ' + JSON.stringify(message));
       return Promise.reject(new Error(this.player.getId() + ' unexpected value ' + JSON.stringify(message)));
     }
   }

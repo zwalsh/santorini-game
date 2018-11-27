@@ -38,7 +38,6 @@ class Player {
   */
   takeTurn(board) {
     let turn = this.strategy.getNextTurn(board);
-    //console.log(this.id + ' taking turn' + turn + ' with strategy ' + JSON.stringify(this.strategy));
     return Promise.resolve(turn);
   }
 
@@ -47,7 +46,6 @@ class Player {
     against an opponent with the given ID.
   */
   newGame(opponentId) {
-    //console.log(this.id + ' starting new game against ' + opponentId);
     this.strategy = new Strategy(this.id, opponentId, 2, 0);
     return Promise.resolve();
   }

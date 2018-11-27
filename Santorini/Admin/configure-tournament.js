@@ -84,7 +84,6 @@ function createPlayers(playerConfigs) {
     let maybePlayer = createComponent(name, path, loadedComponentMap);
 
     if (maybePlayer) {
-      console.log('making player: ' + (maybePlayer instanceof require('../../Santorini/Player/player')) + ' name: ' + name);
       players.push(new GuardedPlayer(maybePlayer, name, TIMEOUT));
     }
   }

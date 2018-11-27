@@ -110,6 +110,7 @@ describe('RemoteProxyTournamentManager tests', function () {
           return assert.isTrue(rptm.playNextGame.calledWith(name));
         });
       });
+      it('resolves with the next');
     });
 
     describe('when given the tournament results', function () {
