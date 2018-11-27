@@ -1,8 +1,8 @@
 const net = require('net');
-const PromiseJsonSocket = require('../Lib/promise-json-socket');
-const GuardedPlayer = require('../Admin/guarded-player');
-const RemoteProxyPlayer = require('./remote-proxy-player');
-const Referee = require('../Admin/referee');
+const PromiseJsonSocket = require('../../Santorini/Lib/promise-json-socket');
+const GuardedPlayer = require('../../Santorini/Admin/guarded-player');
+const RemoteProxyPlayer = require('../../Santorini/Remote/remote-proxy-player');
+const Referee = require('../../Santorini/Admin/referee');
 
 let players = [];
 let playerNames = ['wayne', 'garth'];
