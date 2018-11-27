@@ -172,3 +172,10 @@ that connect to a running server.
 
 * 1-in.json - Specifies a 3-player set of clients, with one good player and two infinite players.
 * 1-out.json - The results of the tournament between the players in 1-in.json
+
+#### Aux/
+* configure-and-run-client.js - Script used by xclients to start up clients from a configuration file.
+* configure-and-run-server.js - Script used by xserver to start up a server from a configuration file.
+* rpp-test-client.js - Test script that creates a connection to the server in rpp-test-server, and sends messages
+from stdin to the server. 
+* rpp-test-server.js - Test script used to set up a server for two RemoteProxyPlayers to play a game.
