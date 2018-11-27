@@ -14,6 +14,10 @@
   EncounterOutcome is defined in client-message-converter.js
 */
 
+const ClientMessageConverter = require('./client-message-converter');
+const ClientMessageFormChecker = require('./client-message-form-checker');
+const RemoteProxyReferee = require('./remote-proxy-referee');
+
 class RemoteProxyTournamentManager {
 
   /* GuardedPlayer PromiseJsonSocket -> RPTM
@@ -45,7 +49,17 @@ class RemoteProxyTournamentManager {
     then rename the player. Resolve with the next message received.
   */
   register() {
+    this.server.sendJson(this.player.getId());
+    let renameOrNextMessage = this.server.readJson();
 
+    return renameOrNextMessage.then((msg) => {
+      if (ClientMessageFormChecker.checkPlayingAs(msg)) {
+        let newName = ClientMessageConverter.jsonToName(msg);
+        return this.player.setId(newName).then(this.server.readJson);
+      } else {
+        return msg;
+      }
+    });
   }
 
   /* JSON -> Promise<[EncounterOutcome, ...]>
@@ -54,8 +68,16 @@ class RemoteProxyTournamentManager {
     the name of a new opponent, or a list of tournament results when the
     tournament is over.
   */
-  handleTournamentMessage(result) {
-
+  handleTournamentMessage(message) {
+    if (ClientMessageFormChecker.checkName(message)) {
+      return this.playNextGame(message).then((nextMessage) => {
+        return this.handleTournamentMessage(nextMessage);
+      });
+    } else if (ClientMessageFormChecker.checkResults(message)) {
+      return Promise.resolve(message);
+    } else {
+      return Promise.reject();
+    }
   }
 
   /* String -> Promise<JSON>
@@ -64,22 +86,23 @@ class RemoteProxyTournamentManager {
     when the game is over.
   */
   playNextGame(name) {
-
+    let ref = this.createReferee();
+    return ref.startGame(name).then(this.server.readJson);
   }
 
-  /* String -> RemoteProxyReferee
-    Create a referee to run a game between the player and an opponent
-    with the given name.
+  /* Void -> RemoteProxyReferee
+    Create a referee to run a game between the player and an opponent.
   */
-  createReferee(name) {
-
+  createReferee() {
+    return new RemoteProxyReferee(this.player, this.server);
   }
 
   /* [EncounterOutcome, ...] -> Promise<Void>
     Notify the player that the tournament has ended with the given results.
    */
   notifyPlayerOfEnd(encounterOutcomes) {
-
+    let gameResults = ClientMessageConverter.jsonToGameResults(encounterOutcomes);
+    return this.player.notifyTournamentOver(gameResults);
   }
 }
 

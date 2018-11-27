@@ -38,6 +38,7 @@ describe('RemoteProxyTournamentManager tests', function () {
       mockSocket = testLib.createMockObject('sendJson', 'readJson');
       name = 'kelly';
       mockPlayer = testLib.mockPlayer(name);
+      mockPlayer.setId.resolves();
     });
 
     describe('when the player is already uniquely named', function () {
@@ -56,7 +57,10 @@ describe('RemoteProxyTournamentManager tests', function () {
         });
       });
       it('returns the following server message', function () {
-        return assert.becomes(registerPromise, opponentName);
+        return registerPromise.then((result) => {
+          assert.deepEqual(result, opponentName);
+          return assert.isTrue(mockSocket.readJson.calledOnce);
+        })
       });
     });
 
@@ -94,10 +98,11 @@ describe('RemoteProxyTournamentManager tests', function () {
       rptm = new RemoteProxyTournamentManager({}, {});
     });
     describe('when given an opponent name', function () {
-      let name;
+      let name, encounterOutcomes;
       beforeEach(function () {
         name = 'phyllis';
-        rptm.playNextGame = sinon.stub();
+        encounterOutcomes = [];
+        rptm.playNextGame = sinon.stub().resolves(encounterOutcomes);
         handleTMPromise = rptm.handleTournamentMessage(name);
       });
       it('starts the next game', function () {
@@ -129,25 +134,29 @@ describe('RemoteProxyTournamentManager tests', function () {
   });
 
   describe('playNextGame', function () {
-    let refResult, opponentName, playNextGamePromise;
+    let mockRef, refResult, opponentName, playNextGamePromise;
     beforeEach(function () {
       rptm = new RemoteProxyTournamentManager({}, {});
       opponentName = 'oppt';
       refResult = 'newopponent';
 
-      let mockRef = testLib.createMockObject('startGame');
+      mockRef = testLib.createMockObject('startGame');
       mockRef.startGame.resolves(refResult);
       rptm.createReferee = sinon.stub().returns(mockRef);
 
       playNextGamePromise = rptm.playNextGame(opponentName);
     });
 
-    it('creates a referee with the given opponent name', function () {
+    it('creates a referee', function () {
       return playNextGamePromise.then(() => {
-        return assert.isTrue(rptm.createReferee.calledWith(opponentName));
+        return assert.isTrue(rptm.createReferee.calledOnce);
       });
     });
-
+    it('starts a game against the given opponent', function () {
+      return playNextGamePromise.then(() => {
+        return assert.isTrue(mockRef.startGame.calledWith(opponentName));
+      });
+    });
     it('resolves with the message returned by the referee after the game', function () {
       return assert.becomes(playNextGamePromise, refResult);
     });

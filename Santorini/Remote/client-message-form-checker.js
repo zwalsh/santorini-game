@@ -40,10 +40,20 @@ const constants = require('../Common/constants');
 const PLAYER_NAME_REGEXP = require('../Admin/player-name-checker').PLAYER_NAME_REGEXP;
 
 /* Any -> Boolean
+  Checks if the given value is a valid player name.
+*/
+function checkName(name) {
+  return typeof name === 'string' && PLAYER_NAME_REGEXP.test(name);
+}
 
+/* Any -> Boolean
+  Check if the given value is a valid Playing-As message.
 */
 function checkPlayingAs(playingAs) {
-  return true;
+  return Array.isArray(playingAs) &&
+    playingAs.length === 2 &&
+    playingAs[0] === constants.Message.PLAYING_AS &&
+    checkName(playingAs[1]);
 }
 
 /* Any -> Boolean
@@ -133,21 +143,37 @@ function checkBuildingWorker(bw) {
 }
 
 /* Any -> Boolean
-
+  Checks if the given value is a valid list of results.
 */
 function checkResults(results) {
-  return true;
+  return Array.isArray(results) && results.every(checkEncounterOutcome);
 }
 
 /* Any -> Boolean
-
+  Return true if the value is a valid EncounterOutcome.
 */
 function checkEncounterOutcome(encounterOutcome) {
-  return true;
+  if (!Array.isArray(encounterOutcome)) {
+    return false;
+  }
+  if (encounterOutcome.length < 2) {
+    return false;
+  }
+  if (!checkName(encounterOutcome[0]) || !checkName(encounterOutcome[1])) {
+    return false;
+  }
+  if (encounterOutcome.length === 2) {
+    return true;
+  } else if (encounterOutcome.length === 3) {
+    return encounterOutcome[2] === constants.Message.ENCOUNTER_OUTCOME_IRREGULAR;
+  } else {
+    return false;
+  }
 }
 
 
 module.exports = {
+  'checkName': checkName,
   'checkPlayingAs': checkPlayingAs,
   'checkPlacement': checkPlacement,
   'checkWorkerPlace': checkWorkerPlace,
