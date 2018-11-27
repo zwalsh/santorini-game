@@ -19,6 +19,7 @@
 
 const ClientMessageConverter = require('./client-message-converter');
 const ClientMessageFormChecker = require('./client-message-form-checker');
+const RFC = require('../Common/request-format-checker');
 
 class RemoteProxyReferee {
 
@@ -85,7 +86,12 @@ class RemoteProxyReferee {
     let initWorkerList = ClientMessageConverter.jsonToInitWorkerList(placement);
 
     let workerPlacement = this.player.placeInitialWorker(initWorkerList)
-      .then((playerPlaceReq) => { return ClientMessageConverter.placeRequestToJson(playerPlaceReq); });
+      .then((playerPlaceReq) => {
+        if (RFC.isWellFormedPlaceReq(playerPlaceReq)) {
+          return ClientMessageConverter.placeRequestToJson(playerPlaceReq);
+        } else {
+          return Promise.reject(new Error('Player provided an invalid place request.'));
+        }});
 
     return workerPlacement.then((placement) => {
       this.server.sendJson(placement);
@@ -102,10 +108,14 @@ class RemoteProxyReferee {
   handleTakeTurn(jsonBoard) {
     let board = ClientMessageConverter.jsonToBoard(jsonBoard);
 
-    //console.log(this.player.getId() + ' taking turn ' + this.player.takeTurn);
-
     let turn = this.player.takeTurn(board)
-      .then((playerTurn) => { return ClientMessageConverter.turnToJson(playerTurn); });
+      .then((playerTurn) => {
+        if (RFC.isWellFormedTurn(playerTurn)) {
+          return ClientMessageConverter.turnToJson(playerTurn);
+        } else {
+          return Promise.reject(new Error('Player provided an invalid turn.'));
+        }
+      });
 
     return turn.then((t) => {
       this.server.sendJson(t);

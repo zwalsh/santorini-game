@@ -26,6 +26,7 @@ function configureAndRunServer(configStr) {
   if (server) {
     return server.startAndReturnResults().then((tournamentResult) => {
       printResults(tournamentResult);
+      process.exit(0);
     });
   } else {
     process.stdout.write('Invalid configuration, cannot start server.\n');

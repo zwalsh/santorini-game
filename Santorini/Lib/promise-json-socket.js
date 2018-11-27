@@ -50,7 +50,7 @@ class PromiseJsonSocket {
           return;
         });
       } else {
-        return Promise.reject();
+        return Promise.reject(new Error('Cannot read from closed socket.'));
       }
     }
   }

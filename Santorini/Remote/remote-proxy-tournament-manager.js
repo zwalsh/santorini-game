@@ -36,7 +36,6 @@ class RemoteProxyTournamentManager {
   start() {
     return this.register()
       .then((message) => {
-        console.log(this.player.getId() + 'done registering with msg: ' + message);
         return this.handleTournamentMessage(message);
       })
       .then((encounterOutcomes) => {
@@ -83,7 +82,7 @@ class RemoteProxyTournamentManager {
       return Promise.resolve(message);
     } else {
       console.log(this.player.getId() + ' unexpected value ' + JSON.stringify(message));
-      return Promise.reject();
+      return Promise.reject(new Error(this.player.getId() + ' unexpected value ' + JSON.stringify(message)));
     }
   }
 

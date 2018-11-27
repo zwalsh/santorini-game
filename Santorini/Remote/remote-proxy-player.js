@@ -53,6 +53,7 @@ class RemoteProxyPlayer {
     against an opponent with the given ID.
   */
   newGame(opponentId) {
+    console.log(this.name + ' starting game against ' + opponentId);
     this.client.sendJson(opponentId);
     return Promise.resolve();
   }

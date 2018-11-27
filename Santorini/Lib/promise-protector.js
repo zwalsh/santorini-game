@@ -19,7 +19,7 @@ function protectedPromise(subject, promiseFunction, timeoutLength = DEFAULT_TIME
   try {
     let promise = promiseFunction(subject);
     if (!(promise instanceof Promise)) {
-      return Promise.reject();
+      return Promise.reject(new Error('The promise function did not produce a promise.'));
     }
     return Promise.race([timeoutPromise, promise]).then((result) => {
       clearTimeout(timeout);
@@ -30,7 +30,7 @@ function protectedPromise(subject, promiseFunction, timeoutLength = DEFAULT_TIME
     });
   } catch (err) {
     // this catches the case where promiseFunction itself throws an error
-    return Promise.reject();
+    return Promise.reject(err);
   }
 }
 

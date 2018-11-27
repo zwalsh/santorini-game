@@ -16,7 +16,7 @@ class BrokenPlayer {
 
   */
   setId(id) {
-    return Promise.reject();
+    return Promise.reject(new Error('broken player set id'));
   }
 
   /* [InitWorker, ...] -> Promise<PlaceRequest>
@@ -41,7 +41,7 @@ class BrokenPlayer {
     against an opponent with the given ID.
   */
   newGame(opponentId) {
-    return Promise.reject();
+    return Promise.reject(new Error('broken player set id'));
   }
 
   /* GameResult -> Promise<Void>
@@ -50,7 +50,7 @@ class BrokenPlayer {
   */
   notifyGameOver(gameResult) {
     // Nothing to do here for now.
-    return Promise.reject();
+    return Promise.reject(new Error('broken player set id'));
   }
 
   /* [GameResult, ...] -> Promise<Void>
@@ -59,7 +59,7 @@ class BrokenPlayer {
 */
   notifyTournamentOver(gameResults) {
     // Nothing to do here for now.
-    return Promise.reject();
+    return Promise.reject(new Error('broken player set id'));
   }
 }
 

@@ -1,0 +1,57 @@
+{
+  "players": [
+    [
+      "good",
+      "a",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "b",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "c",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "d",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "e",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "f",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "g",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "h",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "i",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "j",
+      "../../Santorini/Player/player.js"
+    ]
+  ],
+  "observers": [],
+  "ip": "localhost",
+  "port": 50000
+}

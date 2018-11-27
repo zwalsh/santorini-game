@@ -41,7 +41,10 @@ class SantoriniClient {
       .start()
       .then(() => { return this.shutdown() })
       .catch((err) => {
-        console.log(this.player.getId() + ' catching ' + err.stack);
+        console.log(this.player.getId() + ' catching ' + err);
+        if (err && err.stack) {
+          console.log(err.stack);
+        }
         return this.shutdown();
       });
   }
@@ -62,7 +65,7 @@ class SantoriniClient {
   */
   shutdown() {
     console.log('Player ' + this.player.getId() + ' shut down');
-    this.socket.destroy();
+    this.socket.end();
   }
 }
 
