@@ -1,0 +1,22 @@
+{
+  "players": [
+    [
+      "good",
+      "agood",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "good",
+      "bgood",
+      "../../Santorini/Player/player.js"
+    ],
+    [
+      "breaker",
+      "jbreaker",
+      "../../Santorini/Player/player-turn-breaker.js"
+    ]
+  ],
+  "observers": [],
+  "ip": "localhost",
+  "port": 50000
+}
