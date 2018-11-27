@@ -82,7 +82,7 @@ class TournamentServer {
     Creates the timeout that calls shutdown after waitingFor seconds.
   */
   createTimeout() {
-    this.waitingForTimeout = setTimeout(() => { return this.shutdown(); }, this.waitingFor);
+    return setTimeout(() => { return this.shutdown(); }, this.waitingFor);
   }
 
   /* Void -> Server
