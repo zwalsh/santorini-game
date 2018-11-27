@@ -40,7 +40,7 @@ class RemoteProxyReferee {
     let nextMessageFromServer = this.player.newGame(name).then(this.server.readJson);
 
     let gameMessage = nextMessageFromServer.then((msg) => {
-      if (typeof msg === 'string') { // do checkName
+      if (ClientMessageFormChecker.checkName(msg)) {
         return this.player.setId(msg).then(this.server.readJson);
       } else {
         return msg;
