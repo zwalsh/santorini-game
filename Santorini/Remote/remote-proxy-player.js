@@ -17,6 +17,7 @@ class RemoteProxyPlayer {
   constructor(client, name) {
     this.client = client;
     this.name = name;
+    this.currentOpponent = null;
   }
 
   /* String -> Promise<Void>
@@ -53,7 +54,10 @@ class RemoteProxyPlayer {
     against an opponent with the given ID.
   */
   newGame(opponentId) {
-    this.client.sendJson(opponentId);
+    if (opponentId !== this.currentOpponent) {
+      this.currentOpponent = opponentId;
+      this.client.sendJson(opponentId);
+    }
     return Promise.resolve();
   }
 

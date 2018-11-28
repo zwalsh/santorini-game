@@ -136,6 +136,33 @@ describe('RemoteProxyPlayer tests', function () {
     });
     it('resolves to indicate that the name was sent', function () {
       return assert.isFulfilled(newGameResult);
+    })
+    describe('when playing another game against the same opponent', function () {
+      let nextNewGameResult;
+      beforeEach(function () {
+        nextNewGameResult = newGameResult.then(() => {
+          return rpp.newGame(opponentName);
+        });
+      });
+      it('does not send the name again', function () {
+        return nextNewGameResult.then(() => {
+          return assert.isTrue(mockPJSocket.sendJson.calledOnce);
+        });
+      });
+    });
+    describe('when playing a new game against a new opponent', function () {
+      let nextOpponent, nextNewGameResult;
+      beforeEach(function () {
+        nextOpponent = 'blah';
+        nextNewGameResult = newGameResult.then(() => {
+          return rpp.newGame(nextOpponent);
+        });
+      });
+      it('sends the new name', function () {
+        return nextNewGameResult.then(() => {
+          return assert.isTrue(mockPJSocket.sendJson.calledWith(nextOpponent));
+        });
+      });
     });
   });
 
