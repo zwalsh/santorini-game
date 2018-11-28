@@ -87,7 +87,7 @@ class RemoteProxyTournamentManager {
   */
   playNextGame(name) {
     let ref = this.createReferee();
-    return ref.startGame(name);
+    return ref.startSeries(name);
   }
 
   /* Void -> RemoteProxyReferee

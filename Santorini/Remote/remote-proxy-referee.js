@@ -37,7 +37,7 @@ class RemoteProxyReferee {
     Resolve with the next unrecognized (non-game-level) message
     received from the server.
   */
-  startGame(name) {
+  startSeries(name) {
     let nextMessageFromServer = this.player.newGame(name).then(() => { return this.server.readJson() });
 
     let gameMessage = nextMessageFromServer.then((msg) => {

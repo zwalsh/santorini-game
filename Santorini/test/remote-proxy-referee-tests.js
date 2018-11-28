@@ -11,7 +11,7 @@ const RemoteProxyReferee = require('../Remote/remote-proxy-referee');
 
 describe('RemoteProxyReferee tests', function () {
   let rpr;
-  describe('startGame', function () {
+  describe('startSeries', function () {
     let player, socket, opponentName, serverMsg, unrecognizedMsg, startGamePromise;
     beforeEach(function () {
       player = testLib.mockPlayer('pam');
@@ -26,7 +26,7 @@ describe('RemoteProxyReferee tests', function () {
       rpr.handleGameMessage = sinon.stub().resolves(unrecognizedMsg);
 
       opponentName = 'jim';
-      startGamePromise = rpr.startGame(opponentName);
+      startGamePromise = rpr.startSeries(opponentName);
     });
     it('calls newGame on the player', function () {
       return startGamePromise.then(() => {

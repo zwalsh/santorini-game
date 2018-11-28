@@ -142,8 +142,8 @@ describe('RemoteProxyTournamentManager tests', function () {
       opponentName = 'oppt';
       refResult = 'newopponent';
 
-      mockRef = testLib.createMockObject('startGame');
-      mockRef.startGame.resolves(refResult);
+      mockRef = testLib.createMockObject('startSeries');
+      mockRef.startSeries.resolves(refResult);
       rptm.createReferee = sinon.stub().returns(mockRef);
 
       playNextGamePromise = rptm.playNextGame(opponentName);
@@ -156,7 +156,7 @@ describe('RemoteProxyTournamentManager tests', function () {
     });
     it('starts a game against the given opponent', function () {
       return playNextGamePromise.then(() => {
-        return assert.isTrue(mockRef.startGame.calledWith(opponentName));
+        return assert.isTrue(mockRef.startSeries.calledWith(opponentName));
       });
     });
     it('resolves with the message returned by the referee after the game', function () {
