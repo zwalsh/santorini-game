@@ -40,17 +40,9 @@ class RemoteProxyReferee {
   */
   startSeries(name) {
     this.opponent = name;
-    let nextMessageFromServer = this.player.newGame(name).then(() => { return this.server.readJson() });
-
-    let gameMessage = nextMessageFromServer.then((msg) => {
-      if (ClientMessageFormChecker.checkName(msg)) {
-        return this.player.setId(msg).then(() => { return this.server.readJson() });
-      } else {
-        return msg;
-      }
-    });
-
-    return gameMessage.then((val) => {
+    return this.player.newGame(name).then(() => {
+      return this.server.readJson()
+    }).then((val) => {
       return this.handleGameMessage(val);
     });
   }
@@ -87,7 +79,7 @@ class RemoteProxyReferee {
     //console.log(this.player.getId() + ' making placement ' + JSON.stringify(placement));
     let initWorkerList = ClientMessageConverter.jsonToInitWorkerList(placement);
     let informPlayerOfNewGame = new Promise(resolve => {
-      if (initWorkerList.length === 0) {
+      if (initWorkerList.length === 0 || initWorkerList.length === 1) {
         this.player.newGame(this.opponent).then(resolve);
       } else {
         resolve();

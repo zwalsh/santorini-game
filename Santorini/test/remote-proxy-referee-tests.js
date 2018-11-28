@@ -130,14 +130,42 @@ describe('RemoteProxyReferee tests', function () {
         });
       });
     });
-    describe('when the placement is not empty', function () {
+    describe('when the placement has length 1', function () {
+      let opponent;
       beforeEach(function () {
         let playerName = 'mango';
         placementMsg = [['grape1', 0, 0]];
         expectedInitWorkers = [{player: 'grape', x: 0, y: 0}];
-        placeRequest = ['place', 1, 1];
-        expectedPlace = [1, 1];
-        nextServerMsg = [['grape1', 0, 0], ['mango1', 1, 1], ['grape2', 2, 2]];
+        placeRequest = ['place', 2, 2];
+        expectedPlace = [2, 2];
+        nextServerMsg = [['grape1', 0, 0], ['mango1', 2, 2], ['grape2', 3, 3]];
+
+        player = testLib.mockPlayer(playerName);
+        player.placeInitialWorker = sinon.stub().resolves(placeRequest);
+        player.newGame = sinon.stub().resolves();
+
+        socket = testLib.createMockObject('readJson', 'sendJson');
+        socket.readJson.resolves(nextServerMsg);
+
+        opponent = 'grape';
+        rpr = new RemoteProxyReferee(player, socket);
+        rpr.opponent = opponent;
+        handlePlacementPromise = rpr.handlePlacement(placementMsg);
+      });
+      it('calls newGame on the player', function () {
+        return handlePlacementPromise.then(() => {
+          return assert.isTrue(player.newGame.calledWith(opponent));
+        });
+      });
+    });
+    describe('when the placement is longer than 1', function () {
+      beforeEach(function () {
+        let playerName = 'mango';
+        placementMsg = [['mango1', 1, 1], ['grape1', 0, 0]];
+        expectedInitWorkers = [{player:'mango', x: 1, y: 1},{player: 'grape', x: 0, y: 0}];
+        placeRequest = ['place', 2, 2];
+        expectedPlace = [2, 2];
+        nextServerMsg = [['grape1', 0, 0], ['mango1', 1, 1], ['mango2', 2, 2], ['grape2', 3, 3]];
 
         player = testLib.mockPlayer(playerName);
         player.placeInitialWorker = sinon.stub().resolves(placeRequest);
