@@ -106,36 +106,62 @@ describe('RemoteProxyReferee tests', function () {
   describe('handlePlacement', function () {
     let player, socket, placementMsg, expectedInitWorkers, placeRequest,
       expectedPlace, nextServerMsg, handlePlacementPromise;
-    beforeEach(function () {
-      let playerName = 'mango';
-      placementMsg = [['grape1', 0, 0]];
-      expectedInitWorkers = [{player: 'grape', x: 0, y: 0}];
-      placeRequest = ['place', 1, 1];
-      expectedPlace = [1, 1];
-      nextServerMsg = [['grape1', 0, 0], ['mango1', 1, 1], ['grape2', 2, 2]];
 
-      player = testLib.mockPlayer(playerName);
-      player.placeInitialWorker = sinon.stub().resolves(placeRequest);
+    describe('when the placement is empty', function () {
+      let opponent;
+      beforeEach(function () {
+        let playerName = 'x';
+        placeRequest = ['place', 1, 1];
+        player = testLib.mockPlayer(playerName);
+        player.placeInitialWorker = sinon.stub().resolves(placeRequest);
+        player.newGame = sinon.stub().resolves();
 
-      socket = testLib.createMockObject('readJson', 'sendJson');
-      socket.readJson.resolves(nextServerMsg);
+        socket = testLib.createMockObject('readJson', 'sendJson');
+        socket.readJson.resolves();
 
-      rpr = new RemoteProxyReferee(player, socket);
-      handlePlacementPromise = rpr.handlePlacement(placementMsg);
-    });
-    it('call placeInitialWorker on the player with the converted Placement', function () {
-      return handlePlacementPromise.then(() => {
-        return assert.isTrue(player.placeInitialWorker.calledWith(expectedInitWorkers));
+        opponent = 'y';
+        rpr = new RemoteProxyReferee(player, socket);
+        rpr.opponent = opponent;
+        handlePlacementPromise = rpr.handlePlacement([]);
+      });
+      it('calls newGame on the player', function () {
+        return handlePlacementPromise.then(() => {
+          return assert.isTrue(player.newGame.calledWith(opponent));
+        });
       });
     });
-    it('sends the translated player response back to the server', function () {
-      return handlePlacementPromise.then(() => {
-        let actualWorkerPlace = socket.sendJson.getCall(0).args[0];
-        return assert.deepEqual(actualWorkerPlace, expectedPlace);
+    describe('when the placement is not empty', function () {
+      beforeEach(function () {
+        let playerName = 'mango';
+        placementMsg = [['grape1', 0, 0]];
+        expectedInitWorkers = [{player: 'grape', x: 0, y: 0}];
+        placeRequest = ['place', 1, 1];
+        expectedPlace = [1, 1];
+        nextServerMsg = [['grape1', 0, 0], ['mango1', 1, 1], ['grape2', 2, 2]];
+
+        player = testLib.mockPlayer(playerName);
+        player.placeInitialWorker = sinon.stub().resolves(placeRequest);
+
+        socket = testLib.createMockObject('readJson', 'sendJson');
+        socket.readJson.resolves(nextServerMsg);
+
+        rpr = new RemoteProxyReferee(player, socket);
+        handlePlacementPromise = rpr.handlePlacement(placementMsg);
       });
-    });
-    it('resolve to the next value received from the server', function () {
-      return assert.becomes(handlePlacementPromise, nextServerMsg);
+      it('call placeInitialWorker on the player with the converted Placement', function () {
+        return handlePlacementPromise.then(() => {
+          return assert.isTrue(player.placeInitialWorker.calledWith(expectedInitWorkers));
+        });
+      });
+      it('sends the translated player response back to the server', function () {
+        return handlePlacementPromise.then(() => {
+          let actualWorkerPlace = socket.sendJson.getCall(0).args[0];
+          return assert.deepEqual(actualWorkerPlace, expectedPlace);
+        });
+      });
+      it('resolve to the next value received from the server', function () {
+        return assert.becomes(handlePlacementPromise, nextServerMsg);
+      });
     });
   });
 

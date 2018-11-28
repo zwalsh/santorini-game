@@ -30,6 +30,7 @@ class RemoteProxyReferee {
   constructor (player, socket) {
     this.player = player;
     this.server = socket;
+    this.opponent = null;
   }
 
   /* String -> Promise<JSON>
@@ -38,6 +39,7 @@ class RemoteProxyReferee {
     received from the server.
   */
   startSeries(name) {
+    this.opponent = name;
     let nextMessageFromServer = this.player.newGame(name).then(() => { return this.server.readJson() });
 
     let gameMessage = nextMessageFromServer.then((msg) => {
@@ -84,14 +86,24 @@ class RemoteProxyReferee {
   handlePlacement(placement) {
     //console.log(this.player.getId() + ' making placement ' + JSON.stringify(placement));
     let initWorkerList = ClientMessageConverter.jsonToInitWorkerList(placement);
+    let informPlayerOfNewGame = new Promise(resolve => {
+      if (initWorkerList.length === 0) {
+        this.player.newGame(this.opponent).then(resolve);
+      } else {
+        resolve();
+      }
+    });
 
-    let workerPlacement = this.player.placeInitialWorker(initWorkerList)
-      .then((playerPlaceReq) => {
-        if (RFC.isWellFormedPlaceReq(playerPlaceReq)) {
-          return ClientMessageConverter.placeRequestToJson(playerPlaceReq);
-        } else {
-          return Promise.reject(new Error('Player provided an invalid place request.'));
-        }});
+    let workerPlacement = informPlayerOfNewGame.then(() => {
+      return this.player.placeInitialWorker(initWorkerList)
+        .then((playerPlaceReq) => {
+          if (RFC.isWellFormedPlaceReq(playerPlaceReq)) {
+            return ClientMessageConverter.placeRequestToJson(playerPlaceReq);
+          } else {
+            return Promise.reject(new Error('Player provided an invalid place request.'));
+          }
+        });
+    });
 
     return workerPlacement.then((placement) => {
       this.server.sendJson(placement);
