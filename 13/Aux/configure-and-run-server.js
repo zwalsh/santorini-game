@@ -39,7 +39,7 @@ function configureAndRunServer(configStr) {
   of EncounterOutcomes
 */
 function printResults(tournamentResult) {
-  let gameResults = tournamentResult.matchTable.getAllGames();
-  let encounterOutcomes = ServerMessageConverter.gameResultsToJson(gameResults);
+  let matchResults = tournamentResult.matchTable.getAllMatchResults();
+  let encounterOutcomes = ServerMessageConverter.gameResultsToJson(matchResults);
   process.stdout.write(JSON.stringify(encounterOutcomes) + '\n');
 }

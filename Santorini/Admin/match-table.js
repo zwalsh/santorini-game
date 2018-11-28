@@ -96,18 +96,64 @@ class MatchTable {
     constructor.
   */
   getAllGames() {
-    let games = [];
-    for (let player of this.players) {
-      let curPlayerIdx = this.playerIdxMap.get(player);
-      let opponents = this.players.slice(curPlayerIdx + 1);
-      for (let opponent of opponents) {
-        let match = this.getMatch(player, opponent);
-        if (match) {
-          games = games.concat(match);
-        }
+    return this.getAllMatches().reduce((acc, val) => acc.concat(val), []);
+  }
+
+  /* Void -> [Match, ...]
+    Output a list of all Matches that have occurred and not been struck from the record.
+  */
+  getAllMatches() {
+     let matches = [];
+     for (let player of this.players) {
+       let curPlayerIdx = this.playerIdxMap.get(player);
+       let opponents = this.players.slice(curPlayerIdx + 1);
+       for (let opponent of opponents) {
+         let match = this.getMatch(player, opponent);
+         if (match && match.length !== 0) {
+           matches.push(match);
+         }
+       }
+     }
+     return matches;
+  }
+
+  /* Void -> [GameResult, ...]
+    Returns a list of GameResults, one per Match, that indicates the overall winner of
+    that series of games.
+  */
+  getAllMatchResults() {
+    return this.getAllMatches().map((m) => this.matchResult(m));
+  }
+
+  /* Match -> [Maybe GameResult]
+    Produces a single GameResult that represents the result of the match
+    between the two players. The winner of the GameResult is the one
+    that won the most games, and the reason indicates whether the loser
+    cheated.
+  */
+  matchResult(gameResults) {
+    if (gameResults.length === 0) {
+      return false;
+    }
+
+    let gr0 = gameResults[0];
+    let p1 = gr0.winner;
+    let p2 = gr0.loser;
+    let p1WinCount = 0;
+
+    for (let gr of gameResults) {
+      if (gr.reason === constants.EndGameReason.BROKEN_RULE) {
+        return gr.copy();
+      }
+      if (gr.winner === p1) {
+        p1WinCount++;
       }
     }
-    return games;
+    if (p1WinCount > gameResults.length / 2) {
+      return new GameResult(p1, p2, constants.EndGameReason.WON);
+    } else {
+      return new GameResult(p2, p1, constants.EndGameReason.WON);
+    }
   }
 
   // ========== Internal Helpers ==============

@@ -205,10 +205,10 @@ class TournamentManager {
     Send all non-broken players (a copy of) the list of tournament game results.
    */
   notifyPlayersOfResult() {
-    let gameResults = this.matchTable.getAllGames();
+    let matchResults = this.matchTable.getAllMatchResults();
     this.donePlayers.forEach(player => {
-      let gameResultsCopy = gameResults.map(gr => gr.copy());
-      player.notifyTournamentOver(gameResultsCopy);
+      let matchResultsCopy = matchResults.map(gr => gr.copy());
+      player.notifyTournamentOver(matchResultsCopy);
     });
   }
 }
