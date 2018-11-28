@@ -3,6 +3,7 @@ let Strategy = require('../Player/strategy');
 let Worker = require('../Common/worker');
 let Board = require('../Common/board');
 
+const ClientMessageConverter = require('../Remote/client-message-converter');
 
 describe('Strategy Test', function () {
   //DATA
@@ -12,9 +13,9 @@ describe('Strategy Test', function () {
   let listOfInitWorkers2 = [{player: 'alfred', x: 0, y: 0}];
   let listOfInitWorkers3 = [{player: 'sampson', x: 0, y: 0}];
   let listOfInitWorkers4 = [{player: 'sampson', x: 0, y: 0}, {player: 'alfred', x: 5, y: 0},
-                            {player: 'sampson', x: 2, y: 1}];
+    {player: 'sampson', x: 2, y: 1}];
   let listOfInitWorkers5 = [{player: 'sampson', x: 0, y: 0}, {player: 'alfred', x: 5, y: 5},
-                            {player: 'sampson', x: 2, y: 1}];
+    {player: 'sampson', x: 2, y: 1}];
 
   describe('getNextWorkerPlace', function () {
 
@@ -48,7 +49,7 @@ describe('Strategy Test', function () {
   });
 
   describe('otherPlayer', function () {
-    it ('check if returns the player other than the given in the strategy', function () {
+    it('check if returns the player other than the given in the strategy', function () {
       assert.equal(strategy0.otherPlayer('alfred'), 'sampson', 'Returns the other player than the given param');
       assert.equal(strategy0.otherPlayer('sampson'), 'alfred', 'Returns the other player than the given param');
     });
@@ -104,13 +105,13 @@ describe('Strategy Test', function () {
 
     let altWinnerBoard = new Board(null, winningBoardLayoutTrue, listOfWorkers2);
 
-    it ('true if still alive', function () {
+    it('true if still alive', function () {
       assert.isTrue(strategy0.isStillAlive(board), 'Clean board with players scattered');
       assert.isTrue(strategy0.isStillAlive(winningBoardTrue), 'Player alive due to win');
       assert.isTrue(strategy0.isStillAlive(boxInBoard), 'Player alive due to other place loss');
     });
 
-    it ('false if not alive or opponent wins', function () {
+    it('false if not alive or opponent wins', function () {
       assert.isFalse(strategy0.isStillAlive(boxInBoardAlt), 'Player not alive due to box in');
       assert.isFalse(strategy0.isStillAlive(altWinnerBoard), 'Player not alive due to opponent win');
     });
@@ -119,18 +120,18 @@ describe('Strategy Test', function () {
   describe('decisionKeepsMeAlive', function () {
     let jsonBoard1Layout =
       [[0, 2, 1, 0, 4, 0],
-      [4, 4, 0, 0, 4, 4],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0]];
+        [4, 4, 0, 0, 4, 4],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]];
     let w1 = new Worker(2, 0, 1, 'alfred');
     let w2 = new Worker(5, 0, 2, 'alfred');
     let w3 = new Worker(3, 1, 1, 'sampson');
     let w4 = new Worker(2, 1, 2, 'sampson');
     let json1WorkerList = [w1, w2, w3, w4];
     let jsonBoard1 = new Board(null, jsonBoard1Layout, json1WorkerList);
-    let jsonTurn = [["move", { player:'alfred', id:1 }, ["WEST", "PUT"]], ["build", ["EAST", "PUT"]]];
+    let jsonTurn = [["move", {player: 'alfred', id: 1}, ["WEST", "PUT"]], ["build", ["EAST", "PUT"]]];
 
     let jsonBoard2Layout =
       [[0, 0, 4, 0, 0, 0],
@@ -145,7 +146,7 @@ describe('Strategy Test', function () {
     let w8 = new Worker(4, 1, 2, 'sampson');
     let json2WorkerList = [w5, w6, w7, w8];
     let jsonBoard2 = new Board(null, jsonBoard2Layout, json2WorkerList);
-    let jsonTurn2 = [["move", { player:'alfred', id:1 }, ["EAST", "PUT"]], ["build", ["WEST", "PUT"]]];
+    let jsonTurn2 = [["move", {player: 'alfred', id: 1}, ["EAST", "PUT"]], ["build", ["WEST", "PUT"]]];
 
     it('return if the decision and following decisions keep me alive', function () {
       assert.isFalse(strategy0.decisionKeepsAlive(jsonBoard1, 3, 'alfred', jsonTurn));
@@ -154,7 +155,7 @@ describe('Strategy Test', function () {
   });
 
   describe('genDecisions', function () {
-    it ('gets the only available move decision', function () {
+    it('gets the only available move decision', function () {
       let restrictedBoard =
         [[0, 0, 0, 0, 0, 0],
           [4, 4, 0, 0, 0, 0],
@@ -172,7 +173,7 @@ describe('Strategy Test', function () {
       });
     });
 
-    it ('sees if the number of possible moves and builds is correct', function() {
+    it('sees if the number of possible moves and builds is correct', function () {
       let cleanBoard =
         [[0, 0, 0, 0, 0, 0],
           [0, 0, 0, 0, 0, 0],
@@ -189,9 +190,25 @@ describe('Strategy Test', function () {
       // The maximum possible builds in one direction is 8.
       assert.equal(decs.filter((d) => d[0][2][0] === 'PUT' && d[0][2][1] === 'NORTH').length, 8);
     });
+
+    it('only generates valid moves', function () {
+      let jsonBoard = [[1, '1bgood2', 3, 0, 0, 0],
+        [4, 4, 4, 4, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0]];
+      let board = ClientMessageConverter.jsonToBoard(jsonBoard);
+
+      let strategy = new Strategy('bgood', 'agood', 4, 1);
+      let decs = strategy.genDecisions(board, 'bgood');
+
+      assert.deepEqual(decs, [[["move", {"id": 2, "player": "bgood"}, ["WEST", "PUT"]],
+        ["build", ["EAST", "PUT"]]]]);
+    });
   });
 
-  describe('applyDecision', function() {
+  describe('applyDecision', function () {
     let cleanBoard =
       [[0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0],
@@ -202,7 +219,7 @@ describe('Strategy Test', function () {
     let listOfWorkers = [new Worker(0, 0, 1, 'alfred')];
     let board = new Board(null, cleanBoard, listOfWorkers);
 
-    it ('can operate on a move without a build', function() {
+    it('can operate on a move without a build', function () {
       let newBoard = strategy0.applyDecision(board, [["move", {player: 'alfred', id: 1}, ["EAST", "SOUTH"]]]);
 
       assert.equal(newBoard.getWorkers()[0].posn.x, 1);
@@ -215,8 +232,11 @@ describe('Strategy Test', function () {
       });
     });
 
-    it ('doesn\'t mutate the given board', function () {
-      let newBoard = strategy0.applyDecision(board, [["move", {player: 'alfred', id: 1}, ["EAST", "PUT"]], ["build", ["WEST", "PUT"]]]);
+    it('doesn\'t mutate the given board', function () {
+      let newBoard = strategy0.applyDecision(board, [["move", {
+        player: 'alfred',
+        id: 1
+      }, ["EAST", "PUT"]], ["build", ["WEST", "PUT"]]]);
 
       // The worker is moved on the new board and remains on the old board.
       assert.equal(board.getWorkers()[0].posn.x, 0);
@@ -230,7 +250,7 @@ describe('Strategy Test', function () {
 
   describe('getNextTurn', function () {
 
-    it ('picks a decision to move in a restricted scenario', function () {
+    it('picks a decision to move in a restricted scenario', function () {
       let strategyPoorPlanner = new Strategy('alfred', 'sampson', 1, 0);
       let restrictedBoard =
         [[0, 0, 0, 0, 0, 0],
@@ -248,7 +268,7 @@ describe('Strategy Test', function () {
       assert.equal(dec[0][2][1], "PUT");
     });
 
-    it ('picks a move if loss is inevitable', function () {
+    it('picks a move if loss is inevitable', function () {
       let strategyLoser = new Strategy('alfred', 'sampson', 3, 0);
 
       let losingBoard =
@@ -268,18 +288,18 @@ describe('Strategy Test', function () {
     });
 
     it('returns only a move if it chooses a winning one', function () {
-      let board = [[0,0,0,0,0,0],
-        [0,0,0,0,0,0],
-        [4,4,0,0,0,0],
-        [2,4,0,0,0,0],
-        [3,4,0,0,0,0],
-        [4,4,0,0,0,0]];
+      let board = [[0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0],
+        [4, 4, 0, 0, 0, 0],
+        [2, 4, 0, 0, 0, 0],
+        [3, 4, 0, 0, 0, 0],
+        [4, 4, 0, 0, 0, 0]];
       let strategy = new Strategy('wayne', 'garth', 4, 1);
       let listOfWorkers = [new Worker(0, 3, 1, "wayne")];
       let aboutToWinBoard = new Board(null, board, listOfWorkers);
       let decision = strategy.getNextTurn(aboutToWinBoard);
       assert.equal(decision.length, 1);
-      assert.deepEqual(decision[0], ['move', {player: 'wayne', id:1}, ['PUT', 'SOUTH']]);
+      assert.deepEqual(decision[0], ['move', {player: 'wayne', id: 1}, ['PUT', 'SOUTH']]);
     });
   });
 });

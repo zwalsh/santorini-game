@@ -214,7 +214,7 @@ class Strategy {
         // Iterate through all possible combinations of Move Direction and Build Direction
         for (let moveCoord in dirs.directions) {
           let moveDir = dirs.coordToDirection(dirs.directions[moveCoord]);
-          if (board.workerHasNeighbor(wRequest, moveDir) &&
+          if (this.ruleChecker.isValidMove(board, wRequest, moveDir) &&
             board.workerNeighborHeight(wRequest, moveDir) === constants.WINNING_HEIGHT) {
             decisions.push([["move", wRequest, moveDir]]);
             continue;
