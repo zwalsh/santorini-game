@@ -2,13 +2,16 @@
   Server that accepts incoming client connections and runs a
   Santorini tournament between the players.
 
-  The server will wait for a minimum number of players and a
-  minimum amount of time before beginning a tournament.
+  The server will wait for a minimum number of players to successfully register
+  and for a maximum amount of time before beginning a tournament.
+  After enough players are registered, it clears the timeout,
+  and will start the tournament once all outstanding socket connections
+  have been registered as players or dropped.
 
   It can be configured to run a single tournament before shutting down,
   or to continue running new tournaments indefinitely. When it is
   configured to run a single tournament, it can optionally be started
-  with a function that will return the single tournament's result.
+  with a function that returns the single tournament's result.
 
   =================== Data Definitions ===================
 

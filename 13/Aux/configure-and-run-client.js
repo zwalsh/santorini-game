@@ -19,18 +19,19 @@ process.stdin.on('readable', () => {
   that the reader produces.
 */
 function configureAndRunClients(chunk) {
-  let maybeClients = createClients(chunk);
-  if (maybeClients === false) {
-    process.stdout.write('Invalid configuration, cannot start clients.\n');
-    process.exit(1);
-  } else {
-    let timeout = 0;
-    let timeoutIncrement = 1000;
-    maybeClients.forEach((c) => {
-      timeout += timeoutIncrement;
-      setTimeout(() => {
-        c.start();
-      }, timeout);
-    });
-  }
+  return createClients(chunk).then((maybeClients) => {
+    if (maybeClients === false) {
+      process.stdout.write('Invalid configuration, cannot start clients.\n');
+      process.exit(1);
+    } else {
+      let timeout = 0;
+      let timeoutIncrement = 1000;
+      maybeClients.forEach((c) => {
+        timeout += timeoutIncrement;
+        setTimeout(() => {
+          c.start();
+        }, timeout);
+      });
+    }
+  });
 }
