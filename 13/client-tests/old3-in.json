@@ -6,19 +6,19 @@
       "../../Santorini/Player/player.js"
     ],
     [
-      "infinite",
+      "good",
       "b",
-      "../../Santorini/Player/player-infinite.js"
+      "../../Santorini/Player/player.js"
     ],
     [
-      "infinite",
+      "good",
       "c",
-      "../../Santorini/Player/player-infinite.js"
+      "../../Santorini/Player/player.js"
     ],
     [
-      "breaker",
+      "good",
       "d",
-      "../../Santorini/Player/player-all-breaker.js"
+      "../../Santorini/Player/player.js"
     ],
     [
       "good",
@@ -26,9 +26,9 @@
       "../../Santorini/Player/player.js"
     ],
     [
-      "breaker",
+      "good",
       "f",
-      "../../Santorini/Player/player-turn-breaker.js"
+      "../../Santorini/Player/player.js"
     ],
     [
       "good",
@@ -41,17 +41,17 @@
       "../../Santorini/Player/player.js"
     ],
     [
-      "breaker",
+      "good",
       "i",
-      "../../Santorini/Player/player-turn-breaker.js"
+      "../../Santorini/Player/player.js"
     ],
     [
-      "breaker",
+      "good",
       "j",
-      "../../Santorini/Player/player-turn-breaker.js"
+      "../../Santorini/Player/player.js"
     ]
   ],
   "observers": [],
   "ip": "localhost",
-  "port": 55556
+  "port": 50000
 }

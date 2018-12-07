@@ -2,22 +2,12 @@
   "players": [
     [
       "good",
-      "a",
+      "agood",
       "../../Santorini/Player/player.js"
     ],
     [
       "good",
-      "b",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "good",
-      "c",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "good",
-      "d",
+      "bgood",
       "../../Santorini/Player/player.js"
     ]
   ],

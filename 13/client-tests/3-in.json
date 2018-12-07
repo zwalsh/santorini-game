@@ -2,56 +2,26 @@
   "players": [
     [
       "good",
-      "a",
+      "agood",
       "../../Santorini/Player/player.js"
     ],
     [
       "good",
-      "b",
+      "bgood",
       "../../Santorini/Player/player.js"
     ],
     [
-      "good",
-      "c",
-      "../../Santorini/Player/player.js"
+      "breaker",
+      "cbreaker",
+      "../../Santorini/Player/player-turn-breaker.js"
     ],
     [
-      "good",
-      "d",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "good",
-      "e",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "good",
-      "f",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "good",
-      "g",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "good",
-      "h",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "good",
-      "i",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "good",
-      "j",
-      "../../Santorini/Player/player.js"
+      "breaker",
+      "dbreaker",
+      "../../Santorini/Player/player-all-breaker.js"
     ]
   ],
   "observers": [],
   "ip": "localhost",
-  "port": 50000
+  "port": 55556
 }
