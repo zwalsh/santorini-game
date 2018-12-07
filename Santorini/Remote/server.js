@@ -97,10 +97,9 @@ class TournamentServer {
 
   /* Socket -> Promise<Void>
     Add the incoming socket connection to the list.
-    Attempt to register the player, which will trigger starting
-    the tournament.
-    If enough players have registered, destroy any more sockets
-    that are received.
+    Attempt to register it as a player, which may trigger
+    starting the tournament.
+    If enough players have registered, close the incoming socket.
   */
   handleConnection(socket) {
     if (this.uniquePlayers.length >= this.minPlayers)  {
@@ -110,11 +109,7 @@ class TournamentServer {
       this.sockets.push(socket);
       return this.registerPlayer(this.wrapSocket(socket))
         .then((p) => { return this.addAndEnsureUnique(p); })
-        .catch(() => {
-          this.sockets.splice(this.sockets.indexOf(socket), 1);
-          socket.end();
-          return;
-        });
+        .catch(() => { return this.removeSocket(socket); });
     }
   }
 
@@ -235,7 +230,6 @@ class TournamentServer {
     Gets the player's name out of the PromiseJsonSocket.
   */
   getPlayerName(socket) {
-    // use promise protector here
     return protectedPromise(socket, (pjs) => {
       return pjs.readJson();
     }).then((val) => {
@@ -252,6 +246,18 @@ class TournamentServer {
   */
   checkPlayerName(name) {
     return typeof name === 'string' && PLAYER_NAME_REGEXP.test(name);
+  }
+
+  /* Socket -> Void
+    Remove the socket from the server's list of sockets,
+    and ends it.
+  */
+  removeSocket(socket) {
+    let socketIdx = this.sockets.indexOf(socket);
+    if (socketIdx >= 0) {
+      this.sockets.splice(socketIdx, 1);
+    }
+    socket.end();
   }
 }
 

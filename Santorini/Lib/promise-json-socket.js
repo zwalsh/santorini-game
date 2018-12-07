@@ -7,7 +7,9 @@
   It buffers incoming JSON values, storing them internally until they
   are requested.
 
-  If non-JSON input is received, the socket is closed and
+  If non-JSON input is received, the module will no longer attempt to read or store
+  any additional messages from the socket. It will not close the socket.
+  Any unread values may still be requested until the buffer queue is empty.
 
 */
 const parseJson = require('./json-parser').jsonParser;
@@ -76,8 +78,8 @@ class PromiseJsonSocket {
   receiveData(data) {
     if (data && this.socketOpen) {
       this.bufferedInput += data;
-      let parsed;
 
+      let parsed;
       try {
         parsed = parseJson(this.bufferedInput);
       } catch (err) {
