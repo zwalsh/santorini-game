@@ -9,5 +9,4 @@
 
 # Output: Prints the Results (list of EncounterOutcomes, defined
 # in server.js) from the tournament that was run.
-
-node Aux/configure-and-run-server.js
+node Aux/configure-and-run-server.js 2>/dev/null
