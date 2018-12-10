@@ -7,47 +7,47 @@
     ],
     [
       "infinite",
-      "b",
+      "a",
       "../../Santorini/Player/player-infinite.js"
     ],
     [
       "infinite",
-      "c",
+      "a",
       "../../Santorini/Player/player-infinite.js"
     ],
     [
       "breaker",
-      "d",
+      "a",
       "../../Santorini/Player/player-all-breaker.js"
     ],
     [
-      "good",
-      "e",
-      "../../Santorini/Player/player.js"
-    ],
-    [
       "breaker",
-      "f",
-      "../../Santorini/Player/player-turn-breaker.js"
-    ],
-    [
-      "good",
-      "g",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "good",
-      "h",
-      "../../Santorini/Player/player.js"
-    ],
-    [
-      "breaker",
-      "i",
+      "a",
       "../../Santorini/Player/player-turn-breaker.js"
     ],
     [
       "breaker",
-      "j",
+      "a",
+      "../../Santorini/Player/player-turn-breaker.js"
+    ],
+    [
+      "breaker",
+      "a",
+      "../../Santorini/Player/player-turn-breaker.js"
+    ],
+    [
+      "breaker",
+      "a",
+      "../../Santorini/Player/player-turn-breaker.js"
+    ],
+    [
+      "breaker",
+      "a",
+      "../../Santorini/Player/player-turn-breaker.js"
+    ],
+    [
+      "breaker",
+      "a",
       "../../Santorini/Player/player-turn-breaker.js"
     ]
   ],
